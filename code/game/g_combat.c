@@ -615,7 +615,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	self->s.loopSound = 0;
 
-	self->client->ps.maxs[2] = self->s.maxs[2] = -8;
+	self->client->ps.maxs[2] = self->s.maxs[2] = DEAD_HEIGHT;
 
 	// don't allow respawn until the death anim is done
 	// g_forcerespawn may force spawning at some later time
