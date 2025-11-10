@@ -182,6 +182,7 @@ vmCvar_t	cg_showmiss;
 vmCvar_t	cg_footsteps;
 vmCvar_t	cg_addMarks;
 vmCvar_t	cg_bounceMarksMinImpactSpeed;
+vmCvar_t	cg_bounceSoundMinImpactSpeed;
 vmCvar_t	cg_brassTime;
 vmCvar_t	cg_viewsize;
 vmCvar_t	cg_gun_frame;
@@ -340,6 +341,7 @@ static cvarTable_t cgameCvarTable[] = {
 	{ &cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE, RANGE_BOOL },
 	// Note that ~290 corresponds to a free fall with no bounce from player height.
 	{ &cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "350", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_bounceSoundMinImpactSpeed, "cg_bounceSoundMinImpactSpeed", "450", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_lagometer, "cg_lagometer", "1", CVAR_ARCHIVE, RANGE_BOOL },
 	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_gun_x, "cg_gunX", "0", CVAR_CHEAT, RANGE_ALL },
