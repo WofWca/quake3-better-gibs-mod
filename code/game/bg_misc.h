@@ -80,6 +80,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define CROUCH_VIEWHEIGHT	12
 #define DEAD_HEIGHT			-8
 #define	DEAD_VIEWHEIGHT		-16
+#define INVUL_RADIUS		42
 
 #define STEPSIZE			18
 
