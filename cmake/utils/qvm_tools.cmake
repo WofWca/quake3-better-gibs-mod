@@ -78,7 +78,7 @@ function(add_qvm MODULE_NAME)
     string(REPLACE "${CMAKE_BINARY_DIR}/" "" QVM_FILE_COMMENT ${QVM_FILE})
     add_custom_command(
         OUTPUT ${QVM_FILE}
-        COMMAND ${Q3ASM} -o ${QVM_FILE} ${ASM_FILES}
+        COMMAND ${Q3ASM} -vq3 -o ${QVM_FILE} ${ASM_FILES}
         DEPENDS ${ASM_FILES} qvm_tools ${Q3ASM}
         COMMENT "Linking C QVM library ${QVM_FILE_COMMENT}")
 
