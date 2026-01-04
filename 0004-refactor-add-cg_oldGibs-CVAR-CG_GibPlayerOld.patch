@@ -1,0 +1,160 @@
+From bcf515db4dba860ead52173f91857466759404d7 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 9 Nov 2025 14:07:15 +0400
+Subject: [PATCH 04/12] refactor: add `cg_oldGibs` CVAR, `CG_GibPlayerOld`
+
+This is in preparation to some gibs improvements.
+---
+ code/cgame/cg_effects.c | 76 +++++++++++++++++++++++++++++++++++++++++
+ code/cgame/cg_event.c   |  6 +++-
+ code/cgame/cg_local.h   |  2 ++
+ code/cgame/cg_main.c    |  2 ++
+ 4 files changed, 85 insertions(+), 1 deletion(-)
+
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index 9b2d0f7a..ba60f99e 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -637,6 +637,82 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+ 	CG_LaunchGib( origin, velocity, cgs.media.gibLeg );
+ }
++void CG_GibPlayerOld( vec3_t playerOrigin ) {
++	vec3_t	origin, velocity;
++
++	if ( !cg_blood.integer ) {
++		return;
++	}
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	if ( rand() & 1 ) {
++		CG_LaunchGib( origin, velocity, cgs.media.gibSkull );
++	} else {
++		CG_LaunchGib( origin, velocity, cgs.media.gibBrain );
++	}
++
++	// allow gibs to be turned off for speed
++	if ( !cg_gibs.integer ) {
++		return;
++	}
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibAbdomen );
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibArm );
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibChest );
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibFist );
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibFoot );
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibForearm );
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibIntestine );
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibLeg );
++
++	VectorCopy( playerOrigin, origin );
++	velocity[0] = crandom()*GIB_VELOCITY;
++	velocity[1] = crandom()*GIB_VELOCITY;
++	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
++	CG_LaunchGib( origin, velocity, cgs.media.gibLeg );
++}
+ 
+ /*
+ ==================
+diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
+index 131be742..4191888d 100644
+--- a/code/cgame/cg_event.c
++++ b/code/cgame/cg_event.c
+@@ -1219,7 +1219,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
+ 		if ( !(es->eFlags & EF_KAMIKAZE) ) {
+ 			trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.gibSound );
+ 		}
+-		CG_GibPlayer( cent->lerpOrigin );
++		if (cg_oldGibs.integer) {
++			CG_GibPlayerOld( cent->lerpOrigin );
++		} else {
++			CG_GibPlayer( cent->lerpOrigin );
++		}
+ 		break;
+ 
+ 	case EV_STOPLOOPINGSOUND:
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 6546d4d5..4a4da431 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1093,6 +1093,7 @@ extern	vmCvar_t		cg_bobroll;
+ extern	vmCvar_t		cg_swingSpeed;
+ extern	vmCvar_t		cg_shadows;
+ extern	vmCvar_t		cg_gibs;
++extern	vmCvar_t		cg_oldGibs;
+ extern	vmCvar_t		cg_drawTimer;
+ extern	vmCvar_t		cg_drawFPS;
+ extern	vmCvar_t		cg_drawSnapshot;
+@@ -1418,6 +1419,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
+ void CG_ScorePlum( int client, vec3_t org, int score );
+ 
+ void CG_GibPlayer( vec3_t playerOrigin );
++void CG_GibPlayerOld( vec3_t playerOrigin );
+ void CG_BigExplode( vec3_t playerOrigin );
+ 
+ void CG_Bleed( vec3_t origin, int entityNum );
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index 1269e1b6..f8fe4644 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -99,6 +99,7 @@ vmCvar_t	cg_bobroll;
+ vmCvar_t	cg_swingSpeed;
+ vmCvar_t	cg_shadows;
+ vmCvar_t	cg_gibs;
++vmCvar_t	cg_oldGibs;
+ vmCvar_t	cg_drawTimer;
+ vmCvar_t	cg_drawFPS;
+ vmCvar_t	cg_drawSnapshot;
+@@ -216,6 +217,7 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE },
+ 	{ &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE  },
+ 	{ &cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE  },
++	{ &cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE  },
+ 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
+-- 
+2.41.0
+

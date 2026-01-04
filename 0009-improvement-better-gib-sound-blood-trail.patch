@@ -1,0 +1,81 @@
+From 009291cc3bf2a231bcc51206d122e8c333326bf9 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Mon, 10 Nov 2025 17:55:51 +0400
+Subject: [PATCH 09/12] improvement: better gib sound, blood trail
+
+Allow playing the gib sound more than once,
+and keep leaving the blood trail even if the gib
+already hit something.
+---
+ code/cgame/cg_local.h     |  1 +
+ code/cgame/cg_localents.c | 14 +++++++++-----
+ code/cgame/cg_main.c      |  2 ++
+ 3 files changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index d1e18cca..9f8ef673 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1126,6 +1126,7 @@ extern	vmCvar_t		cg_showmiss;
+ extern	vmCvar_t		cg_footsteps;
+ extern	vmCvar_t		cg_addMarks;
+ extern	vmCvar_t		cg_bounceMarksMinImpactSpeed;
++extern	vmCvar_t		cg_bounceSoundMinImpactSpeed;
+ extern	vmCvar_t		cg_brassTime;
+ extern	vmCvar_t		cg_gun_frame;
+ extern	vmCvar_t		cg_gun_x;
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index a0784830..a4cf2430 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -201,9 +201,11 @@ void CG_FragmentBounceSound( localEntity_t *le, trace_t *trace ) {
+ 
+ 	}
+ 
+-	// don't allow a fragment to make multiple bounce sounds,
+-	// or it gets too noisy as they settle
+-	le->leBounceSoundType = LEBS_NONE;
++	// This is no longer needed, because we now decide whether to play a sound
++	// purely based on impact velocity.
++	// // don't allow a fragment to make multiple bounce sounds,
++	// // or it gets too noisy as they settle
++	// le->leBounceSoundType = LEBS_NONE;
+ }
+ 
+ 
+@@ -319,8 +321,10 @@ void CG_AddFragment( localEntity_t *le ) {
+ 		CG_FragmentBounceMark( le, &trace );
+ 	}
+ 
+-	// do a bouncy sound
+-	CG_FragmentBounceSound( le, &trace );
++	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceSoundMinImpactSpeed.value ) ) {
++		// do a bouncy sound
++		CG_FragmentBounceSound( le, &trace );
++	}
+ 
+ 	trap_R_AddRefEntityToScene( &le->refEntity );
+ }
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index bf352143..235f1bfe 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -129,6 +129,7 @@ vmCvar_t	cg_showmiss;
+ vmCvar_t	cg_footsteps;
+ vmCvar_t	cg_addMarks;
+ vmCvar_t	cg_bounceMarksMinImpactSpeed;
++vmCvar_t	cg_bounceSoundMinImpactSpeed;
+ vmCvar_t	cg_brassTime;
+ vmCvar_t	cg_viewsize;
+ vmCvar_t	cg_drawGun;
+@@ -246,6 +247,7 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE },
+ 	// Note that ~290 corresponds to a free fall with no bounce from player height.
+ 	{ &cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "350", CVAR_ARCHIVE },
++	{ &cg_bounceSoundMinImpactSpeed, "cg_bounceSoundMinImpactSpeed", "450", CVAR_ARCHIVE },
+ 	{ &cg_lagometer, "cg_lagometer", "1", CVAR_ARCHIVE },
+ 	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE  },
+ 	{ &cg_gun_x, "cg_gunX", "0", CVAR_CHEAT },
+-- 
+2.41.0
+

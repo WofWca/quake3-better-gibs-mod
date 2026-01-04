@@ -1,0 +1,126 @@
+From 3f5276413e1c5f8a754943f233a3d8147732f126 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Mon, 10 Nov 2025 13:54:51 +0400
+Subject: [PATCH 08/12] improvement: allow multiple bounce marks (gibs)
+
+It's more "physically accurate" to decide whether to leave a mark
+based on velocity.
+This allows gibs to leave multiple marks,
+should they keep high velocity after the first impact.
+---
+ code/cgame/cg_local.h     |  1 +
+ code/cgame/cg_localents.c | 30 ++++++++++++++++++++----------
+ code/cgame/cg_main.c      |  3 +++
+ 3 files changed, 24 insertions(+), 10 deletions(-)
+
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 08a190f0..d1e18cca 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1125,6 +1125,7 @@ extern	vmCvar_t		cg_noPlayerAnims;
+ extern	vmCvar_t		cg_showmiss;
+ extern	vmCvar_t		cg_footsteps;
+ extern	vmCvar_t		cg_addMarks;
++extern	vmCvar_t		cg_bounceMarksMinImpactSpeed;
+ extern	vmCvar_t		cg_brassTime;
+ extern	vmCvar_t		cg_gun_frame;
+ extern	vmCvar_t		cg_gun_x;
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index 1c66a1bf..a0784830 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -169,9 +169,11 @@ void CG_FragmentBounceMark( localEntity_t *le, trace_t *trace ) {
+ 	}
+ 
+ 
+-	// don't allow a fragment to make multiple marks, or they
+-	// pile up while settling
+-	le->leMarkType = LEMT_NONE;
++	// This is no longer needed, because we now decide whether to leave a mark
++	// purely based on impact velocity.
++	// // don't allow a fragment to make multiple marks, or they
++	// // pile up while settling
++	// le->leMarkType = LEMT_NONE;
+ }
+ 
+ /*
+@@ -208,9 +210,11 @@ void CG_FragmentBounceSound( localEntity_t *le, trace_t *trace ) {
+ /*
+ ================
+ CG_ReflectVelocity
++
++Modifies velocity of `le` and writes the difference to `velocityDifference`
+ ================
+ */
+-void CG_ReflectVelocity( localEntity_t *le, trace_t *trace ) {
++void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDifference ) {
+ 	vec3_t	velocity;
+ 	float	dot;
+ 	int		hitTime;
+@@ -223,6 +227,10 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace ) {
+ 
+ 	VectorScale( le->pos.trDelta, le->bounceFactor, le->pos.trDelta );
+ 
++	if (velocityDifference) {
++		VectorSubtract( le->pos.trDelta, velocity, velocityDifference );
++	}
++
+ 	VectorCopy( trace->endpos, le->pos.trBase );
+ 	le->pos.trTime = cg.time;
+ 
+@@ -243,7 +251,7 @@ CG_AddFragment
+ ================
+ */
+ void CG_AddFragment( localEntity_t *le ) {
+-	vec3_t	newOrigin;
++	vec3_t	newOrigin, impactVelocityDiff;
+ 	trace_t	trace;
+ 
+ 	if ( le->pos.trType == TR_STATIONARY ) {
+@@ -303,15 +311,17 @@ void CG_AddFragment( localEntity_t *le ) {
+ 		return;
+ 	}
+ 
+-	// leave a mark
+-	CG_FragmentBounceMark( le, &trace );
++	// reflect the velocity on the trace plane
++	CG_ReflectVelocity( le, &trace, impactVelocityDiff );
++
++	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceMarksMinImpactSpeed.value ) ) {
++		// leave a mark
++		CG_FragmentBounceMark( le, &trace );
++	}
+ 
+ 	// do a bouncy sound
+ 	CG_FragmentBounceSound( le, &trace );
+ 
+-	// reflect the velocity on the trace plane
+-	CG_ReflectVelocity( le, &trace );
+-
+ 	trap_R_AddRefEntityToScene( &le->refEntity );
+ }
+ 
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index 5c1c7f6e..bf352143 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -128,6 +128,7 @@ vmCvar_t	cg_noPlayerAnims;
+ vmCvar_t	cg_showmiss;
+ vmCvar_t	cg_footsteps;
+ vmCvar_t	cg_addMarks;
++vmCvar_t	cg_bounceMarksMinImpactSpeed;
+ vmCvar_t	cg_brassTime;
+ vmCvar_t	cg_viewsize;
+ vmCvar_t	cg_drawGun;
+@@ -243,6 +244,8 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_brassTime, "cg_brassTime", "2500", CVAR_ARCHIVE },
+ 	{ &cg_simpleItems, "cg_simpleItems", "0", CVAR_ARCHIVE },
+ 	{ &cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE },
++	// Note that ~290 corresponds to a free fall with no bounce from player height.
++	{ &cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "350", CVAR_ARCHIVE },
+ 	{ &cg_lagometer, "cg_lagometer", "1", CVAR_ARCHIVE },
+ 	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE  },
+ 	{ &cg_gun_x, "cg_gunX", "0", CVAR_CHEAT },
+-- 
+2.41.0
+
