@@ -4,6 +4,8 @@ Quake III Arena mod that makes gibs' physics more realistic and satisfying.
 
 https://github.com/user-attachments/assets/a5a8d0a2-a835-4b70-b4c9-d1e0161a348b
 
+https://github.com/user-attachments/assets/23454b69-2ec3-4722-af26-2030e9c865b4
+
 Namely, with this mod gibs' speed and direction
 depends on the direction and the amount of damage you inflicted
 on the poor opponent.
