@@ -112,6 +112,12 @@ into the ["baseq3a" mod](https://github.com/ec-/baseq3a).
 The `pak8a-baseq3a-mod-with-better-gibs.pk3` file was built
 from the `baseq3a` branch of this repo.
 
+## Similar projects
+
+- [GibHappy](https://web.archive.org/web/20051226113935/http://www.planetquake.com/gibfactory/),
+
+  Also downloadable [on lvlworld.com](https://www.lvlworld.com/mod/id:45).
+
 ## License
 
 These patches are dual-licensed under either
