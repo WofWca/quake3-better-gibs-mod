@@ -90,7 +90,7 @@ To do that:
 ```bash
 cd my-mod-dir
 git clone https://github.com/WofWca/quake3-better-gibs-mod.git` ../quake3-better-gibs-mod
-git am ../quake3-better-gibs-mod/*.patch
+git am ../quake3-better-gibs-mod/patches/*.patch
 ```
 
 This should apply the patches to your mod's code, by creating git commits.
@@ -101,7 +101,7 @@ wherever you have them.
 Also see the `ioq3` branch in this repo,
 which already applied these patches on top of ioquake3.
 In fact, the `.patch` files have been generated from that branch,
-with `git format-patch --output-directory=../quake3-better-gibs-mod ioquake/main`.
+with `git format-patch --output-directory=../quake3-better-gibs-mod/patches ioquake/main`.
 To build a vanillaq3-compatible version in CI,
 replace `COMMAND ${Q3ASM} -o ${QVM_FILE} ${ASM_FILES}`
 with `COMMAND ${Q3ASM} -vq3 -o ${QVM_FILE} ${ASM_FILES}`.
