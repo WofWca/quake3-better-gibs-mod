@@ -1,7 +1,7 @@
 From 1939f47291f978983068188c63c28e84acdd3bdb Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 7 Nov 2025 12:25:32 +0400
-Subject: [PATCH 07/12] feat: make gibs fly away from damage
+Subject: [PATCH] feat: make gibs fly away from damage
 
 To be more precise, preserve the player velocity,
 most importantly, including the velocity they get from knockback.

@@ -1,7 +1,7 @@
 From 54ce018b90a4de4c86e4406f1ac97150e14a982d Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 21:00:17 +0400
-Subject: [PATCH 06/12] improvement: gibs: keep player angles
+Subject: [PATCH] improvement: gibs: keep player angles
 
 The previous commit added proper initial positions
 to each individual gib.

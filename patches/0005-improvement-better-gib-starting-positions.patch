@@ -1,7 +1,7 @@
 From d6b26d40b337dab775768c98cb10814f9b092f11 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 14:35:21 +0400
-Subject: [PATCH 05/12] improvement: better gib starting positions
+Subject: [PATCH] improvement: better gib starting positions
 
 In the original game, all gibs start flying from one single point
 (i.e. `playerOrigin`), which is sometimes noticeable.

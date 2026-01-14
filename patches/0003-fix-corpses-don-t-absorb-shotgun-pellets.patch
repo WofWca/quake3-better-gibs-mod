@@ -1,7 +1,7 @@
 From dcebc0b4fe9842cfaf035531251921196cc2759c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 18 Nov 2025 12:34:11 +0400
-Subject: [PATCH 03/12] fix: corpses don't absorb shotgun pellets
+Subject: [PATCH] fix: corpses don't absorb shotgun pellets
 
 This is a follow-up to
 ca9183fc5efa21b536fe11313079bf31f0e50e49

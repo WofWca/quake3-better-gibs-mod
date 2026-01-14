@@ -1,7 +1,7 @@
 From 3f5276413e1c5f8a754943f233a3d8147732f126 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 13:54:51 +0400
-Subject: [PATCH 08/12] improvement: allow multiple bounce marks (gibs)
+Subject: [PATCH] improvement: allow multiple bounce marks (gibs)
 
 It's more "physically accurate" to decide whether to leave a mark
 based on velocity.

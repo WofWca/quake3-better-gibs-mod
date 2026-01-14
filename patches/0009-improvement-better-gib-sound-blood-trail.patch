@@ -1,7 +1,7 @@
 From 009291cc3bf2a231bcc51206d122e8c333326bf9 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 17:55:51 +0400
-Subject: [PATCH 09/12] improvement: better gib sound, blood trail
+Subject: [PATCH] improvement: better gib sound, blood trail
 
 Allow playing the gib sound more than once,
 and keep leaving the blood trail even if the gib

@@ -1,7 +1,7 @@
 From ca9183fc5efa21b536fe11313079bf31f0e50e49 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 13 Sep 2025 18:56:45 +0400
-Subject: [PATCH 02/12] fix: shotgun not gibbing unless aiming at feet
+Subject: [PATCH] fix: shotgun not gibbing unless aiming at feet
 
 Original ioquake issue: https://github.com/ioquake/ioq3/issues/794.
 Original (rejected) MR: https://github.com/ioquake/ioq3/pull/795.

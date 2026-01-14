@@ -1,7 +1,7 @@
 From bcf515db4dba860ead52173f91857466759404d7 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 14:07:15 +0400
-Subject: [PATCH 04/12] refactor: add `cg_oldGibs` CVAR, `CG_GibPlayerOld`
+Subject: [PATCH] refactor: add `cg_oldGibs` CVAR, `CG_GibPlayerOld`
 
 This is in preparation to some gibs improvements.
 ---

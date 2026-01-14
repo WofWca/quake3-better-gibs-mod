@@ -1,7 +1,7 @@
 From 102dfb912200ca14e58effe1e4c49db368f17036 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 28 Oct 2025 21:36:43 +0400
-Subject: [PATCH 01/12] fix: allow gibbing after `intermissionQueued`
+Subject: [PATCH] fix: allow gibbing after `intermissionQueued`
 
 The argument for this: it's dissatisfying that you can't
 gib the corpse after finishing someone with the gauntlet.

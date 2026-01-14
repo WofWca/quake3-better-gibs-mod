@@ -1,7 +1,7 @@
 From 78a6a0ed4d75d47c4e841ac488ea84f9325f21af Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 18 Nov 2025 19:14:07 +0400
-Subject: [PATCH 12/12] improvement: lower gibs bounceFactor
+Subject: [PATCH] improvement: lower gibs bounceFactor
 
 This makes the gibs feel more "dead" and less frog-like.
 ---
