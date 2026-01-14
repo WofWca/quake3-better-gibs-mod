@@ -67,6 +67,10 @@ so you can enjoy it on basically any server
 
 - `cg_oldGibs` set to 0 to disable most (but not all!)
   of this mod's features
+- `cg_gibs` is now non-binary,
+  (acting the same as `cg_gibfactor` in the GibHappy mod!):
+  set to 1.3 to launch 3 more pieces of gibs,
+  or to 0.5 to half the amount of gibs
 - `cg_gibsInheritPlayerVelocity`
 - `cg_gibsRandomVelocity`
 - `cg_gibsExtraVerticalVelocity`
