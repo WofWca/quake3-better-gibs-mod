@@ -1,4 +1,4 @@
-From 1939f47291f978983068188c63c28e84acdd3bdb Mon Sep 17 00:00:00 2001
+From 3d70dd09db9bde2b8905b9f5782f7531a3aefce7 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 7 Nov 2025 12:25:32 +0400
 Subject: [PATCH] feat: make gibs fly away from damage
@@ -14,7 +14,7 @@ most importantly, including the velocity they get from knockback.
  5 files changed, 59 insertions(+), 34 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 454cec37..959fc427 100644
+index 454cec37..43bb90a1 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -561,7 +561,8 @@ Generated a bunch of gibs launching out from the bodies location
@@ -31,7 +31,7 @@ index 454cec37..959fc427 100644
  	float playerHeight = 32 - MINS_Z;
  	float bottom = playerOrigin[2] + MINS_Z;
  	float playerRadius = 15;
-+	float baseRandomVelocity = cg_gibsRandomVelocity.value;
++	float baseRandomVelocity = cg_gibsExtraRandomVelocity.value;
 +	vec3_t playerVelocityScaled;
 +	float jump = cg_gibsExtraVerticalVelocity.value;
  
@@ -180,7 +180,7 @@ index 83a9cb58..510f24a0 100644
  		break;
  
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index dbfec5d3..08a190f0 100644
+index dbfec5d3..43b8b262 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1094,6 +1094,9 @@ extern	vmCvar_t		cg_swingSpeed;
@@ -188,7 +188,7 @@ index dbfec5d3..08a190f0 100644
  extern	vmCvar_t		cg_gibs;
  extern	vmCvar_t		cg_oldGibs;
 +extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
-+extern	vmCvar_t		cg_gibsRandomVelocity;
++extern	vmCvar_t		cg_gibsExtraRandomVelocity;
 +extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
  extern	vmCvar_t		cg_drawTimer;
  extern	vmCvar_t		cg_drawFPS;
@@ -217,7 +217,7 @@ index bfb1401a..1c66a1bf 100644
  	else {
  		trap_R_AddRefEntityToScene( &le->refEntity );
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index f8fe4644..5c1c7f6e 100644
+index f8fe4644..1f67c7b6 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
 @@ -100,6 +100,9 @@ vmCvar_t	cg_swingSpeed;
@@ -225,7 +225,7 @@ index f8fe4644..5c1c7f6e 100644
  vmCvar_t	cg_gibs;
  vmCvar_t	cg_oldGibs;
 +vmCvar_t	cg_gibsInheritPlayerVelocity;
-+vmCvar_t	cg_gibsRandomVelocity;
++vmCvar_t	cg_gibsExtraRandomVelocity;
 +vmCvar_t	cg_gibsExtraVerticalVelocity;
  vmCvar_t	cg_drawTimer;
  vmCvar_t	cg_drawFPS;
@@ -235,7 +235,7 @@ index f8fe4644..5c1c7f6e 100644
  	{ &cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE  },
  	{ &cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE  },
 +	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE  },
-+	{ &cg_gibsRandomVelocity, "cg_gibsRandomVelocity", "250", CVAR_ARCHIVE  },
++	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE  },
 +	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE  },
  	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
  	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },

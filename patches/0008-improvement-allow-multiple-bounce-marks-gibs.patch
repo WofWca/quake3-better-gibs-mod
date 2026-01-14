@@ -1,4 +1,4 @@
-From 3f5276413e1c5f8a754943f233a3d8147732f126 Mon Sep 17 00:00:00 2001
+From 5064b377be122d06b825c931eb2f54000f822469 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 13:54:51 +0400
 Subject: [PATCH] improvement: allow multiple bounce marks (gibs)
@@ -14,7 +14,7 @@ should they keep high velocity after the first impact.
  3 files changed, 24 insertions(+), 10 deletions(-)
 
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 08a190f0..d1e18cca 100644
+index 43b8b262..58cd8e94 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1125,6 +1125,7 @@ extern	vmCvar_t		cg_noPlayerAnims;
@@ -101,7 +101,7 @@ index 1c66a1bf..a0784830 100644
  }
  
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 5c1c7f6e..bf352143 100644
+index 1f67c7b6..21342305 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
 @@ -128,6 +128,7 @@ vmCvar_t	cg_noPlayerAnims;

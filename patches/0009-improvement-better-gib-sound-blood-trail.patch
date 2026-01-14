@@ -1,4 +1,4 @@
-From 009291cc3bf2a231bcc51206d122e8c333326bf9 Mon Sep 17 00:00:00 2001
+From b21e901cb9c12a92d6cb5404bc09c4d3b592e102 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 17:55:51 +0400
 Subject: [PATCH] improvement: better gib sound, blood trail
@@ -13,7 +13,7 @@ already hit something.
  3 files changed, 12 insertions(+), 5 deletions(-)
 
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index d1e18cca..9f8ef673 100644
+index 58cd8e94..229f82f0 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1126,6 +1126,7 @@ extern	vmCvar_t		cg_showmiss;
@@ -57,7 +57,7 @@ index a0784830..a4cf2430 100644
  	trap_R_AddRefEntityToScene( &le->refEntity );
  }
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index bf352143..235f1bfe 100644
+index 21342305..73def7b6 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
 @@ -129,6 +129,7 @@ vmCvar_t	cg_showmiss;

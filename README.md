@@ -72,7 +72,7 @@ so you can enjoy it on basically any server
   set to 1.3 to launch 3 more pieces of gibs,
   or to 0.5 to half the amount of gibs
 - `cg_gibsInheritPlayerVelocity`
-- `cg_gibsRandomVelocity`
+- `cg_gibsExtraRandomVelocity`
 - `cg_gibsExtraVerticalVelocity`
 - `cg_gibsBounceFactor`
 - `cg_bounceMarksMinImpactSpeed`

@@ -1,4 +1,4 @@
-From 29ac29cb1814899355bf56ba16d034a4c539e8bc Mon Sep 17 00:00:00 2001
+From a94021d2f351023b218133e6aa68aab8c90add29 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 12 Jan 2026 22:49:16 +0400
 Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
@@ -9,7 +9,7 @@ Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
  2 files changed, 141 insertions(+), 107 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index ad820e92..66b9396e 100644
+index f6a65239..b6071ac6 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -559,8 +559,9 @@ CG_GibPlayer
@@ -25,7 +25,7 @@ index ad820e92..66b9396e 100644
  					vec3_t playerVelocity ) {
  	vec3_t	origin, velocity;
 @@ -575,6 +576,8 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles,
- 	float baseRandomVelocity = cg_gibsRandomVelocity.value;
+ 	float baseRandomVelocity = cg_gibsExtraRandomVelocity.value;
  	vec3_t playerVelocityScaled;
  	float jump = cg_gibsExtraVerticalVelocity.value;
 +	int numGibs = cg_gibs.value * DEFAULT_NUM_GIBS;
@@ -289,7 +289,7 @@ index ad820e92..66b9396e 100644
  void CG_GibPlayerOld( vec3_t playerOrigin ) {
  	vec3_t	origin, angles, velocity;
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index ac15639e..1d6ceac9 100644
+index e658828e..5be1e212 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
 @@ -222,7 +222,7 @@ static cvarTable_t cvarTable[] = {
@@ -300,7 +300,7 @@ index ac15639e..1d6ceac9 100644
 +	{ &cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE  },
  	{ &cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE  },
  	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE  },
- 	{ &cg_gibsRandomVelocity, "cg_gibsRandomVelocity", "250", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE  },
 -- 
 2.41.0
 
