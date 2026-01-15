@@ -1,15 +1,15 @@
-From a94021d2f351023b218133e6aa68aab8c90add29 Mon Sep 17 00:00:00 2001
+From f42ad0a0b448f2e85b2c6ab7bfe43c84a6bb4c26 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 12 Jan 2026 22:49:16 +0400
 Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
 
 ---
- code/cgame/cg_effects.c | 246 +++++++++++++++++++++++-----------------
+ code/cgame/cg_effects.c | 250 +++++++++++++++++++++++-----------------
  code/cgame/cg_main.c    |   2 +-
- 2 files changed, 141 insertions(+), 107 deletions(-)
+ 2 files changed, 143 insertions(+), 109 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index f6a65239..b6071ac6 100644
+index 25b839bf..c014f50f 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -559,8 +559,9 @@ CG_GibPlayer
@@ -33,7 +33,7 @@ index f6a65239..b6071ac6 100644
  
  	if ( !cg_blood.integer ) {
  		return;
-@@ -583,119 +586,150 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles,
+@@ -583,121 +586,152 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles,
  	AngleVectors( playerAngles, forward, right, NULL );
  	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocityScaled );
  
@@ -132,17 +132,21 @@ index f6a65239..b6071ac6 100644
 -	VectorCopy( playerOrigin, origin );
 -	origin[2] = bottom + 0.80 * playerHeight;
 -	VectorClear( velocity );
--	velocity[0] = crandom()*baseRandomVelocity;
--	velocity[1] = crandom()*baseRandomVelocity;
--	velocity[2] = jump + crandom()*baseRandomVelocity;
+-	// Chest is a more "central" and "heavier" piece,
+-	// so it gets less random velocity.
+-	velocity[0] = 0.5*crandom()*baseRandomVelocity;
+-	velocity[1] = 0.5*crandom()*baseRandomVelocity;
+-	velocity[2] = jump + 0.5*crandom()*baseRandomVelocity;
 -	VectorAdd( velocity, playerVelocityScaled, velocity );
 -	CG_LaunchGib( origin, playerAngles, velocity, cgs.media.gibChest );
 +		VectorCopy( playerOrigin, origin );
 +		origin[2] = bottom + 0.80 * playerHeight;
 +		VectorClear( velocity );
-+		velocity[0] = crandom()*baseRandomVelocity;
-+		velocity[1] = crandom()*baseRandomVelocity;
-+		velocity[2] = jump + crandom()*baseRandomVelocity;
++		// Chest is a more "central" and "heavier" piece,
++		// so it gets less random velocity.
++		velocity[0] = 0.5*crandom()*baseRandomVelocity;
++		velocity[1] = 0.5*crandom()*baseRandomVelocity;
++		velocity[2] = jump + 0.5*crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, playerAngles, velocity, cgs.media.gibChest );
 +		if (numGibs-- <= 0) {
