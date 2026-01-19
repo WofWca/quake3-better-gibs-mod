@@ -80,6 +80,21 @@ so you can enjoy it on basically any server
 - `cg_bounceSoundMinImpactSpeed`
 - (maybe I've missed some: search the code for `+vmCvar_t`)
 
+Another way to (almost) restore the old behavior:
+
+```cfg
+// cg_oldGibs 0
+set cg_gibs 1.0
+set cg_gibsInheritPlayerVelocity 0
+set cg_gibsExtraRandomVelocity 250
+set cg_gibsExtraVerticalVelocity 250
+set cg_gibsBounceFactor 0.6
+set cg_gibsRotationFactor 0
+// Can't "restore" these
+// cg_bounceMarksMinImpactSpeed
+// cg_bounceSoundMinImpactSpeed
+```
+
 ## Integrating into other mods
 
 As was said, this mod modifies `vm/cgame.qvm` and `vm/qagame.qvm`,
