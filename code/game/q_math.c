@@ -373,6 +373,28 @@ void RotateAroundDirection( vec3_t axis[3], float yaw ) {
 	CrossProduct( axis[0], axis[1], axis[2] );
 }
 
+/*
+===============
+RotateAxisAroundVector
+
+`dir` must be normalized
+===============
+*/
+void RotateAxisAroundVector( vec3_t axis[3], const vec3_t dir, float degrees ) {
+	int i;
+
+	// Maybe we can make this cheaper?
+	for ( i = 0; i < 2; i++ ) {
+		vec3_t temp;
+
+		VectorCopy( axis[i], temp );
+		RotatePointAroundVector( axis[i], dir, temp, degrees );
+	}
+
+	// cross to get axis[2]
+	CrossProduct( axis[0], axis[1], axis[2] );
+}
+
 
 
 void vectoangles( const vec3_t value1, vec3_t angles ) {
@@ -412,6 +434,28 @@ void vectoangles( const vec3_t value1, vec3_t angles ) {
 	angles[PITCH] = -pitch;
 	angles[YAW] = yaw;
 	angles[ROLL] = 0;
+}
+
+vec_t AxisToAnglesRoll( vec3_t axis[3] ) {
+	vec_t roll = 0;
+
+	// Reference implementation:
+	// https://github.com/darklegion/tremulous/blob/c862a5340c8de44dcc7abaff170c20c04f9340e8/src/qcommon/q_math.c#L449-L452
+	if ( axis[0][1] == 0 && axis[0][0] == 0 ) {
+		roll = 0;
+	} else {
+		roll = atan2( axis[1][2], axis[2][2] ) * 180 / M_PI;
+		if ( roll < 0 ) {
+			roll += 360;
+		}
+	}
+
+	return roll;
+}
+
+void AxisToAngles( vec3_t axis[3], vec3_t angles ) {
+	vectoangles( axis[0], angles );
+	angles[ROLL] = AxisToAnglesRoll( axis );
 }
 
 

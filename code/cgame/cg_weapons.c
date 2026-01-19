@@ -70,6 +70,18 @@ static void CG_MachineGunEjectBrass( centity_t *cent ) {
 	le->angles.trDelta[1] = 1;
 	le->angles.trDelta[2] = 0;
 
+	// VectorCopy ( cent->lerpAngles, le->angles.trBase );
+	// le->angles.trBase[0] = 90;
+	// le->angles.trBase[0] += rand()&31;
+	// le->angles.trBase[1] += rand()&31;
+	// le->angles.trBase[2] += rand()&31;
+	// le->angles.trDelta[0] = RAD2DEG( 2 );
+	// le->angles.trDelta[1] = RAD2DEG( 1 );
+	// le->angles.trDelta[2] = RAD2DEG( 0 );
+	// le->angles.trDelta[0] = 2 * 1000;
+	// le->angles.trDelta[1] = 1 * 1000;
+	// le->angles.trDelta[2] = 0 * 1000;
+	
 	le->leFlags = LEF_TUMBLE;
 	le->leBounceSoundType = LEBS_BRASS;
 	le->leMarkType = LEMT_NONE;
@@ -145,6 +157,14 @@ static void CG_ShotgunEjectBrass( centity_t *cent ) {
 		le->angles.trDelta[0] = 1;
 		le->angles.trDelta[1] = 0.5;
 		le->angles.trDelta[2] = 0;
+		// VectorCopy( cent->lerpAngles, le->angles.trBase );
+		// le->angles.trBase[0] = 90;
+		// le->angles.trBase[0] += rand()&31;
+		// le->angles.trBase[1] += rand()&31;
+		// le->angles.trBase[2] += rand()&31;
+		// le->angles.trDelta[0] = 1 * 1000;
+		// le->angles.trDelta[1] = 0.5 * 1000;
+		// le->angles.trDelta[2] = 0 * 1000;
 
 		le->leFlags = LEF_TUMBLE;
 		le->leBounceSoundType = LEBS_BRASS;

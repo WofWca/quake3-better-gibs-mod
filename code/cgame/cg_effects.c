@@ -537,6 +537,11 @@ static void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
 						const vec3_t velocity, qhandle_t hModel ) {
 	localEntity_t	*le;
 	refEntity_t		*re;
+	// `VectorLength` would be more precise, but this is faster
+	// and good enough for randomness.
+	float speedIsh = fabs(velocity[0]) + fabs(velocity[1]) + fabs(velocity[2]);
+	int i;
+	int mainRotationAxis = rand() % 3;
 
 	le = CG_AllocLocalEntity();
 	re = &le->refEntity;
@@ -544,8 +549,52 @@ static void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
 	le->leType = LE_FRAGMENT;
 	le->startTime = cg.time;
 	le->endTime = le->startTime + 5000 + random() * 3000;
+	le->leFlags = LEF_TUMBLE;
+
+	le->angles.trType = TR_LINEAR;
+	le->angles.trTime = cg.time;
+
+	VectorCopy( angles, le->angles.trBase );
+	// Just a few degrees of randomness.
+	le->angles.trBase[PITCH] += rand()&7;
+	le->angles.trBase[YAW] += rand()&7;
+	le->angles.trBase[ROLL] += rand()&7;
+
+	// TODO CVAR for scale.
+	// TODO the angular velocity should probably depend on damage instead,
+	// or at least on random velocity.
+	le->angles.trDelta[0] = ( speedIsh / 100 ) * crandom();
+	le->angles.trDelta[1] = ( speedIsh / 100 ) * crandom();
+	le->angles.trDelta[2] = ( speedIsh / 100 ) * crandom();
+
+	// Hmmmm this is pretty good with `BG_EvaluateTrajectory`.
+	// Not ideal, but good.
+	// The numbers are not based on science, but it looks like having one axis
+	// be bigger than others doesn't look that unnatural.
+	// le->angles.trDelta[0] = ( speedIsh * 1 ) * crandom();
+	// le->angles.trDelta[1] = ( speedIsh * 1 * 0.25 ) * crandom();
+	// le->angles.trDelta[2] = ( speedIsh * 1 * 0.25 ) * crandom();
+
+	// for ( i = 0; i < 3; i++ ) {
+	// 	le->angles.trDelta[i] = ( speedIsh * (mainRotationAxis == i ? 1 : 0.25) * 1 ) * crandom();
+	// }
+
+	// speedIsh *= crandom();
+	// le->angles.trDelta[0] = ( speedIsh * 1 );
+	// le->angles.trDelta[1] = ( speedIsh * 1 * 0.25 );
+	// le->angles.trDelta[2] = ( speedIsh * 1 * 0.25 );
+
+
+
+	// // Just testing
+	// le->angles.trDelta[0] = ( speedIsh / 10 ) * crandom();
+	// le->angles.trDelta[1] = ( speedIsh / 10 ) * crandom();
+	// le->angles.trDelta[2] = ( speedIsh / 10 ) * crandom();
+
 
 	VectorCopy( origin, re->origin );
+	// This `AnglesToAxis` is not really needed
+	// because rotation will be applied based on `le->angles`.
 	AnglesToAxis( angles, re->axis );
 	re->hModel = hModel;
 

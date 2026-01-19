@@ -1257,6 +1257,38 @@ void BG_EvaluateTrajectoryDelta( const trajectory_t *tr, int atTime, vec3_t resu
 	}
 }
 
+/*
+================
+BG_EvaluateAngularVelocity
+
+Note that `BG_EvaluateTrajectory` is not suitable for calculating orientation
+based on a constant angular velocity (`trDelta`).
+(unless it only has one component x, y or z).
+================
+*/
+void BG_EvaluateAngularVelocity( const trajectory_t *tr, int atTime, vec3_t resultAxis[3] ) {
+	float rotationRate;
+	float degrees;
+	vec3_t rotationDir;
+
+	// TODO perf: It would be better for performance to just
+	// store axis in `trajectory_t` instead of converting
+	// back and forth each time.
+	// But changing `trajectory_t` appears to affect the network protocol.
+	// Maybe we should change `localEntity_t.angles` to a new type.
+	AnglesToAxis(tr->trBase, resultAxis );
+	// Here again it would be nice not to do this each time.
+	rotationRate = VectorNormalize2( tr->trDelta, rotationDir );
+
+	if ( rotationRate == 0 ) {
+		return;
+	}
+
+	// Milliseconds to seconds, as in `BG_EvaluateTrajectory`.
+	degrees = RAD2DEG( rotationRate * ( atTime - tr->trTime ) * 0.001 );
+	RotateAxisAroundVector( resultAxis, rotationDir, degrees );
+}
+
 
 const char *eventnames[EV_MAX] = {
 #define EVENT_STRINGS

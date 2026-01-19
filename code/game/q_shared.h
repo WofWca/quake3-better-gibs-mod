@@ -512,6 +512,8 @@ float	Q_crandom( int *seed );
 #define crandom()	(2.0 * (random() - 0.5))
 
 void vectoangles( const vec3_t value1, vec3_t angles);
+vec_t AxisToAnglesRoll( vec3_t axis[3] );
+void AxisToAngles( vec3_t axis[3], vec3_t angles );
 void AnglesToAxis( const vec3_t angles, vec3_t axis[3] );
 
 void AxisClear( vec3_t axis[3] );
@@ -529,6 +531,7 @@ float AngleDelta ( float angle1, float angle2 );
 void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal );
 void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees );
 void RotateAroundDirection( vec3_t axis[3], float yaw );
+void RotateAxisAroundVector( vec3_t axis[3], const vec3_t dir, float degrees );
 void MakeNormalVectors( const vec3_t forward, vec3_t right, vec3_t up );
 // perpendicular vector could be replaced by this
 
@@ -980,8 +983,13 @@ typedef struct {
 	trType_t	trType;
 	int		trTime;
 	int		trDuration;			// if non 0, trTime + trDuration = stop time
+	// For linear velocity trajectory it's the initial position.
+	// For `LEF_TUMBLE` angular velocity it's the base rotational angles.
 	vec3_t	trBase;
-	vec3_t	trDelta;			// velocity, etc
+	// velocity, etc. For `LEF_TUMBLE` the direction represents
+	// the axis of rotation and the length represents the angular speed
+	// in radians per second.
+	vec3_t	trDelta;
 } trajectory_t;
 
 // entityState_t is the information conveyed from the server

@@ -241,6 +241,17 @@ static void CG_AddFragment( localEntity_t *le ) {
 		int		t;
 		float	oldZ;
 		
+		// Make lie down horizontally. Just testing.
+		// TODO perf - we only need to know pitch.
+		// TODO doesn't apply to gibs.
+		if (le->leBounceSoundType == LEBS_BRASS) {
+			vec3_t angles;
+			AxisToAngles( le->refEntity.axis, angles );
+			// TODO or 270
+			angles[PITCH] = 90;
+			AnglesToAxis( angles, le->refEntity.axis );
+		}
+
 		t = le->endTime - cg.time;
 		if ( t < SINK_TIME ) {
 			// we must use an explicit lighting origin, otherwise the
@@ -269,10 +280,11 @@ static void CG_AddFragment( localEntity_t *le ) {
 		VectorCopy( newOrigin, le->refEntity.origin );
 
 		if ( le->leFlags & LEF_TUMBLE ) {
-			vec3_t angles;
+			// vec3_t angles;
+			// BG_EvaluateTrajectory( &le->angles, cg.time, angles );
+			// AnglesToAxis( angles, le->refEntity.axis );
 
-			BG_EvaluateTrajectory( &le->angles, cg.time, angles );
-			AnglesToAxis( angles, le->refEntity.axis );
+			BG_EvaluateAngularVelocity( &le->angles, cg.time, le->refEntity.axis );
 		}
 
 		trap_R_AddRefEntityToScene( &le->refEntity );
@@ -295,6 +307,22 @@ static void CG_AddFragment( localEntity_t *le ) {
 
 	// reflect the velocity on the trace plane
 	CG_ReflectVelocity( le, &trace, impactVelocityDiff );
+
+	// reduce angular velocity, if any
+	if ( le->leFlags & LEF_TUMBLE ) {
+		// Having angular velocity damping synchronized with
+		// linear velocity damping (`bounceFactor`) makes sure
+		// that they both decay at the same rate.
+		// Though having angular velocity damping a little smaller
+		// makes the fragment look a little better when it stops,
+		// (as long as its angular velocity is not too big
+		// compared to its linear velocity).
+		float damping = 1 - (1 - le->bounceFactor) / 2;
+		VectorScale( le->angles.trDelta, damping, le->angles.trDelta );
+
+		le->angles.trTime = cg.time;
+		AxisToAngles( le->refEntity.axis, le->angles.trBase );
+	}
 
 	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceMarksMinImpactSpeed.value ) ) {
 		// leave a mark
