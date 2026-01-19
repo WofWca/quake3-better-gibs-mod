@@ -75,6 +75,7 @@ so you can enjoy it on basically any server
 - `cg_gibsExtraRandomVelocity`
 - `cg_gibsExtraVerticalVelocity`
 - `cg_gibsBounceFactor`
+- `cg_gibsRotationFactor`
 - `cg_bounceMarksMinImpactSpeed`
 - `cg_bounceSoundMinImpactSpeed`
 - (maybe I've missed some: search the code for `+vmCvar_t`)

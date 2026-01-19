@@ -1,0 +1,89 @@
+From c54321e334b3f178dc72fbc3c941dd68b4167022 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Mon, 19 Jan 2026 21:36:34 +0400
+Subject: [PATCH] feat: make gibs tumble (rotate)
+
+---
+ code/cgame/cg_effects.c | 25 +++++++++++++++++++++++++
+ code/cgame/cg_local.h   |  1 +
+ code/cgame/cg_main.c    |  2 ++
+ 3 files changed, 28 insertions(+)
+
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index c014f50f..ef7a17e0 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -529,6 +529,11 @@ CG_LaunchGib
+ void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hModel ) {
+ 	localEntity_t	*le;
+ 	refEntity_t		*re;
++	// `VectorLength` would be more precise, but this is faster
++	// and good enough for randomness.
++	float speedIsh = fabs(velocity[0]) + fabs(velocity[1]) + fabs(velocity[2]);
++	int i;
++	int mainRotationAxis = rand() % 3;
+ 
+ 	le = CG_AllocLocalEntity();
+ 	re = &le->refEntity;
+@@ -548,6 +553,26 @@ void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hMod
+ 
+ 	le->bounceFactor = cg_oldGibs.integer ? 0.6f : cg_gibsBounceFactor.value;
+ 
++	if (!cg_oldGibs.integer) {
++		le->leFlags = LEF_TUMBLE;
++		le->angles.trType = TR_LINEAR;
++		le->angles.trTime = cg.time;
++		VectorCopy( angles, le->angles.trBase );
++		// Just a few degrees of randomness.
++		le->angles.trBase[PITCH] += rand()&7;
++		le->angles.trBase[YAW] += rand()&7;
++		le->angles.trBase[ROLL] += rand()&7;
++		// TODO the tumble speed should probably depend on damage instead,
++		// or at least on random velocity.
++		for ( i = 0; i < 3; i++ ) {
++			// The numbers are not based on science, but it looks like
++			// having one axis be bigger than others makes rotation look natural.
++			float axisMul = mainRotationAxis == i ? 1 : 0.25;
++			le->angles.trDelta[i] = speedIsh * axisMul * 0.5 *
++				cg_gibsRotationFactor.value * crandom();
++		}
++	}
++
+ 	le->leBounceSoundType = LEBS_BLOOD;
+ 	le->leMarkType = LEMT_BLOOD;
+ }
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 0d5056dc..6114d2ef 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1098,6 +1098,7 @@ extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
+ extern	vmCvar_t		cg_gibsExtraRandomVelocity;
+ extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
+ extern	vmCvar_t		cg_gibsBounceFactor;
++extern	vmCvar_t		cg_gibsRotationFactor;
+ extern	vmCvar_t		cg_drawTimer;
+ extern	vmCvar_t		cg_drawFPS;
+ extern	vmCvar_t		cg_drawSnapshot;
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index 5be1e212..38d7b079 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -104,6 +104,7 @@ vmCvar_t	cg_gibsInheritPlayerVelocity;
+ vmCvar_t	cg_gibsExtraRandomVelocity;
+ vmCvar_t	cg_gibsExtraVerticalVelocity;
+ vmCvar_t	cg_gibsBounceFactor;
++vmCvar_t	cg_gibsRotationFactor;
+ vmCvar_t	cg_drawTimer;
+ vmCvar_t	cg_drawFPS;
+ vmCvar_t	cg_drawSnapshot;
+@@ -228,6 +229,7 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE  },
+ 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
++	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
+ 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
+-- 
+2.41.0
+
