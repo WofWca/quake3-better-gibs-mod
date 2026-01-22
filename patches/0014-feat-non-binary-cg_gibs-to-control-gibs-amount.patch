@@ -1,4 +1,4 @@
-From f42ad0a0b448f2e85b2c6ab7bfe43c84a6bb4c26 Mon Sep 17 00:00:00 2001
+From 46482ec874ff071a31b305a895058981db517326 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 12 Jan 2026 22:49:16 +0400
 Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
@@ -9,7 +9,7 @@ Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
  2 files changed, 143 insertions(+), 109 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 25b839bf..c014f50f 100644
+index c955bc8c..b7d279de 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -559,8 +559,9 @@ CG_GibPlayer
@@ -202,9 +202,9 @@ index 25b839bf..c014f50f 100644
 -	VectorMA( origin, -0.6 * playerRadius, right, origin );
 -	VectorMA( origin, -0.2 * playerRadius, forward, origin );
 -	VectorClear( velocity );
--	velocity[0] = crandom()*baseRandomVelocity;
 -	VectorMA( velocity, -random()*baseRandomVelocity, right, velocity );
 -	VectorMA( velocity, crandom()*baseRandomVelocity, forward, velocity );
+-	velocity[2] = jump + crandom()*baseRandomVelocity;
 -	VectorAdd( velocity, playerVelocityScaled, velocity );
 -	CG_LaunchGib( origin, playerAngles, velocity, cgs.media.gibForearm );
 +		VectorCopy( playerOrigin, origin );
@@ -212,9 +212,9 @@ index 25b839bf..c014f50f 100644
 +		VectorMA( origin, -0.6 * playerRadius, right, origin );
 +		VectorMA( origin, -0.2 * playerRadius, forward, origin );
 +		VectorClear( velocity );
-+		velocity[0] = crandom()*baseRandomVelocity;
 +		VectorMA( velocity, -random()*baseRandomVelocity, right, velocity );
 +		VectorMA( velocity, crandom()*baseRandomVelocity, forward, velocity );
++		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, playerAngles, velocity, cgs.media.gibForearm );
 +		if (numGibs-- <= 0) {
