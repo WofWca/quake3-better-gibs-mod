@@ -1,4 +1,4 @@
-From 5064b377be122d06b825c931eb2f54000f822469 Mon Sep 17 00:00:00 2001
+From b9aabc04126d82e6d261c17f68322f64eba223ae Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 13:54:51 +0400
 Subject: [PATCH] improvement: allow multiple bounce marks (gibs)
