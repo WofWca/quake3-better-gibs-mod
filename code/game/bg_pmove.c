@@ -1283,7 +1283,7 @@ static void PM_CheckDuck (void)
 
 	if (pm->ps->pm_type == PM_DEAD)
 	{
-		pm->ps->maxs[2] = DEAD_HEIGHT;
+		pm->ps->maxs[2] = DEAD_MAXS_Z;
 		pm->ps->viewheight = DEAD_VIEWHEIGHT;
 		return;
 	}
@@ -1297,7 +1297,7 @@ static void PM_CheckDuck (void)
 		if (pm->ps->pm_flags & PMF_DUCKED)
 		{
 			// try to stand up
-			pm->ps->maxs[2] = DEFAULT_HEIGHT;
+			pm->ps->maxs[2] = MAXS_Z;
 			pm->trace (&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs, pm->ps->origin, pm->ps->clientNum, pm->tracemask );
 			if (!trace.allsolid)
 				pm->ps->pm_flags &= ~PMF_DUCKED;
@@ -1306,12 +1306,12 @@ static void PM_CheckDuck (void)
 
 	if (pm->ps->pm_flags & PMF_DUCKED)
 	{
-		pm->ps->maxs[2] = CROUCH_HEIGHT;
+		pm->ps->maxs[2] = CROUCH_MAXS_Z;
 		pm->ps->viewheight = CROUCH_VIEWHEIGHT;
 	}
 	else
 	{
-		pm->ps->maxs[2] = DEFAULT_HEIGHT;
+		pm->ps->maxs[2] = MAXS_Z;
 		pm->ps->viewheight = DEFAULT_VIEWHEIGHT;
 	}
 }
