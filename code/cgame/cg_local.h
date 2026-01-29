@@ -72,7 +72,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define	MAX_STEP_CHANGE		32
 
 #define	MAX_VERTS_ON_POLY	10
-#define	MAX_MARK_POLYS		256
+#define	MAX_MARK_POLYS		1024
 
 #define STAT_MINUS			10	// num frame for '-' stats digit
 
