@@ -1,4 +1,4 @@
-From fc272890fe68f97f9c8ea73af0b6624348ea7ab7 Mon Sep 17 00:00:00 2001
+From f8c94245031969166a22c76688650d2118ae145e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 14 Jan 2026 22:46:48 +0400
 Subject: [PATCH] fix: own gibs not flying away from damage

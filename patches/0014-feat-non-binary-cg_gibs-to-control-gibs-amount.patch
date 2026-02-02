@@ -1,4 +1,4 @@
-From 989f5f262500d55e8dd02e9de299e5b6dd23d5df Mon Sep 17 00:00:00 2001
+From 22014b012c0630e094b3ccd95bf05270390207b7 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 12 Jan 2026 22:49:16 +0400
 Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
@@ -9,7 +9,7 @@ Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
  2 files changed, 143 insertions(+), 109 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index c411ec68..fc3446c3 100644
+index c411ec68..06a08e61 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -559,8 +559,9 @@ CG_GibPlayer
@@ -81,7 +81,7 @@ index c411ec68..fc3446c3 100644
 +		} else {
 +			CG_LaunchGib( origin, playerAngles, velocity, cgs.media.gibBrain );
 +		}
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -101,7 +101,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibAbdomen );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -125,7 +125,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibArm );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -149,7 +149,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + 0.5*crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibChest );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -169,7 +169,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibFist );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -193,7 +193,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibFoot );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -217,7 +217,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibForearm );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -237,7 +237,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibIntestine );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -261,7 +261,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibLeg );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
  
@@ -285,7 +285,7 @@ index c411ec68..fc3446c3 100644
 +		velocity[2] = jump + crandom()*baseRandomVelocity;
 +		VectorAdd( velocity, playerVelocityScaled, velocity );
 +		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibLeg );
-+		if (numGibs-- <= 0) {
++		if (--numGibs <= 0) {
 +			return;
 +		}
 +	} while (numGibs > 0);

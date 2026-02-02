@@ -1,4 +1,4 @@
-From 8ec73bae47dbc1b319c7e6fd9bed789f7577584c Mon Sep 17 00:00:00 2001
+From 766770058ab10fdb3bb16f0efe4123749ebe0037 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 19 Jan 2026 21:36:34 +0400
 Subject: [PATCH] feat: make gibs tumble (rotate)
@@ -10,7 +10,7 @@ Subject: [PATCH] feat: make gibs tumble (rotate)
  3 files changed, 28 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index fc3446c3..8a3081cc 100644
+index 06a08e61..d19a7da0 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -529,6 +529,11 @@ CG_LaunchGib
