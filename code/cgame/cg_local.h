@@ -1165,6 +1165,9 @@ typedef struct {
 	int				maxclients;
 	char			mapname[MAX_QPATH];
 
+	// parsed from systeminfo
+	int				g_gibsNewEvGibPlayerParmProtocol;
+
 	int				voteTime;
 	int				voteYes;
 	int				voteNo;
@@ -1250,6 +1253,7 @@ extern	vmCvar_t		cg_gibs;
 extern	vmCvar_t		cg_oldGibs;
 extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
 extern	vmCvar_t		cg_gibsExtraRandomVelocity;
+extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
 extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
 extern	vmCvar_t		cg_gibsBounceFactor;
 extern	vmCvar_t		cg_gibsRotationFactor;
@@ -1655,7 +1659,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
 void CG_ScorePlum( int client, vec3_t org, int score );
 
 void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
-				const vec3_t playerVelocity,
+				const vec3_t playerVelocity, const int knockbackSpeed,
 				const lerpFrame_t *bodyAnimation );
 void CG_GibPlayerOld( vec3_t playerOrigin );
 void CG_BigExplode( vec3_t playerOrigin );
@@ -1731,6 +1735,7 @@ void CG_StopCinematic_f( void );
 //
 void CG_ExecuteNewServerCommands( int latestSequence );
 void CG_ParseServerinfo( void );
+void CG_ParseSysteminfo( void );
 void CG_SetConfigValues( void );
 void CG_ShaderStateChanged(void);
 #ifdef MISSIONPACK
