@@ -1675,6 +1675,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	cgs.levelStartTime = atoi( s );
 
 	CG_ParseServerinfo();
+	CG_ParseSysteminfo();
 
 	// load the new map
 	CG_LoadingString( "collision map" );
