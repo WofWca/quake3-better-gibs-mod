@@ -229,17 +229,14 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker ) 
 	self->client->ps.stats[STAT_DEAD_YAW] = vectoyaw ( dir );
 }
 
+#define MAX_KNOCKBACK 200
 /*
 ==================
 KnockbackToKnockbackSpeed
 ==================
 */
 static float KnockbackToKnockbackSpeed( int knockback ) {
-	float	mass;
-
-	mass = 200;
-
-	return g_knockback.value * (float)knockback / mass;
+	return g_knockback.value * (float)knockback / COMBAT_PLAYER_MASS;
 }
 
 
@@ -248,7 +245,8 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
 GibEntity
 ==================
 */
-void GibEntity( gentity_t *self, int killer ) {
+void GibEntity( gentity_t *self, int killer, int damageBloodFallback ) {
+	int eventParm = killer;
 	gentity_t *ent;
 	int i;
 
@@ -267,7 +265,51 @@ void GibEntity( gentity_t *self, int killer ) {
 			break;
 		}
 	}
-	G_AddEvent( self, EV_GIB_PLAYER, killer );
+
+	// In vanilla Quake the meaning of the `EV_GIB_PLAYER` eventParm
+	// is `killer`.
+	// But it is unused client-side, so it's safe for us to change its meaning
+	// (i.e. to change the network protocol).
+	// However, some mods might in fact rely on it,
+	// so let's have a CVAR to keep the old behavior.
+	//
+	// Note that we're not checking `g_oldGibs`, because in itself
+	// this does not affect behavior:
+	// we're simply providing the client with the knockback info,
+	// and whether to use that into is up to `cg_oldGibs`.
+	if ( g_gibsNewEvGibPlayerParmProtocol.integer == 1 ) {
+		int damage;
+		float knockbackSpeed;
+
+		// We prefer actual damage over `client->damage_knockback`
+		// because `damage_knockback` is sometimes undesirably 0. Namely:
+		// - when the target is a dead body, with `FL_NO_KNOCKBACK`.
+		// - when the knockback `dir` is not provided to `G_Damage`,
+		//   such as with crushers.
+		//
+		// Most of the time (but not always e.g. with lava)
+		// "no knockback" means "the player should not be moved
+		// in any particular direction",
+		// and not that "their gibs should stay put".
+		damage = self->client
+			? self->client->damage_blood + self->client->damage_armor
+			: damageBloodFallback;
+		if ( damage > MAX_KNOCKBACK ) {
+			damage = MAX_KNOCKBACK;
+		}
+
+		knockbackSpeed = KnockbackToKnockbackSpeed( damage );
+
+		// Fit it into one byte.
+		eventParm = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
+		if (eventParm > 255) {
+			eventParm = 255;
+		}
+	} else {
+		eventParm = killer;
+	}
+	G_AddEvent( self, EV_GIB_PLAYER, eventParm );
+
 	self->takedamage = qfalse;
 	self->s.eType = ET_INVISIBLE;
 	self->r.contents = 0;
@@ -287,7 +329,7 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d
 		return;
 	}
 
-	GibEntity( self, 0 );
+	GibEntity( self, 0, damage );
 }
 
 
@@ -646,7 +688,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	if ( (self->health <= GIB_HEALTH && !(contents & CONTENTS_NODROP) && g_blood.integer) || meansOfDeath == MOD_SUICIDE) {
 		// gib death
-		GibEntity( self, killer );
+		GibEntity( self, killer, damage );
 	} else {
 		// normal death
 		static int lastDeath;
@@ -1003,8 +1045,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
 	knockback = damage;
-	if ( knockback > 200 ) {
-		knockback = 200;
+	if ( knockback > MAX_KNOCKBACK ) {
+		knockback = MAX_KNOCKBACK;
 	}
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
