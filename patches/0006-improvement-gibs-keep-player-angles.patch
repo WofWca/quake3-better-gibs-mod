@@ -1,4 +1,4 @@
-From 4f79e940971d2c0d071a177c2883aac07356ea04 Mon Sep 17 00:00:00 2001
+From 9c958cd6a35f5b565b556e1483496b0852e91220 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 21:00:17 +0400
 Subject: [PATCH] improvement: gibs: keep player angles
@@ -8,14 +8,14 @@ to each individual gib.
 And now it's time to also make sure
 that they're facing the right direction.
 ---
- code/cgame/cg_effects.c   | 83 ++++++++++++++++++++++-----------------
+ code/cgame/cg_effects.c   | 87 ++++++++++++++++++++++-----------------
  code/cgame/cg_event.c     |  2 +-
  code/cgame/cg_local.h     |  2 +-
  code/cgame/cg_localents.c |  6 ++-
- 4 files changed, 54 insertions(+), 39 deletions(-)
+ 4 files changed, 56 insertions(+), 41 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 16a5b7d4..280f05c2 100644
+index ab6bb416..6da5aca3 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -526,7 +526,7 @@ void CG_Bleed( vec3_t origin, int entityNum ) {
@@ -73,7 +73,7 @@ index 16a5b7d4..280f05c2 100644
  	}
  
  	// allow gibs to be turned off for speed
-@@ -596,89 +605,91 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
+@@ -596,91 +605,93 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
@@ -81,11 +81,11 @@ index 16a5b7d4..280f05c2 100644
 +	CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibAbdomen );
  
  	VectorCopy( playerOrigin, origin );
- 	origin[2] = bottom + 0.75 * playerHeight;
--	origin[1] += 0.5 * playerRadius;
--	origin[0] += 0.5 * playerRadius;
-+	VectorMA( origin, 0.5 * playerRadius, right, origin );
-+	VectorMA( origin, 0.5 * playerRadius, forward, origin );
+ 	origin[2] = bottom + 0.78 * playerHeight;
+-	origin[1] += 0.8 * playerRadius;
+-	origin[0] += 0.3 * playerRadius;
++	VectorMA( origin, 0.8 * playerRadius, right, origin );
++	VectorMA( origin, 0.3 * playerRadius, forward, origin );
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
@@ -102,6 +102,10 @@ index 16a5b7d4..280f05c2 100644
  
  	VectorCopy( playerOrigin, origin );
  	origin[2] = bottom + 0.66 * playerHeight;
+-	origin[1] += 0.8 * playerRadius;
+-	origin[0] += 0.2 * playerRadius;
++	VectorMA( origin, 0.8 * playerRadius, right, origin );
++	VectorMA( origin, 0.2 * playerRadius, forward, origin );
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
@@ -187,7 +191,7 @@ index 16a5b7d4..280f05c2 100644
  	}
  
  	// allow gibs to be turned off for speed
-@@ -690,55 +701,55 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
+@@ -692,55 +703,55 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;

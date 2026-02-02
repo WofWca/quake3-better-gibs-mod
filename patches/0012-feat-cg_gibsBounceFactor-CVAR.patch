@@ -1,4 +1,4 @@
-From 973d76dc2396197305a5573baf95a0b34c932d17 Mon Sep 17 00:00:00 2001
+From 2437f660085976085c84108b917c29fe1a7db931 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 11 Nov 2025 11:39:56 +0400
 Subject: [PATCH] feat: `cg_gibsBounceFactor` CVAR
@@ -10,7 +10,7 @@ Subject: [PATCH] feat: `cg_gibsBounceFactor` CVAR
  3 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 6ec1597f..6111742a 100644
+index db4f439c..87be7126 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -546,7 +546,7 @@ void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hMod

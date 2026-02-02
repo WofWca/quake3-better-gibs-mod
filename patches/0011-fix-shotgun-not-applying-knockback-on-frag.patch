@@ -1,4 +1,4 @@
-From 94dcdcdbcd0354c3ffc535c2d48e7e47ad588da3 Mon Sep 17 00:00:00 2001
+From 8866bb2418f278d40adb1b311fac0965f5fe5bd8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 14 Nov 2025 17:55:52 +0400
 Subject: [PATCH] fix: shotgun not applying knockback on frag

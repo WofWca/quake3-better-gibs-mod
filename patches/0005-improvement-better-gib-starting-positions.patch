@@ -1,4 +1,4 @@
-From d6b26d40b337dab775768c98cb10814f9b092f11 Mon Sep 17 00:00:00 2001
+From b03a77d7780e1869b48fb11a67b6d4b77f2f5a3f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 14:35:21 +0400
 Subject: [PATCH] improvement: better gib starting positions
@@ -8,11 +8,11 @@ In the original game, all gibs start flying from one single point
 Let's position the gibs closer to where they are supposed to be
 anatomically. That is, legs go lower, head goes higher.
 ---
- code/cgame/cg_effects.c | 27 +++++++++++++++++++++++++++
- 1 file changed, 27 insertions(+)
+ code/cgame/cg_effects.c | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index ba60f99e..16a5b7d4 100644
+index ba60f99e..ab6bb416 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -563,12 +563,20 @@ Generated a bunch of gibs launching out from the bodies location
@@ -36,7 +36,7 @@ index ba60f99e..16a5b7d4 100644
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
-@@ -584,54 +592,73 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
+@@ -584,54 +592,75 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
  	}
  
  	VectorCopy( playerOrigin, origin );
@@ -47,9 +47,9 @@ index ba60f99e..16a5b7d4 100644
  	CG_LaunchGib( origin, velocity, cgs.media.gibAbdomen );
  
  	VectorCopy( playerOrigin, origin );
-+	origin[2] = bottom + 0.75 * playerHeight;
-+	origin[1] += 0.5 * playerRadius;
-+	origin[0] += 0.5 * playerRadius;
++	origin[2] = bottom + 0.78 * playerHeight;
++	origin[1] += 0.8 * playerRadius;
++	origin[0] += 0.3 * playerRadius;
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
@@ -64,6 +64,8 @@ index ba60f99e..16a5b7d4 100644
  
  	VectorCopy( playerOrigin, origin );
 +	origin[2] = bottom + 0.66 * playerHeight;
++	origin[1] += 0.8 * playerRadius;
++	origin[0] += 0.2 * playerRadius;
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
