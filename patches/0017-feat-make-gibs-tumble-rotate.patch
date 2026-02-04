@@ -1,35 +1,29 @@
-From b178a499f753ae7b8f3868f012613ebae5f0e8a0 Mon Sep 17 00:00:00 2001
+From 65940dd4ff6d52608725e27229a73552b9c580ca Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 19 Jan 2026 21:36:34 +0400
 Subject: [PATCH] feat: make gibs tumble (rotate)
 
 ---
- code/cgame/cg_effects.c | 25 +++++++++++++++++++++++++
+ code/cgame/cg_effects.c | 26 ++++++++++++++++++++++++++
  code/cgame/cg_local.h   |  1 +
  code/cgame/cg_main.c    |  2 ++
- 3 files changed, 28 insertions(+)
+ 3 files changed, 29 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 2959c2da..e346ffe0 100644
+index 2959c2da..760ba55a 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -529,6 +529,11 @@ CG_LaunchGib
- void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hModel ) {
- 	localEntity_t	*le;
- 	refEntity_t		*re;
-+	// `VectorLength` would be more precise, but this is faster
-+	// and good enough for randomness.
-+	float speedIsh = fabs(velocity[0]) + fabs(velocity[1]) + fabs(velocity[2]);
-+	int i;
-+	int mainRotationAxis = rand() % 3;
- 
- 	le = CG_AllocLocalEntity();
- 	re = &le->refEntity;
-@@ -548,6 +553,26 @@ void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hMod
+@@ -548,6 +548,32 @@ void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hMod
  
  	le->bounceFactor = cg_oldGibs.integer ? 0.6f : cg_gibsBounceFactor.value;
  
 +	if (!cg_oldGibs.integer) {
++		// `VectorLength` would be more precise, but this is faster
++		// and good enough for randomness.
++		float speedIsh = fabs(velocity[0]) + fabs(velocity[1]) + fabs(velocity[2]);
++		int i;
++		int mainRotationAxis = rand() % 3;
++
 +		le->leFlags = LEF_TUMBLE;
 +		le->angles.trType = TR_LINEAR;
 +		le->angles.trTime = cg.time;
