@@ -1240,6 +1240,17 @@ void CG_EntityEvent( centity_t *cent, vec3_t position, int entityNum ) {
 				randSeed = Q_rand(&randSeed) + ci->name[0];
 			}
 
+			// CG_Printf("angles %.1f %.1f %.1f\n",
+			// 	cent->rawAngles[PITCH],
+			// 	cent->rawAngles[YAW],
+			// 	cent->rawAngles[ROLL]
+			// );
+			CG_Printf("angles %.1f %.1f\n",
+				cent->pe.torso.pitchAngle,
+				cent->pe.torso.yawAngle
+				// cent->nextState.apos.trBase[PITCH],
+				// cent->nextState.apos.trBase[YAW]
+			);
 			if ( es->number == cg.snap->ps.clientNum ) {
 				// Apparently at this point `es->pos.trDelta` doesn't yet have
 				// the knockback from the damage that gibbed us,
@@ -1247,11 +1258,19 @@ void CG_EntityEvent( centity_t *cent, vec3_t position, int entityNum ) {
 				// and use `cg.predictedPlayerState.velocity`
 				// if it's ourself.
 				// `cent->pe.torso` also appears to be not good here.
-				CG_GibPlayer( cent->lerpOrigin, cent->lerpAngles,
+				CG_GibPlayer( cent->lerpOrigin,
+					cent->lerpAngles,
+					cent->lerpAngles,
+					// cent->nextState.apos.trBase,
+					// cent->nextState.apos.trBase,
 					cg.predictedPlayerState.velocity, knockbackSpeed,
 					&cg.predictedPlayerEntity.pe.torso, randSeed );
 			} else {
-				CG_GibPlayer( cent->lerpOrigin, cent->lerpAngles,
+				vec3_t bodyAngles;
+				bodyAngles[PITCH] = cent->pe.torso.pitchAngle;
+				bodyAngles[YAW] = cent->pe.torso.yawAngle;
+				bodyAngles[ROLL] = 0;
+				CG_GibPlayer( cent->lerpOrigin, bodyAngles, cent->lerpAngles,
 					es->pos.trDelta, knockbackSpeed,
 					&cent->pe.torso, randSeed );
 			}

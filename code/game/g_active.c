@@ -1216,6 +1216,34 @@ void ClientEndFrame( gentity_t *ent ) {
 		client->damage.team = 0;
 	}
 
+	// // Simply set at spawn
+	// G_Printf("angles %.1f %.1f %.1f\n",
+	// 	ent->s.angles[0],
+	// 	ent->s.angles[1],
+	// 	ent->s.angles[2]
+	// );
+
+	// // Just fucking 0.
+	// G_Printf("angles %.1f %.1f %.1f\n",
+	// 	ent->r.currentAngles[0],
+	// 	ent->r.currentAngles[1],
+	// 	ent->r.currentAngles[2]
+	// );
+	
+	// // 0
+	// G_Printf("angles %.1f %.1f %.1f\n",
+	// 	client->pers.cmd.angles[0],
+	// 	client->pers.cmd.angles[1],
+	// 	client->pers.cmd.angles[2]
+	// );
+
+	// // OK, these are good.
+	// G_Printf("angles %.1f %.1f %.1f\n",
+	// 	client->ps.viewangles[0],
+	// 	client->ps.viewangles[1],
+	// 	client->ps.viewangles[2]
+	// );
+
 	//
 	// clear damage totals
 	//

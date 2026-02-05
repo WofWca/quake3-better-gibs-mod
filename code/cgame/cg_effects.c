@@ -629,6 +629,10 @@ void AdjustPositionIfDeathAnimation( const lerpFrame_t *anim, vec3_t origin,
 	// TODO fix: but sometimes the "dead" animation is such that
 	// the player is facing down.
 	bodyAngles[PITCH] = 360 - deathAnimationProgress * 90;
+	// Body angles can be initially pitched, see
+	// `CG_PlayerAngles`.
+	// bodyAngles[PITCH] += 360 - deathAnimationProgress * 90;
+
 	lookDirAngles[PITCH] += - deathAnimationProgress * 90;
 	// Normalize. Doesn't seem to be necessary, but let's do it.
 	if (lookDirAngles[PITCH] < 0) {
@@ -645,7 +649,8 @@ Generated a bunch of gibs launching out from the bodies location
 #define	DEFAULT_NUM_GIBS	10
 #define	GIB_VELOCITY		250
 #define	GIB_JUMP			250
-void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t bodyAnglesRaw,
+					const vec3_t lookDirAnglesRaw,
 					const vec3_t playerVelocity, const int knockbackSpeed,
 					const lerpFrame_t *bodyAnimation, const int randSeed ) {
 	vec3_t	baseOrigin, origin, velocity;
@@ -675,8 +680,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 	}
 
 	VectorCopy( playerOrigin, baseOrigin );
-	VectorCopy( playerAngles, lookDirAngles );
-	VectorCopy( playerAngles, bodyAngles );
+	VectorCopy( lookDirAnglesRaw, lookDirAngles );
+	VectorCopy( bodyAnglesRaw, bodyAngles );
 	if ( bodyAnimation ) {
 		AdjustPositionIfDeathAnimation( bodyAnimation, baseOrigin, bodyAngles, lookDirAngles );
 	} else {
@@ -685,6 +690,13 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 	AngleVectors( bodyAngles, forward, right, up );
 
 	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocityScaled );
+
+	if ( 1 ) {
+		CG_Printf("CG_GibPlayer: scaled player speed: %.2f, random speed: %.2f, body / head pitch: %.1f / %.1f yaw: %.1f / %.1f, seed %i\n",
+			VectorLength( playerVelocityScaled ),
+			baseRandomVelocity, bodyAngles[PITCH] - 360, lookDirAngles[PITCH],
+			AngleNormalize360( bodyAngles[YAW] ), AngleNormalize360( lookDirAngles[YAW] ), seed );
+	}
 
 	do {
 		// Note that one gib will get launched even if `numGibs == 0`.
