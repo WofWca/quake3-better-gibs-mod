@@ -1,4 +1,4 @@
-From 8866bb2418f278d40adb1b311fac0965f5fe5bd8 Mon Sep 17 00:00:00 2001
+From 08e0b875fb5ccedcf3b4e962e94dfd0c5b34c842 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 14 Nov 2025 17:55:52 +0400
 Subject: [PATCH] fix: shotgun not applying knockback on frag
@@ -63,5 +63,5 @@ index 822bc412..4fd874a0 100644
  			if (targ->health < -999)
  				targ->health = -999;
 -- 
-2.41.0
+2.43.0
 

@@ -1,4 +1,4 @@
-From 8ca2a4f14488f00311aa568ba0c2265c278a04ef Mon Sep 17 00:00:00 2001
+From 2e7cc6a0636ba0d00ace704a41f3820c84d028fc Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 13:54:51 +0400
 Subject: [PATCH] improvement: allow multiple bounce marks (gibs)
@@ -14,7 +14,7 @@ should they keep high velocity after the first impact.
  3 files changed, 24 insertions(+), 10 deletions(-)
 
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 43b8b262..58cd8e94 100644
+index 62b37e6c..0ce4dcb3 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1125,6 +1125,7 @@ extern	vmCvar_t		cg_noPlayerAnims;
@@ -26,7 +26,7 @@ index 43b8b262..58cd8e94 100644
  extern	vmCvar_t		cg_gun_frame;
  extern	vmCvar_t		cg_gun_x;
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 1c66a1bf..a0784830 100644
+index 8fc9cbc8..0cee27dc 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -169,9 +169,11 @@ void CG_FragmentBounceMark( localEntity_t *le, trace_t *trace ) {
@@ -122,5 +122,5 @@ index 1f67c7b6..21342305 100644
  	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE  },
  	{ &cg_gun_x, "cg_gunX", "0", CVAR_CHEAT },
 -- 
-2.41.0
+2.43.0
 

@@ -1,4 +1,4 @@
-From 453cbbaa92e280e154277a1a922a1ffd34075279 Mon Sep 17 00:00:00 2001
+From 65751d67c99acdd88bd3423081d83d99b22306bd Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 14 Jan 2026 22:46:48 +0400
 Subject: [PATCH] fix: own gibs not flying away from damage
@@ -32,5 +32,5 @@ index 510f24a0..03a10dc4 100644
  		break;
  
 -- 
-2.41.0
+2.43.0
 

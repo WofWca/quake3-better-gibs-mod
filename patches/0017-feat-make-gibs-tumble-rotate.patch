@@ -1,4 +1,4 @@
-From 65940dd4ff6d52608725e27229a73552b9c580ca Mon Sep 17 00:00:00 2001
+From 2bfe76885c5ec8c28877dcec5e0dbd42dd0f38be Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 19 Jan 2026 21:36:34 +0400
 Subject: [PATCH] feat: make gibs tumble (rotate)
@@ -10,10 +10,10 @@ Subject: [PATCH] feat: make gibs tumble (rotate)
  3 files changed, 29 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 2959c2da..760ba55a 100644
+index 5a3a1dd7..0a6a9b41 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -548,6 +548,32 @@ void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hMod
+@@ -549,6 +549,32 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
  
  	le->bounceFactor = cg_oldGibs.integer ? 0.6f : cg_gibsBounceFactor.value;
  
@@ -47,7 +47,7 @@ index 2959c2da..760ba55a 100644
  	le->leMarkType = LEMT_BLOOD;
  }
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 0d5056dc..6114d2ef 100644
+index 68378808..9ba1b4c5 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1098,6 +1098,7 @@ extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
@@ -79,5 +79,5 @@ index 5be1e212..38d7b079 100644
  	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
  	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 -- 
-2.41.0
+2.43.0
 

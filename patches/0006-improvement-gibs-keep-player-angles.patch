@@ -1,4 +1,4 @@
-From 9c958cd6a35f5b565b556e1483496b0852e91220 Mon Sep 17 00:00:00 2001
+From 3c0dd1b6cffa31342c1833bc114a8d7f2d17f1f4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 21:00:17 +0400
 Subject: [PATCH] improvement: gibs: keep player angles
@@ -8,26 +8,27 @@ to each individual gib.
 And now it's time to also make sure
 that they're facing the right direction.
 ---
- code/cgame/cg_effects.c   | 87 ++++++++++++++++++++++-----------------
+ code/cgame/cg_effects.c   | 88 ++++++++++++++++++++++-----------------
  code/cgame/cg_event.c     |  2 +-
  code/cgame/cg_local.h     |  2 +-
  code/cgame/cg_localents.c |  6 ++-
- 4 files changed, 56 insertions(+), 41 deletions(-)
+ 4 files changed, 57 insertions(+), 41 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index ab6bb416..6da5aca3 100644
+index ab6bb416..09986505 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -526,7 +526,7 @@ void CG_Bleed( vec3_t origin, int entityNum ) {
+@@ -526,7 +526,8 @@ void CG_Bleed( vec3_t origin, int entityNum ) {
  CG_LaunchGib
  ==================
  */
 -void CG_LaunchGib( vec3_t origin, vec3_t velocity, qhandle_t hModel ) {
-+void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hModel ) {
++void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
++					const vec3_t velocity, const qhandle_t hModel ) {
  	localEntity_t	*le;
  	refEntity_t		*re;
  
-@@ -538,7 +538,7 @@ void CG_LaunchGib( vec3_t origin, vec3_t velocity, qhandle_t hModel ) {
+@@ -538,7 +539,7 @@ void CG_LaunchGib( vec3_t origin, vec3_t velocity, qhandle_t hModel ) {
  	le->endTime = le->startTime + 5000 + random() * 3000;
  
  	VectorCopy( origin, re->origin );
@@ -36,12 +37,12 @@ index ab6bb416..6da5aca3 100644
  	re->hModel = hModel;
  
  	le->pos.trType = TR_GRAVITY;
-@@ -561,8 +561,12 @@ Generated a bunch of gibs launching out from the bodies location
+@@ -561,8 +562,12 @@ Generated a bunch of gibs launching out from the bodies location
  */
  #define	GIB_VELOCITY	250
  #define	GIB_JUMP		250
 -void CG_GibPlayer( vec3_t playerOrigin ) {
-+void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
++void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
  	vec3_t	origin, velocity;
 +	// Generally only the head should have pitch,
 +	// the rest of the body is upright.
@@ -50,7 +51,7 @@ index ab6bb416..6da5aca3 100644
  	// See `playerMins`, `playerMaxs`.
  	// TODO we could try to check the actual `mins` and `maxs`
  	// (do we have them available on the client though?),
-@@ -575,15 +579,20 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
+@@ -575,15 +580,20 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
  		return;
  	}
  
@@ -73,7 +74,7 @@ index ab6bb416..6da5aca3 100644
  	}
  
  	// allow gibs to be turned off for speed
-@@ -596,91 +605,93 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
+@@ -596,91 +606,93 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
@@ -191,7 +192,7 @@ index ab6bb416..6da5aca3 100644
  	}
  
  	// allow gibs to be turned off for speed
-@@ -692,55 +703,55 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
+@@ -692,55 +704,55 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
@@ -270,7 +271,7 @@ index 4191888d..83a9cb58 100644
  		break;
  
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 4a4da431..dbfec5d3 100644
+index 4a4da431..e87bb14f 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1418,7 +1418,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
@@ -278,12 +279,12 @@ index 4a4da431..dbfec5d3 100644
  void CG_ScorePlum( int client, vec3_t org, int score );
  
 -void CG_GibPlayer( vec3_t playerOrigin );
-+void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles );
++void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles );
  void CG_GibPlayerOld( vec3_t playerOrigin );
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index be61ce31..bfb1401a 100644
+index be61ce31..67975fec 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -686,8 +686,12 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
@@ -291,7 +292,7 @@ index be61ce31..bfb1401a 100644
  	}
  	if ( t > 5000 ) {
 +		vec3_t angles;
-+		// Andles don't matter much here.
++		// Angles don't matter much here.
 +		VectorClear( angles );
 +
  		le->endTime = 0;
@@ -301,5 +302,5 @@ index be61ce31..bfb1401a 100644
  	else {
  		trap_R_AddRefEntityToScene( &le->refEntity );
 -- 
-2.41.0
+2.43.0
 

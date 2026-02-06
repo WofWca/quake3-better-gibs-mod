@@ -41,5 +41,5 @@ index beafafb6..47cf60cd 100644
  	// don't allow respawn until the death anim is done
  	// g_forcerespawn may force spawning at some later time
 -- 
-2.41.0
+2.43.0
 

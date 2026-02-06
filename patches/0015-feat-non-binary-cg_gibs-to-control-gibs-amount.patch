@@ -1,4 +1,4 @@
-From edfac85ff6766e39acc9317bad7ba09eac134d51 Mon Sep 17 00:00:00 2001
+From 544706aa32bba87e87ec8f590549ed3fe066ef57 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 12 Jan 2026 22:49:16 +0400
 Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
@@ -9,10 +9,10 @@ Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
  2 files changed, 159 insertions(+), 125 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 22954ec3..2959c2da 100644
+index 82efe802..5a3a1dd7 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -559,8 +559,9 @@ CG_GibPlayer
+@@ -560,8 +560,9 @@ CG_GibPlayer
  Generated a bunch of gibs launching out from the bodies location
  ===================
  */
@@ -21,10 +21,10 @@ index 22954ec3..2959c2da 100644
 +#define	DEFAULT_NUM_GIBS	10
 +#define	GIB_VELOCITY		250
 +#define	GIB_JUMP			250
- void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles,
- 					vec3_t playerVelocity ) {
+ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 					const vec3_t playerVelocity ) {
  	vec3_t	origin, velocity;
-@@ -579,6 +580,8 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles,
+@@ -580,6 +581,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	float baseRandomVelocity = cg_gibsExtraRandomVelocity.value;
  	vec3_t playerVelocityScaled;
  	float jump = cg_gibsExtraVerticalVelocity.value;
@@ -33,7 +33,7 @@ index 22954ec3..2959c2da 100644
  
  	if ( !cg_blood.integer ) {
  		return;
-@@ -591,137 +594,168 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles,
+@@ -592,137 +595,168 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  
  	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocityScaled );
  
@@ -338,5 +338,5 @@ index e658828e..5be1e212 100644
  	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE  },
  	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE  },
 -- 
-2.41.0
+2.43.0
 

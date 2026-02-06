@@ -1,4 +1,4 @@
-From 2437f660085976085c84108b917c29fe1a7db931 Mon Sep 17 00:00:00 2001
+From 651acbe59316933c3465bc1c8847bfa41db25ceb Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 11 Nov 2025 11:39:56 +0400
 Subject: [PATCH] feat: `cg_gibsBounceFactor` CVAR
@@ -10,10 +10,10 @@ Subject: [PATCH] feat: `cg_gibsBounceFactor` CVAR
  3 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index db4f439c..87be7126 100644
+index 1cff2800..800f089a 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -546,7 +546,7 @@ void CG_LaunchGib( vec3_t origin, vec3_t angles, vec3_t velocity, qhandle_t hMod
+@@ -547,7 +547,7 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
  	VectorCopy( velocity, le->pos.trDelta );
  	le->pos.trTime = cg.time;
  
@@ -23,7 +23,7 @@ index db4f439c..87be7126 100644
  	le->leBounceSoundType = LEBS_BLOOD;
  	le->leMarkType = LEMT_BLOOD;
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 229f82f0..0d5056dc 100644
+index a47c00ea..68378808 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1097,6 +1097,7 @@ extern	vmCvar_t		cg_oldGibs;
@@ -55,5 +55,5 @@ index 73def7b6..cdf014a2 100644
  	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
  	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 -- 
-2.41.0
+2.43.0
 

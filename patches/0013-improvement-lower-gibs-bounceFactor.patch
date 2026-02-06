@@ -1,4 +1,4 @@
-From eebc76e5a0438decc91e6555a5e50cd6ffa2962b Mon Sep 17 00:00:00 2001
+From bd61f4cf8ea81f0b1a688fb70697bce3fdaf05a4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 18 Nov 2025 19:14:07 +0400
 Subject: [PATCH] improvement: lower gibs bounceFactor
@@ -22,5 +22,5 @@ index cdf014a2..e658828e 100644
  	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
  	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 -- 
-2.41.0
+2.43.0
 

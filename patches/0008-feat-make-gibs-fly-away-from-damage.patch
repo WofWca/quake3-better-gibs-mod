@@ -1,4 +1,4 @@
-From 3d0fd6d844b4ff3646b0d04046d7c0120041911c Mon Sep 17 00:00:00 2001
+From 8193bd923b226fc72eb5c98acdb0b5ce42eb0567 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 7 Nov 2025 12:25:32 +0400
 Subject: [PATCH] feat: make gibs fly away from damage
@@ -14,20 +14,20 @@ most importantly, including the velocity they get from knockback.
  5 files changed, 60 insertions(+), 34 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index d4343710..db4f439c 100644
+index 7ae0eb37..1cff2800 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -561,7 +561,8 @@ Generated a bunch of gibs launching out from the bodies location
+@@ -562,7 +562,8 @@ Generated a bunch of gibs launching out from the bodies location
  */
  #define	GIB_VELOCITY	250
  #define	GIB_JUMP		250
--void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
-+void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles,
-+					vec3_t playerVelocity ) {
+-void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
++void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
++					const vec3_t playerVelocity ) {
  	vec3_t	origin, velocity;
  	// Generally only the head should have pitch,
  	// the rest of the body is upright.
-@@ -575,6 +576,9 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
+@@ -576,6 +577,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
  	float playerHeight = 32 - MINS_Z;
  	float bottom = playerOrigin[2] + MINS_Z;
  	float playerRadius = 15;
@@ -37,7 +37,7 @@ index d4343710..db4f439c 100644
  
  	if ( !cg_blood.integer ) {
  		return;
-@@ -585,11 +589,14 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
+@@ -586,11 +590,14 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
  	bodyAngles[PITCH] = 0;
  	AngleVectors( bodyAngles, forward, right, up );
  
@@ -55,7 +55,7 @@ index d4343710..db4f439c 100644
  	if ( rand() & 1 ) {
  		CG_LaunchGib( origin, playerAngles, velocity, cgs.media.gibSkull );
  	} else {
-@@ -603,18 +610,20 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
+@@ -604,18 +611,20 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
  
  	VectorCopy( playerOrigin, origin );
  	origin[2] = bottom + 0.65 * playerHeight;
@@ -82,7 +82,7 @@ index d4343710..db4f439c 100644
  	VectorCopy( bodyAngles, angles );
  	angles[ROLL] += 70;
  	angles[PITCH] += 45;
-@@ -622,18 +631,20 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
+@@ -623,18 +632,20 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
  
  	VectorCopy( playerOrigin, origin );
  	origin[2] = bottom + 0.80 * playerHeight;
@@ -109,7 +109,7 @@ index d4343710..db4f439c 100644
  	VectorCopy( bodyAngles, angles );
  	angles[PITCH] -= 80;
  	angles[YAW] += 50;
-@@ -643,18 +654,20 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
+@@ -644,18 +655,20 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
  	origin[2] = bottom + 0.05 * playerHeight;
  	VectorMA( origin, -0.5 * playerRadius, right, origin );
  	VectorMA( origin, -0.5 * playerRadius, forward, origin );
@@ -136,7 +136,7 @@ index d4343710..db4f439c 100644
  	VectorCopy( bodyAngles, angles );
  	angles[ROLL] -= 90;
  	angles[PITCH] -= 75;
-@@ -662,18 +675,20 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
+@@ -663,18 +676,20 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
  
  	VectorCopy( playerOrigin, origin );
  	origin[2] = bottom + 0.57 * playerHeight;
@@ -163,7 +163,7 @@ index d4343710..db4f439c 100644
  	VectorCopy( bodyAngles, angles );
  	angles[ROLL] -= 30;
  	angles[PITCH] -= 15;
-@@ -683,9 +698,10 @@ void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles ) {
+@@ -684,9 +699,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {
  	origin[2] = bottom + 0.44 * playerHeight;
  	VectorMA( origin, -0.5 * playerRadius, right, origin );
  	VectorMA( origin, -0.2 * playerRadius, forward, origin );
@@ -191,7 +191,7 @@ index 83a9cb58..510f24a0 100644
  		break;
  
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index dbfec5d3..43b8b262 100644
+index e87bb14f..62b37e6c 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1094,6 +1094,9 @@ extern	vmCvar_t		cg_swingSpeed;
@@ -208,14 +208,14 @@ index dbfec5d3..43b8b262 100644
  #endif
  void CG_ScorePlum( int client, vec3_t org, int score );
  
--void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles );
-+void CG_GibPlayer( vec3_t playerOrigin, vec3_t playerAngles,
-+				vec3_t playerVelocity );
+-void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles );
++void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
++				const vec3_t playerVelocity );
  void CG_GibPlayerOld( vec3_t playerOrigin );
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index bfb1401a..1c66a1bf 100644
+index 67975fec..8fc9cbc8 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -691,7 +691,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
@@ -252,5 +252,5 @@ index f8fe4644..1f67c7b6 100644
  	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
  	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 -- 
-2.41.0
+2.43.0
 
