@@ -51,6 +51,30 @@ The installation steps for this mod are the same as for almost every other mod.
    `C:\Programs (x86)\ioquake3\baseq3` or  
    `C:\Programs (x86)\Steam\steamapps\common\Quake 3 Arena\baseq3`.
    For Team Arena the final folder is `missionpack` instead of `baseq3`.
+
+   The directory structure will look like this:
+
+   ```tree
+   Quake 3 Arena
+   ├── baseq3
+   │   ├── pak0.pk3
+   │   ├── pak1.pk3
+   │   ├── pak2.pk3
+   │   ├── pak3.pk3
+   │   ├── pak4.pk3
+   │   ├── pak5.pk3
+   │   ├── pak6.pk3
+   │   ├── pak7.pk3
+   │   ├── pak8.pk3
+   │   └── pak999-baseq3-better-gibs-mod.pk3
+   ├── missionpack
+   │   ├── pak0.pk3
+   │   └── pak999-missionpack-better-gibs-mod.pk3
+   └── quake3.exe
+   ```
+
+   Again, if you don't have `missionpack`, you don't need to create it.
+
 3. Start the game!
 
 ### Usage details
