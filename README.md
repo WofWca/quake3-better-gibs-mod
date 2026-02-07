@@ -65,7 +65,7 @@ so you can enjoy it on basically any server
 
 ### New CVARs
 
-- `cg_oldGibs` set to 0 to disable most (but not all!)
+- `cg_oldGibs` and `g_oldGibs`: set to 0 to disable most (but not all!)
   of this mod's features
 - `cg_gibs` is now non-binary,
   (acting the same as `cg_gibfactor` in the GibHappy mod!):
@@ -73,23 +73,39 @@ so you can enjoy it on basically any server
   or to 0.5 to half the amount of gibs
 - `cg_gibsInheritPlayerVelocity`
 - `cg_gibsExtraRandomVelocity`
+- `cg_gibsRandomVelocityFromKnockback`
 - `cg_gibsExtraVerticalVelocity`
 - `cg_gibsBounceFactor`
 - `cg_gibsRotationFactor`
 - `cg_bounceMarksMinImpactSpeed`
 - `cg_bounceSoundMinImpactSpeed`
+- `g_gibsMissileDirectionKnockbackWeight`
+  As you can tell by the `g_` prefix, this variable techically changes gameplay.
+  However, this only affects the direction in which the player's camera will fly
+  when they get gibbed.
+- `g_gibsNewEvGibPlayerParmProtocol`: this mod technically modifies
+  the network protocol, namely the `EV_GIB_PLAYER` event's argument.
+  Now we pass the knockback speed as the argument,
+  instead of the killer's entity number.
+  But in vanilla Quake 3 the argument is anyway unused so it is fine.
+  However, if some other mod does rely on this argument,
+  you can set this CVAR to 0 to revert this change.
 - (maybe I've missed some: search the code for `+vmCvar_t`)
 
 Another way to (almost) restore the old behavior:
 
 ```cfg
 // cg_oldGibs 0
+// g_oldGibs 0
 set cg_gibs 1.0
 set cg_gibsInheritPlayerVelocity 0
 set cg_gibsExtraRandomVelocity 250
+set cg_gibsRandomVelocityFromKnockback 0
 set cg_gibsExtraVerticalVelocity 250
 set cg_gibsBounceFactor 0.6
 set cg_gibsRotationFactor 0
+set g_gibsMissileDirectionKnockbackWeight 1
+set g_gibsNewEvGibPlayerParmProtocol 0
 // Can't "restore" these
 // cg_bounceMarksMinImpactSpeed
 // cg_bounceSoundMinImpactSpeed
