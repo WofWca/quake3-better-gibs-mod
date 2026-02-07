@@ -1,15 +1,16 @@
-From bcf515db4dba860ead52173f91857466759404d7 Mon Sep 17 00:00:00 2001
+From ad4a942002c6cc541f555b4f3c9cf52f9241c38d Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 14:07:15 +0400
 Subject: [PATCH] refactor: add `cg_oldGibs` CVAR, `CG_GibPlayerOld`
 
 This is in preparation to some gibs improvements.
 ---
- code/cgame/cg_effects.c | 76 +++++++++++++++++++++++++++++++++++++++++
- code/cgame/cg_event.c   |  6 +++-
- code/cgame/cg_local.h   |  2 ++
- code/cgame/cg_main.c    |  2 ++
- 4 files changed, 85 insertions(+), 1 deletion(-)
+ code/cgame/cg_effects.c   | 76 +++++++++++++++++++++++++++++++++++++++
+ code/cgame/cg_event.c     |  6 +++-
+ code/cgame/cg_local.h     |  2 ++
+ code/cgame/cg_localents.c |  6 +++-
+ code/cgame/cg_main.c      |  2 ++
+ 5 files changed, 90 insertions(+), 2 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index 9b2d0f7a..ba60f99e 100644
@@ -135,6 +136,23 @@ index 6546d4d5..4a4da431 100644
  void CG_BigExplode( vec3_t playerOrigin );
  
  void CG_Bleed( vec3_t origin, int entityNum );
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index be61ce31..d0ddef2c 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -687,7 +687,11 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
+ 	}
+ 	if ( t > 5000 ) {
+ 		le->endTime = 0;
+-		CG_GibPlayer( le->refEntity.origin );
++		if (cg_oldGibs.integer) {
++			CG_GibPlayerOld( le->refEntity.origin );
++		} else {
++			CG_GibPlayer( le->refEntity.origin );
++		}
+ 	}
+ 	else {
+ 		trap_R_AddRefEntityToScene( &le->refEntity );
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
 index 1269e1b6..f8fe4644 100644
 --- a/code/cgame/cg_main.c

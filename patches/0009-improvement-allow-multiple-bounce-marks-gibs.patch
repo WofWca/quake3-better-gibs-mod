@@ -1,4 +1,4 @@
-From 2e7cc6a0636ba0d00ace704a41f3820c84d028fc Mon Sep 17 00:00:00 2001
+From e05e0bdf680b804321d577906fc63f4974729d5a Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 13:54:51 +0400
 Subject: [PATCH] improvement: allow multiple bounce marks (gibs)
@@ -26,7 +26,7 @@ index 62b37e6c..0ce4dcb3 100644
  extern	vmCvar_t		cg_gun_frame;
  extern	vmCvar_t		cg_gun_x;
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 8fc9cbc8..0cee27dc 100644
+index 5fba9340..10c99c3a 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -169,9 +169,11 @@ void CG_FragmentBounceMark( localEntity_t *le, trace_t *trace ) {

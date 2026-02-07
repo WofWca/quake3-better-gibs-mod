@@ -1,4 +1,4 @@
-From 3c0dd1b6cffa31342c1833bc114a8d7f2d17f1f4 Mon Sep 17 00:00:00 2001
+From e2a5781d132673264d93fb682a998f1344969a4b Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 21:00:17 +0400
 Subject: [PATCH] improvement: gibs: keep player angles
@@ -284,23 +284,22 @@ index 4a4da431..e87bb14f 100644
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index be61ce31..67975fec 100644
+index d0ddef2c..c1683908 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
-@@ -686,8 +686,12 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
- 		le->refEntity.axis[2][2] = (float) 0.7 + 0.3 * (2000 - (t - 3000)) / 2000;
- 	}
- 	if ( t > 5000 ) {
-+		vec3_t angles;
-+		// Angles don't matter much here.
-+		VectorClear( angles );
+@@ -690,7 +690,11 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
+ 		if (cg_oldGibs.integer) {
+ 			CG_GibPlayerOld( le->refEntity.origin );
+ 		} else {
+-			CG_GibPlayer( le->refEntity.origin );
++			vec3_t angles;
++			// Angles don't matter much here.
++			VectorClear( angles );
 +
- 		le->endTime = 0;
--		CG_GibPlayer( le->refEntity.origin );
-+		CG_GibPlayer( le->refEntity.origin, angles );
++			CG_GibPlayer( le->refEntity.origin, angles );
+ 		}
  	}
  	else {
- 		trap_R_AddRefEntityToScene( &le->refEntity );
 -- 
 2.43.0
 

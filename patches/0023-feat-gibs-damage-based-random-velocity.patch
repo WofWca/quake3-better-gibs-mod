@@ -1,4 +1,4 @@
-From eab365c6aa837f128026fb7bf139bf64b50d48f3 Mon Sep 17 00:00:00 2001
+From a4db23b270c1f60ff3d873d2279ce2aa6ce7e64f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 2 Feb 2026 14:41:58 +0400
 Subject: [PATCH] feat: gibs: damage-based random velocity
@@ -121,25 +121,24 @@ index f1bae3d0..0e07221f 100644
  void CG_ShaderStateChanged(void);
  #ifdef MISSIONPACK
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 1c1f214e..f1ef96cf 100644
+index 66a513fe..14aa8909 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
-@@ -701,11 +701,14 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
- 	}
- 	if ( t > 5000 ) {
- 		vec3_t angles;
-+		// Just use the default knockback speed for 200 damage.
-+		int knockbackSpeed = 200 * 1000 / COMBAT_PLAYER_MASS;
- 		// Angles don't matter much here.
- 		VectorClear( angles );
+@@ -705,10 +705,13 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
+ 			CG_GibPlayerOld( le->refEntity.origin );
+ 		} else {
+ 			vec3_t angles;
++			// Just use the default knockback speed for 200 damage.
++			int knockbackSpeed = 200 * 1000 / COMBAT_PLAYER_MASS;
+ 			// Angles don't matter much here.
+ 			VectorClear( angles );
  
- 		le->endTime = 0;
--		CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta, NULL );
-+		CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta,
-+			knockbackSpeed, NULL );
+-			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta, NULL );
++			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta,
++				knockbackSpeed, NULL );
+ 		}
  	}
  	else {
- 		trap_R_AddRefEntityToScene( &le->refEntity );
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
 index 38d7b079..e8816489 100644
 --- a/code/cgame/cg_main.c

@@ -1,4 +1,4 @@
-From 8193bd923b226fc72eb5c98acdb0b5ce42eb0567 Mon Sep 17 00:00:00 2001
+From 28e6e90b93044f71b936479dff936013f5ee48e9 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 7 Nov 2025 12:25:32 +0400
 Subject: [PATCH] feat: make gibs fly away from damage
@@ -215,18 +215,18 @@ index e87bb14f..62b37e6c 100644
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 67975fec..8fc9cbc8 100644
+index c1683908..5fba9340 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
-@@ -691,7 +691,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
- 		VectorClear( angles );
+@@ -694,7 +694,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
+ 			// Angles don't matter much here.
+ 			VectorClear( angles );
  
- 		le->endTime = 0;
--		CG_GibPlayer( le->refEntity.origin, angles );
-+		CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta );
+-			CG_GibPlayer( le->refEntity.origin, angles );
++			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta );
+ 		}
  	}
  	else {
- 		trap_R_AddRefEntityToScene( &le->refEntity );
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
 index f8fe4644..1f67c7b6 100644
 --- a/code/cgame/cg_main.c

@@ -1,4 +1,4 @@
-From bd61f4cf8ea81f0b1a688fb70697bce3fdaf05a4 Mon Sep 17 00:00:00 2001
+From d648fff7b365e7c825f5268b75fc0ac3b835175e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 18 Nov 2025 19:14:07 +0400
 Subject: [PATCH] improvement: lower gibs bounceFactor

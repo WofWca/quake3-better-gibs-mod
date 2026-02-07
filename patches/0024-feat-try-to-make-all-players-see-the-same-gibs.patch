@@ -1,4 +1,4 @@
-From 18e232480a3aa7776fbfa0c391c17ff591b7bd88 Mon Sep 17 00:00:00 2001
+From 0c3a39688109956eb8cc30a1574f2881911ab798 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 5 Feb 2026 12:01:40 +0400
 Subject: [PATCH] feat: try to make all players see the same gibs
@@ -409,31 +409,30 @@ index 0e07221f..b2f03803 100644
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index f1ef96cf..a2a89f77 100644
+index 14aa8909..59c99439 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
-@@ -703,12 +703,20 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
- 		vec3_t angles;
- 		// Just use the default knockback speed for 200 damage.
- 		int knockbackSpeed = 200 * 1000 / COMBAT_PLAYER_MASS;
-+		int randSeed;
- 		// Angles don't matter much here.
- 		VectorClear( angles );
-+		// Since the player with invulnerability is not moving,
-+		// we expect its position to be the same for all players,
-+		// so we can use it as a seed.
-+		randSeed = le->refEntity.origin[0] * 1024;
-+		randSeed = Q_rand(&randSeed) + le->refEntity.origin[1] * 1024;
-+		randSeed = Q_rand(&randSeed) + le->refEntity.origin[2] * 1024;
-+		randSeed = Q_rand(&randSeed) + cgs.levelStartTime;
+@@ -707,11 +707,19 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
+ 			vec3_t angles;
+ 			// Just use the default knockback speed for 200 damage.
+ 			int knockbackSpeed = 200 * 1000 / COMBAT_PLAYER_MASS;
++			int randSeed;
+ 			// Angles don't matter much here.
+ 			VectorClear( angles );
++			// Since the player with invulnerability is not moving,
++			// we expect its position to be the same for all players,
++			// so we can use it as a seed.
++			randSeed = le->refEntity.origin[0] * 1024;
++			randSeed = Q_rand(&randSeed) + le->refEntity.origin[1] * 1024;
++			randSeed = Q_rand(&randSeed) + le->refEntity.origin[2] * 1024;
++			randSeed = Q_rand(&randSeed) + cgs.levelStartTime;
  
- 		le->endTime = 0;
- 		CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta,
--			knockbackSpeed, NULL );
-+			knockbackSpeed, NULL, randSeed );
+ 			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta,
+-				knockbackSpeed, NULL );
++				knockbackSpeed, NULL, randSeed );
+ 		}
  	}
  	else {
- 		trap_R_AddRefEntityToScene( &le->refEntity );
 -- 
 2.43.0
 

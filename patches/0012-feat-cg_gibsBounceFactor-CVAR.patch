@@ -1,4 +1,4 @@
-From 651acbe59316933c3465bc1c8847bfa41db25ceb Mon Sep 17 00:00:00 2001
+From 6f809cdaf90232d9065ecbb50692002aedbfb3f4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 11 Nov 2025 11:39:56 +0400
 Subject: [PATCH] feat: `cg_gibsBounceFactor` CVAR

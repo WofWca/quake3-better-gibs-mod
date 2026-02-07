@@ -1,4 +1,4 @@
-From 51d926bf7a42e34750daa0fce721cc829ad87354 Mon Sep 17 00:00:00 2001
+From 707d1ab3c3f8a680abe11f4c16fdd17df8610fe3 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 24 Jan 2026 16:48:44 +0400
 Subject: [PATCH] feat: better gib positions for dead bodies
@@ -255,18 +255,18 @@ index 9ba1b4c5..5db7b94b 100644
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 05da3007..1c1f214e 100644
+index a99fcaea..66a513fe 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
-@@ -705,7 +705,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
- 		VectorClear( angles );
+@@ -708,7 +708,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
+ 			// Angles don't matter much here.
+ 			VectorClear( angles );
  
- 		le->endTime = 0;
--		CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta );
-+		CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta, NULL );
+-			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta );
++			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta, NULL );
+ 		}
  	}
  	else {
- 		trap_R_AddRefEntityToScene( &le->refEntity );
 -- 
 2.43.0
 

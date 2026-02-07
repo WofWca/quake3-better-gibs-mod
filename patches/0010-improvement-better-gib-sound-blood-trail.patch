@@ -1,4 +1,4 @@
-From 9d2e67f167955b4f42361dabe09b5f590f02117d Mon Sep 17 00:00:00 2001
+From 205240f4872956d0982cb971a1a22e6fd1d881d1 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 17:55:51 +0400
 Subject: [PATCH] improvement: better gib sound, blood trail
@@ -25,7 +25,7 @@ index 0ce4dcb3..a47c00ea 100644
  extern	vmCvar_t		cg_gun_frame;
  extern	vmCvar_t		cg_gun_x;
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 0cee27dc..05da3007 100644
+index 10c99c3a..a99fcaea 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -201,9 +201,11 @@ void CG_FragmentBounceSound( localEntity_t *le, trace_t *trace ) {

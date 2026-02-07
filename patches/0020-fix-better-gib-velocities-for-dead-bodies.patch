@@ -1,4 +1,4 @@
-From 2ef37abb7f0ba8542f630ae67c14869f52400d87 Mon Sep 17 00:00:00 2001
+From 2d6429b09472206955d1f72d530636efc8e95fb4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 24 Jan 2026 16:56:17 +0400
 Subject: [PATCH] fix: better gib velocities for dead bodies
