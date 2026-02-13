@@ -839,6 +839,16 @@ const char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	ClientUserinfoChanged( clientNum );
 
+	// // We're settings this here, in `ClientConnect`
+	// // and not in `ClientUserinfoChanged` (which might get called during a game)
+	// // to make sure that it can't be somehow abused.
+	// //
+	// // TODO ah craap, but if the client sets it during the game,
+	// // then there will be prediction error.
+	// // Also it's confusing to people - you change a var and it does nothing.
+	// client->pers.cg_gibsBetterCameraOnGib =
+	// 	atoi( Info_ValueForKey( userinfo, "cg_gibsBetterCameraOnGib" ) );
+
 	// don't do the "xxx connected" messages if they were caried over from previous level
 	if ( firstTime ) {
 		G_BroadcastServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname ) );
@@ -1061,6 +1071,13 @@ void ClientSpawn(gentity_t *ent) {
 	// clear entity values
 	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 	client->ps.eFlags = flags;
+
+	// We're settings this here and not in `ClientUserinfoChanged`
+	// to make sure that changing this CVAR's value only takes effect
+	// on next respawn, so that it can't be somehow abused,
+	// to clip through the floor or something.
+	client->pers.cg_gibsBetterCameraOnGib =
+		atoi( Info_ValueForKey( userinfo, "cg_gibsBetterCameraOnGib" ) );
 
 	ent->s.groundEntityNum = ENTITYNUM_NONE;
 	ent->client = &level.clients[index];

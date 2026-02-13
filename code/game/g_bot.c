@@ -679,6 +679,13 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 	Info_SetValueForKey( userinfo, "skill", va( "%1.2f", skill ) );
 	Info_SetValueForKey( userinfo, "team", team );
 
+	// Settings this to 0 for bots because this also fixes a bug
+	// https://github.com/WofWca/quake3-better-gibs-mod/issues/3.
+	// TODO explain better
+	// TODO maybe we should rename the var then?
+	// Or doesn't matter?
+	Info_SetValueForKey( userinfo, "cg_gibsBetterCameraOnGib", "1" );
+
 	bot = &g_entities[ clientNum ];
 	bot->r.svFlags |= SVF_BOT;
 	bot->inuse = qtrue;

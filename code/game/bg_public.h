@@ -31,9 +31,11 @@
 
 #define	DROPPED_TIME		30000   // 30 seconds before removing  dropped items
 
+#define PLAYER_WIDTH		15
 #define	MINS_Z				-24
 #define	DEFAULT_VIEWHEIGHT	26
 #define CROUCH_VIEWHEIGHT	12
+#define DEAD_MAXS_Z			-8
 #define	DEAD_VIEWHEIGHT		-16
 
 #define	PM_STEP_HEIGHT		18
@@ -145,6 +147,11 @@ typedef enum {
 
 #define	PMF_ALL_TIMES	(PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK)
 
+// // Whether to change player's mins so that they are no longer
+// // touching the ground when they get gibbed
+// // so that their camera flies farther away, together with their gibs.
+// #define PMF2_FLY_FARTHER_ON_GIB	1;
+
 #define	MAXTOUCH	32
 typedef struct {
 	// state (in / out)
@@ -172,6 +179,18 @@ typedef struct {
 	// for fixed msec Pmove
 	int			pmove_fixed;
 	int			pmove_msec;
+
+	// int			pm_flags2;
+
+	// // As always for Pmove, this value too must be the same on the server
+	// // and on the client to lower prediction error.
+	// // For backwards compatibiltiy with clients or servers
+	// // that don't support this, both the server and the client
+	// // must explicitly check whether the other party supports this.
+	// qboolean	flyFartherOnGib;
+
+	int			cg_gibsBetterCameraOnGib;
+	int			g_gibsBetterCameraOnGib;
 
 	// callbacks to test the world
 	// these will be different functions during game and cgame

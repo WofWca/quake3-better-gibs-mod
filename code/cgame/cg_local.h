@@ -1137,6 +1137,7 @@ typedef struct {
 
 	qboolean		synchronousClients;
 	int				g_gibsNewEvGibPlayerParmProtocol;
+	int				g_gibsBetterCameraOnGib;
 
 	int				ospEnc;
 	qboolean		defrag;

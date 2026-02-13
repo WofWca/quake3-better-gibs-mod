@@ -254,6 +254,10 @@ void GibEntity( gentity_t *self, int killer, int damageBloodFallback ) {
 	}
 #endif
 
+	// TODO so now this gets called multiple times per shotgun shot.
+	// But apparently this doesn't cause more gibs, IDK.
+	G_Printf("GibEntity\n");
+
 
 	// In vanilla Quake the meaning of the `EV_GIB_PLAYER` eventParm
 	// is `killer`.
@@ -299,9 +303,20 @@ void GibEntity( gentity_t *self, int killer, int damageBloodFallback ) {
 	}
 	G_AddEvent( self, EV_GIB_PLAYER, eventParm );
 
+
 	self->takedamage = qfalse;
 	self->s.eType = ET_INVISIBLE;
 	self->r.contents = 0;
+	// // Check if this is a body from a body queue
+	// // TODO more reliable check.
+	// if ( !self->client ) {
+	// 	self->takedamage = qfalse;
+	// 	self->s.eType = ET_INVISIBLE;
+	// 	self->r.contents = 0;
+	// }
+
+	// // TODO but now there is no knockback limit of 200 for the shotgun.
+	// // Looks a little bad.
 }
 
 /*
@@ -1229,6 +1244,16 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				vec3_t velChange;
 				AdjustKnockbackIfDirectMissileHit( targ, inflictor, dir, point,
 					knockback, kvel, dflags, mod, velChange );
+				VectorAdd(targ->client->ps.velocity, velChange, targ->client->ps.velocity);
+			}
+			if ( g_gibsKnockbackOnGib.value != 1.0 &&
+				targ->health <= GIB_HEALTH && g_blood.integer) {
+				// TODO hmmmm, this doesn't work well for the shotgun?
+				// Again, because of the pellets
+				// being individual pieces of damage.
+				// Maybe we should look at `damage_knockback` instead?
+				vec3_t velChange;
+				VectorScale( kvel, (g_gibsKnockbackOnGib.value - 1), velChange );
 				VectorAdd(targ->client->ps.velocity, velChange, targ->client->ps.velocity);
 			}
 

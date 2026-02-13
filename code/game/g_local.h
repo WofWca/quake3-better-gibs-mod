@@ -238,6 +238,11 @@ typedef struct {
 	qboolean	teamInfo;			// send team overlay updates?
 	int			voted;
 	int			teamVoted;
+	// Whether the client wants their camera to fly father away
+	// when they get gibbed
+	// TODO set this from CLIENTINFO CVAR.
+	// TODO maybe just use `cg_
+	int			cg_gibsBetterCameraOnGib;
 
 	qboolean	inGame;
 } clientPersistant_t;

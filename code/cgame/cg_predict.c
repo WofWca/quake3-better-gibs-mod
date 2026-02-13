@@ -974,6 +974,11 @@ void CG_PredictPlayerState( void ) {
 	cg_pmove.pmove_fixed = cgs.pmove_fixed;
 	cg_pmove.pmove_msec = cgs.pmove_msec;
 
+	// cg_pmove.flyFartherOnGib = cgs.g_gibsBetterCameraOnGib &&
+	// 	cg_gibsBetterCameraOnGib.integer;
+	cg_pmove.g_gibsBetterCameraOnGib = cgs.g_gibsBetterCameraOnGib;
+	cg_pmove.cg_gibsBetterCameraOnGib = cg_gibsBetterCameraOnGib.integer;
+
 	// Like the comments described above, a player's state is entirely
 	// re-predicted from the last valid snapshot every client frame, which
 	// can be really, really, really slow.  Every old command has to be

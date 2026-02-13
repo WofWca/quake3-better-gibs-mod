@@ -25,6 +25,11 @@ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_A
 CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE )
+// In order for this to work, the server must set `g_gibsBetterCameraOnGib 1`.
+
+// TODO craaaap, but this is `false` for bots by default...
+// Maybe we can set it, same as for `handicap`
+CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE )
 CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE )
 CG_CVAR( cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE )
 CG_CVAR( cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE )

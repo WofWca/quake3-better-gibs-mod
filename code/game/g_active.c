@@ -308,6 +308,14 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		pm.trace = trap_Trace;
 		pm.pointcontents = trap_PointContents;
 
+		// pm.flyFartherOnGib =
+		// 	g_gibsBetterCameraOnGib.integer && client->pers.cg_gibsBetterCameraOnGib;
+		//
+		// These have no effect on spectators as of writing,
+		// but let's still pass it for consistency.
+		pm.g_gibsBetterCameraOnGib = g_gibsBetterCameraOnGib.integer;
+		pm.cg_gibsBetterCameraOnGib = client->pers.cg_gibsBetterCameraOnGib;
+
 		// perform a pmove
 		Pmove( &pm );
 		// save results of pmove
@@ -893,6 +901,11 @@ void ClientThink_real( gentity_t *ent ) {
 	pm.pmove_fixed = pmove_fixed.integer;
 	pm.pmove_msec = pmove_msec.integer;
 
+	// pm.flyFartherOnGib =
+	// 	g_gibsBetterCameraOnGib.integer && client->pers.cg_gibsBetterCameraOnGib;
+	pm.g_gibsBetterCameraOnGib = g_gibsBetterCameraOnGib.integer;
+	pm.cg_gibsBetterCameraOnGib = client->pers.cg_gibsBetterCameraOnGib;
+
 	VectorCopy( client->ps.origin, client->oldOrigin );
 
 #ifdef MISSIONPACK
@@ -1146,6 +1159,19 @@ void ClientEndFrame( gentity_t *ent ) {
 	P_DamageFeedback (ent);
 
 	client->ps.stats[STAT_HEALTH] = ent->health;	// FIXME: get rid of ent->health...
+
+	// if (
+	// 	// TODO ahhh, but this will not work if the player already respawned.
+	// 	// Their "old" body will keep getting gibbed without becoming invisible.
+	// 	// We would need to run this code for the entities themselves,
+	// 	// maybe have `think` for the body.
+	// 	// Also `client->damage_blood` is not relevant for such dead bodies.
+	// 	client->ps.stats[STAT_HEALTH] <= GIB_HEALTH
+	// ) {
+	// 	ent->takedamage = qfalse;
+	// 	ent->s.eType = ET_INVISIBLE;
+	// 	ent->r.contents = 0;
+	// }
 
 	// This is not present in the original game code,
 	// see comments about `FL_NO_KNOCKBACK` in `g_combat`.

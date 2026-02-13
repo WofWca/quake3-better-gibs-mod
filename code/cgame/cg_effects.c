@@ -670,6 +670,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 	int seed = randSeed;
 
 	vec3_t playerVelocityScaled;
+	// TODO check whether `g_gibsBetterCameraOnGib` is enabled
+	// and add more velocity? But then there is also the client-side var...
+	// Do we maybe just unconditionally set the velocity,
+	// and hope that the camera improvement is enabled for everyone?
+	// Not a big deal anyway, that's just a bug.
 	float jump = cg_gibsExtraVerticalVelocity.value;
 	int numGibs = cg_gibs.value * DEFAULT_NUM_GIBS;
 	qboolean skullLaunched = qfalse; // launch only one skull.
@@ -689,6 +694,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 	AngleVectors( bodyAngles, forward, right, up );
 
 	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocityScaled );
+
+	CG_Printf("gib speed %f, vert %f \n", VectorLength(playerVelocityScaled), playerVelocityScaled[2]);
 
 	do {
 		// Note that one gib will get launched even if `numGibs == 0`.

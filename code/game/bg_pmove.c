@@ -1268,8 +1268,110 @@ static void PM_CheckDuck (void)
 
 	if (pm->ps->pm_type == PM_DEAD)
 	{
-		pm->maxs[2] = -8;
-		pm->ps->viewheight = DEAD_VIEWHEIGHT;
+		if (
+			// pm->flyFartherOnGib &&
+			// TODO un-magic flag
+			// Needed in case new clients / servers decide to add more meaning
+			// to this var, adding other flags.
+			pm->cg_gibsBetterCameraOnGib & 0x01 &&
+			pm->g_gibsBetterCameraOnGib & 0x01 &&
+
+
+
+			pm->ps->stats[STAT_HEALTH] <= GIB_HEALTH &&
+			// If we were already dead when we got gibbed,
+			// do not change viewheight again.
+			pm->ps->viewheight != DEAD_VIEWHEIGHT &&
+			pm->maxs[2] != DEAD_MAXS_Z
+			// pm->ps->viewheight == DEFAULT_VIEWHEIGHT &&
+
+			// && qfalse
+		) {
+			// Makes the camera fly farther away when getting gibbed,
+			// by making the player's bounding box smaller
+			// and lifting it off the ground.
+			//
+			// This might also fix the issue with gibs
+			// flying parallel to the ground even when damage direction
+			// is towards the ground?
+			// https://github.com/WofWca/quake3-better-gibs-mod/issues/3.
+			//
+			// Only apply this improvement when gibbed,
+			// because otherwise, if we change `mins[2]`,
+			// the body will be under ground.
+			//
+			// TODO but if `com_blood 0`, the body is not actually gibbed?
+			// Oh wait, there is code that makes sure
+			// that HP doesn't go below -40!! Nice.
+			//
+			// TODO note that this also runs if the player god gibbed
+			// _after_ dying. This will cause the camera to raise up
+			// and fall again.
+			// Can we run this only in `GibEntity`?
+			// Or does it have to be in `bg_`, so that this change also affects
+			// the client?
+			// Hmm I think this should be fine, because e.g. `PM_DEAD`
+			// is only set on the server, so `maxs` / `mins`
+			// should also be synced?
+			// Maybe we could somehow check if they're already dead?
+			// For example, a stupid hack of checking
+			// `pm->ps->viewheight == DEAD_VIEWHEIGHT` or something like that.
+
+			// TODO craaaaaaaaaaap. We should ensure compatibility
+			// between client and server...
+
+			{
+				// // Viewheight changes by 16 + 26 = 42
+				// // Box height changes by 32 + 8 = 40
+				// int ourChange = -(MINS_Z + 2); // 22
+				// // Don't make `mins` positive so that "origin" doesn't sink
+				// // into the ground, IDK why. Maybe for damage from explosions.
+				// pm->mins[2] = MINS_Z + ourChange;
+				// // Ahhhh, we can't be doing this, because this runs every frame.
+				// pm->ps->origin[2] += ourChange;
+				// // pm->maxs[2] = -8;
+				// pm->maxs[2] = -8 + ourChange;
+				// pm->ps->viewheight = DEAD_VIEWHEIGHT + ourChange;
+			}
+			{
+				// Viewheight changes by 16 + 26 = 42
+				// Box height changes by 32 + 8 = 40
+				int ourChange = -(MINS_Z + 2); // 22
+				// Don't make `mins` positive so that "origin" doesn't sink
+				// into the ground, IDK why. Maybe for damage from explosions.
+				pm->mins[2] = MINS_Z + ourChange;
+
+				// // "Lifted" our mins, so we should be in the air now.
+				// // TODO maybe no need for this,
+				// // because we do another ground trace just after `PM_CheckDuck`?
+				// pm->ps->groundEntityNum = ENTITYNUM_NONE;
+				// PM_GroundTraceMissed();
+
+				// TODO it would be nice to also change `origin` here,
+				// but this runs every frame, unfortunately.
+
+				// pm->maxs[2] = -8;
+				pm->maxs[2] = DEAD_MAXS_Z + ourChange;
+
+				pm->ps->viewheight = DEAD_VIEWHEIGHT + ourChange;
+
+				// // TODO there is some weird camera flipping when origin gets to below 10
+				// // when `pm->ps->viewheight = DEAD_VIEWHEIGHT
+				// pm->ps->viewheight = DEAD_VIEWHEIGHT;
+			}
+
+			// Also make them slimmer, because they're just a piece of meat now,
+			// and not an entire body.
+			pm->mins[0] = -15 * 3 / 4;
+			pm->mins[1] = -15 * 3 / 4;
+			pm->maxs[0] = 15 * 3 / 4;
+			pm->maxs[1] = 15 * 3 / 4;
+		} else {
+			pm->maxs[2] = DEAD_MAXS_Z;
+			pm->ps->viewheight = DEAD_VIEWHEIGHT;
+		}
+
+		// Com_Printf("pm->ps->viewheight, %i, origin %f\n", pm->ps->viewheight, pm->ps->origin[2]);
 		return;
 	}
 
