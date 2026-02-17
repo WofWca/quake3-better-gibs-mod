@@ -299,9 +299,30 @@ void GibEntity( gentity_t *self, int killer, int damageBloodFallback ) {
 	}
 	G_AddEvent( self, EV_GIB_PLAYER, eventParm );
 
-	self->takedamage = qfalse;
-	self->s.eType = ET_INVISIBLE;
-	self->r.contents = 0;
+	// If it's a client, then we will change `takedamage` and `r.contents`
+	// in `ClientEndFrame`.
+	// If we were to change `takedamage` here, then we'd stop receiving damage
+	// from other shotgun pellets from the same shot,
+	// resulting in less knockback, and thus worse-looking gibs.
+	// See a similar issue: https://github.com/ec-/baseq3a/pull/58.
+	//
+	// If it's not a client, then it's probably a body from the body queue,
+	// for which there is no "EndFrame" function,
+	// so we have to set `takedamage = qfalse` right away.
+	// Maybe we could do that in `entity.think`,
+	// but it's good enough for a start.
+	//
+	// Note that this will also cause `GibEntity` to get called multiple times
+	// in the same frame, e.g. for each shotgun pellet.
+	// While this is not nice semantically, it is desireable functionally.
+	// Calling `GibEntity` multiple times will not actually send
+	// the `EV_GIB_PLAYER` multiple times, but it will set its `eventParm`
+	// to the latest value. See `damage_blood` above.
+	if (self->client == NULL || g_oldGibs.integer) {
+		self->takedamage = qfalse;
+		self->s.eType = ET_INVISIBLE;
+		self->r.contents = 0;
+	}
 }
 
 /*

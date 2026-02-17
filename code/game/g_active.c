@@ -1152,6 +1152,12 @@ void ClientEndFrame( gentity_t *ent ) {
 	if ( client->ps.pm_type & PM_DEAD ) {
 		ent->flags |= FL_NO_KNOCKBACK;
 	}
+	if ( client->ps.stats[STAT_HEALTH] <= GIB_HEALTH && !g_oldGibs.integer ) {
+		// See `GibEntity` in `g_combat.c`.
+		ent->takedamage = qfalse;
+		ent->s.eType = ET_INVISIBLE;
+		ent->r.contents = 0;
+	}
 
 	G_SetClientSound( ent );
 
