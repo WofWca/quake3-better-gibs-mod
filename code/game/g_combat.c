@@ -1252,6 +1252,28 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 					knockback, kvel, dflags, mod, velChange );
 				VectorAdd(targ->client->ps.velocity, velChange, targ->client->ps.velocity);
 			}
+			// If we already got to max knockback, don't apply any more of it.
+			// Otherwise one quad shotgun shot can get you 330 knockback,
+			// resuling in gibs flying too fast, much faster
+			// than from e.g. a railgun shot.
+			// It would make sense to do this adjustment always,
+			// but let's only apply this to shotgun gib deaths,
+			// to be closer to how the original game works.
+			if (
+				targ->health <= GIB_HEALTH && g_blood.integer &&
+				!g_oldGibs.integer &&
+				mod == MOD_SHOTGUN &&
+				targ->client && targ->client->damage_knockback > MAX_KNOCKBACK ) {
+				int excess = targ->client->damage_knockback - MAX_KNOCKBACK;
+				if ( excess > knockback ) {
+					// It's excess knockback from this particular shot,
+					// not total excess knockback.
+					excess = knockback;
+				}
+				VectorMA( targ->client->ps.velocity,
+					KnockbackToKnockbackSpeed( -excess ), dir,
+					targ->client->ps.velocity );
+			}
 
 			targ->enemy = attacker;
 			targ->die (targ, inflictor, attacker, take, mod);
