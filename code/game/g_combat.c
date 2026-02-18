@@ -284,7 +284,11 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d
 		killer = ENTITYNUM_WORLD;
 	}
 
-	GibEntity( self, killer );
+	if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
+		self->gibScheduled = qtrue;
+	} else {
+		GibEntity( self, killer );
+	}
 }
 
 
@@ -624,7 +628,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// never gib in a nodrop
 	if ( (self->health <= GIB_HEALTH && !(contents & CONTENTS_NODROP) && g_blood.integer) || meansOfDeath == MOD_SUICIDE) {
 		// gib death
-		GibEntity( self, killer );
+		if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
+			self->gibScheduled = qtrue;
+		} else {
+			GibEntity( self, killer );
+		}
 	} else {
 		// normal death
 		static int i;
