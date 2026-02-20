@@ -232,6 +232,7 @@ typedef struct {
 	qboolean	localClient;		// true if "ip" info key is "localhost"
 	qboolean	initialSpawn;		// the first spawn should be at a cool location
 	qboolean	predictItemPickup;	// based on cg_predictItems userinfo
+	int			cg_gibsBetterCameraOnGib;
 	char		netname[MAX_NETNAME];
 	int			maxHealth;			// for handicapping
 	int			enterTime;			// level.time the client entered the game
@@ -297,6 +298,7 @@ struct gclient_s {
 
 	// timers
 	int			respawnTime;		// can respawn when time > this, force after g_forcerespwan
+	int			deathTime;			// 0 if alive
 	int			inactivityTime;		// kick players when time > this
 	qboolean	inactivityWarning;	// qtrue if the five seoond warning has been given
 	int			rewardTime;			// clear the EF_AWARD_IMPRESSIVE, etc when time > this
