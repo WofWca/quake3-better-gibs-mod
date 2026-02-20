@@ -753,6 +753,11 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 	}
 	Info_SetValueForKey( userinfo, "characterfile", s );
 
+	// Settings this to 1 for bots because this also fixes a bug
+	// https://github.com/WofWca/quake3-better-gibs-mod/issues/3.
+	// See `bg_pmove.c`.
+	Info_SetValueForKey( userinfo, "cg_gibsBetterCameraOnGib", "1" );
+
 	// register the userinfo
 	trap_SetUserinfo( clientNum, userinfo );
 

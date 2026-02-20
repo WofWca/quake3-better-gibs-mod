@@ -327,6 +327,18 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
 	if (self->client) {
 		self->client->ps.contents = 0;
 	}
+
+	// See `NEW_GIBBED_VIEWHEIGHT` references in `bg_pmove.c`.
+	//
+	// Note that we only do this when gibbed and not on any death,
+	// because otherwise, due to the change to `mins[2]`,
+	// the body would immediately visually fall under ground.
+	if ( self->client && self->client->pers.cg_gibsBetterCameraOnGib & 0x1
+		// If we already died, we don't want to change
+		// the camera position again.
+		&& self->client->deathTime == level.time ) {
+		self->client->ps.viewheight = NEW_GIBBED_VIEWHEIGHT;
+	}
 }
 
 /*
@@ -537,6 +549,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}
 #endif
 	self->client->ps.pm_type = PM_DEAD;
+	self->client->deathTime = level.time;
 
 	if ( attacker ) {
 		killer = attacker->s.number;
