@@ -106,6 +106,7 @@ so you can enjoy it on basically any server
 - `cg_gibsExtraVerticalVelocity`
 - `cg_gibsBounceFactor`
 - `cg_gibsRotationFactor`
+- `cg_gibsBetterCameraOnGib`
 - `cg_bounceMarksMinImpactSpeed`
 - `cg_bounceSoundMinImpactSpeed`
 - `g_gibsMissileDirectionKnockbackWeight`
@@ -133,6 +134,7 @@ set cg_gibsRandomVelocityFromKnockback 0
 set cg_gibsExtraVerticalVelocity 250
 set cg_gibsBounceFactor 0.6
 set cg_gibsRotationFactor 0
+set cg_gibsBetterCameraOnGib 0
 set g_gibsMissileDirectionKnockbackWeight 1
 set g_gibsNewEvGibPlayerParmProtocol 0
 // Can't "restore" these
