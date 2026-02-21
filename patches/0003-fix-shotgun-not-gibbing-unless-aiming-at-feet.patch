@@ -1,4 +1,4 @@
-From ca9183fc5efa21b536fe11313079bf31f0e50e49 Mon Sep 17 00:00:00 2001
+From 7c2b62d8a7f3f17b132016322d469f2534e12e17 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 13 Sep 2025 18:56:45 +0400
 Subject: [PATCH] fix: shotgun not gibbing unless aiming at feet
@@ -10,14 +10,14 @@ Original (rejected) MR: https://github.com/ioquake/ioq3/pull/795.
  1 file changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index beafafb6..47cf60cd 100644
+index 8f8e6311..e29853ec 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -601,7 +601,25 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
  
  	self->s.loopSound = 0;
  
--	self->r.maxs[2] = DEAD_HEIGHT;
+-	self->r.maxs[2] = DEAD_MAXS_Z;
 +	// The below line has been commented out in
 +	// https://github.com/ec-/baseq3a/pull/49.
 +	// Executing this line causes a bug where the shotgun doesn't gib
@@ -36,7 +36,7 @@ index beafafb6..47cf60cd 100644
 +	// But this is already handled in `PM_CheckDuck`,
 +	// so maybe it's just leftover code.
 +	//
-+	// self->r.maxs[2] = DEAD_HEIGHT;
++	// self->r.maxs[2] = DEAD_MAXS_Z;
  
  	// don't allow respawn until the death anim is done
  	// g_forcerespawn may force spawning at some later time

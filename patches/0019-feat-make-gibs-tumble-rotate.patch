@@ -1,4 +1,4 @@
-From 21c1ffff114ed0d0e99063841cd3ef6b57532e0f Mon Sep 17 00:00:00 2001
+From 3c0367ac59597d196cc137cfd598e5f28d3f35b5 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 19 Jan 2026 21:36:34 +0400
 Subject: [PATCH] feat: make gibs tumble (rotate)

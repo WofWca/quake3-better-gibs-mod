@@ -1,4 +1,4 @@
-From 1ca2f6d1768c0c5042687ac7befe746f086bd1f0 Mon Sep 17 00:00:00 2001
+From 789f0407c4e4a797e230637bb334d5b2d30ad6fa Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 12 Jan 2026 22:49:16 +0400
 Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount

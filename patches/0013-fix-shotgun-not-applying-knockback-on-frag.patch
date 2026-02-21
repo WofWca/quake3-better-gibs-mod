@@ -1,0 +1,70 @@
+From c5f34f16d9b437efbf4074d1718e513ac6c001f1 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Fri, 14 Nov 2025 17:55:52 +0400
+Subject: [PATCH] fix: shotgun not applying knockback on frag
+
+---
+ code/game/g_combat.c | 21 +++++++++++++++++++--
+ code/game/g_local.h  |  1 +
+ code/game/g_weapon.c |  1 +
+ 3 files changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/code/game/g_combat.c b/code/game/g_combat.c
+index 1e824432..9ed883d0 100644
+--- a/code/game/g_combat.c
++++ b/code/game/g_combat.c
+@@ -1060,8 +1060,25 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+ 		}
+ 			
+ 		if ( targ->health <= 0 ) {
+-			if ( client )
+-				targ->flags |= FL_NO_KNOCKBACK;
++			// Not checking `ShouldPostponeDeath` would cause a bug:
++			// when fragging with the shotgun,
++			// the dead body would not gain momentum (knockback)
++			// from the pellets that come after the pellet
++			// that made the health go below 0.
++			// This would result in the dead body not getting pushed
++			// as far as it should have been, and, most importantly,
++			// the gibs not getting enough momentum. See
++			// https://github.com/ec-/baseq3a/pull/53.
++			//
++			// Note that if the body gets gibbed,
++			// then it will still stop absorbing pellets,
++			// i.e. this fix only adds at most `GIB_HEALTH` worth of knockback.
++			//
++			// This issiue is similar to
++			// https://github.com/ioquake/ioq3/issues/794.
++			if ( client && !ShouldPostponeDeath( mod ) ) {
++				SetFlNoKnockback( targ );
++			}
+ 
+ 			if (targ->health < -999)
+ 				targ->health = -999;
+diff --git a/code/game/g_local.h b/code/game/g_local.h
+index 6814d193..c83d0cd2 100644
+--- a/code/game/g_local.h
++++ b/code/game/g_local.h
+@@ -503,6 +503,7 @@ void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
+ // - Also `glcient_s.damage_knockback`.
+ #define ShouldPostponeDeath( mod ) (mod == MOD_SHOTGUN)
+ #define SetDeadHeight( ent ) {ent->r.maxs[2] = DEAD_MAXS_Z;}
++#define SetFlNoKnockback( ent ) {ent->flags |= FL_NO_KNOCKBACK;}
+ qboolean G_RadiusDamage (vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod);
+ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t impactpoint, vec3_t bouncedir );
+ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
+diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
+index 664888c4..ccf2f250 100644
+--- a/code/game/g_weapon.c
++++ b/code/game/g_weapon.c
+@@ -376,6 +376,7 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
+ 
+ 		if ( ent2->client && ent2->client->ps.pm_type == PM_DEAD ) {
+ 			SetDeadHeight( ent2 );
++			SetFlNoKnockback( ent2 );
+ 		}
+ 	}
+ }
+-- 
+2.43.0
+

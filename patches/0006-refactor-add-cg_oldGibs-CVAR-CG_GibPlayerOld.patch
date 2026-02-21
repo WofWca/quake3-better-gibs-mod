@@ -1,4 +1,4 @@
-From ad4a942002c6cc541f555b4f3c9cf52f9241c38d Mon Sep 17 00:00:00 2001
+From 877a7ef0ff69b8adcc03fd2f2243e58928c06b82 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 14:07:15 +0400
 Subject: [PATCH] refactor: add `cg_oldGibs` CVAR, `CG_GibPlayerOld`

@@ -1,4 +1,4 @@
-From 2d6429b09472206955d1f72d530636efc8e95fb4 Mon Sep 17 00:00:00 2001
+From 2e3f16328f7c5d56b2c6c28d77565c2461af5aa8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 24 Jan 2026 16:56:17 +0400
 Subject: [PATCH] fix: better gib velocities for dead bodies
@@ -8,10 +8,10 @@ Subject: [PATCH] fix: better gib velocities for dead bodies
  1 file changed, 12 insertions(+), 10 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index a5a7ef51..65d5450a 100644
+index 78aa934d..319ad16d 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -667,9 +667,6 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -666,9 +666,6 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	} else {
  		bodyAngles[PITCH] = 0;
  	}
@@ -21,7 +21,7 @@ index a5a7ef51..65d5450a 100644
  	AngleVectors( bodyAngles, forward, right, up );
  
  	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocityScaled );
-@@ -681,14 +678,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -680,14 +677,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorCopy( baseOrigin, origin );
  		VectorMA(origin, MINS_Z + 0.95 * playerHeight, up, origin);
  		VectorClear( velocity );
@@ -40,7 +40,7 @@ index a5a7ef51..65d5450a 100644
  		VectorAdd( velocity, playerVelocityScaled, velocity );
  		if ( !skullLaunched && (rand() & 1) ) {
  			CG_LaunchGib( origin, lookDirAngles, velocity, cgs.media.gibSkull );
-@@ -719,7 +717,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -718,7 +716,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorClear( velocity );
  		VectorMA( velocity, +random()*baseRandomVelocity, right, velocity );
  		VectorMA( velocity, crandom()*baseRandomVelocity, forward, velocity );
@@ -50,7 +50,7 @@ index a5a7ef51..65d5450a 100644
  		VectorAdd( velocity, playerVelocityScaled, velocity );
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] += 70;
-@@ -781,7 +780,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -780,7 +779,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorClear( velocity );
  		VectorMA( velocity, -random()*baseRandomVelocity, right, velocity );
  		VectorMA( velocity, crandom()*baseRandomVelocity, forward, velocity );
@@ -60,7 +60,7 @@ index a5a7ef51..65d5450a 100644
  		VectorAdd( velocity, playerVelocityScaled, velocity );
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] -= 90;
-@@ -810,7 +810,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -809,7 +809,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorClear( velocity );
  		VectorMA( velocity, +random()*baseRandomVelocity, right, velocity );
  		VectorMA( velocity, crandom()*baseRandomVelocity, forward, velocity );
@@ -70,7 +70,7 @@ index a5a7ef51..65d5450a 100644
  		VectorAdd( velocity, playerVelocityScaled, velocity );
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] -= 30;
-@@ -827,7 +828,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -826,7 +827,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorClear( velocity );
  		VectorMA( velocity, -random()*baseRandomVelocity, right, velocity );
  		VectorMA( velocity, crandom()*baseRandomVelocity, forward, velocity );

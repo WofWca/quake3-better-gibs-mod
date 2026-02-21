@@ -1,4 +1,4 @@
-From a4db23b270c1f60ff3d873d2279ce2aa6ce7e64f Mon Sep 17 00:00:00 2001
+From 9bb24547ca4fc42596c3c6a94bdf87fb148f0926 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 2 Feb 2026 14:41:58 +0400
 Subject: [PATCH] feat: gibs: damage-based random velocity
@@ -16,21 +16,22 @@ because `P_DamageFeedback` early-returns when `PM_DEAD`.
  code/cgame/cg_effects.c    |  7 +++--
  code/cgame/cg_event.c      |  9 ++++--
  code/cgame/cg_local.h      |  7 ++++-
- code/cgame/cg_localents.c  |  5 ++-
- code/cgame/cg_main.c       |  5 ++-
- code/cgame/cg_servercmds.c | 12 +++++++
+ code/cgame/cg_localents.c  |  5 +++-
+ code/cgame/cg_main.c       |  5 +++-
+ code/cgame/cg_servercmds.c | 12 ++++++++
  code/game/bg_public.h      |  7 +++++
  code/game/g_active.c       | 14 ++++-----
- code/game/g_combat.c       | 64 +++++++++++++++++++++++++++++++-------
- code/game/g_local.h        |  1 +
+ code/game/g_combat.c       | 59 ++++++++++++++++++++++++++++++++------
+ code/game/g_local.h        |  3 +-
  code/game/g_main.c         |  2 ++
- 11 files changed, 108 insertions(+), 25 deletions(-)
+ code/game/g_weapon.c       |  5 +++-
+ 12 files changed, 110 insertions(+), 25 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 65d5450a..f6d21b38 100644
+index 319ad16d..7d7035a3 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -635,7 +635,7 @@ Generated a bunch of gibs launching out from the bodies location
+@@ -634,7 +634,7 @@ Generated a bunch of gibs launching out from the bodies location
  #define	GIB_VELOCITY		250
  #define	GIB_JUMP			250
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -39,10 +40,10 @@ index 65d5450a..f6d21b38 100644
  					const lerpFrame_t *bodyAnimation ) {
  	vec3_t	baseOrigin, origin, velocity;
  	// Generally only the head should have pitch,
-@@ -649,7 +649,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -648,7 +648,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	// to account for crounching.
  	float playerHeight = 32 - MINS_Z;
- 	float playerRadius = PLAYER_RADIUS;
+ 	float playerRadius = PLAYER_WIDTH;
 -	float baseRandomVelocity = cg_gibsExtraRandomVelocity.value;
 +	float baseRandomVelocity =
 +		cg_gibsExtraRandomVelocity.value +
@@ -200,7 +201,7 @@ index 5829e8f3..fe13adec 100644
  		CG_ParseServerinfo();
  	} else if ( num == CS_WARMUP ) {
 diff --git a/code/game/bg_public.h b/code/game/bg_public.h
-index 7d203fb0..07bb9af2 100644
+index 19a71ed8..ef8b5a1b 100644
 --- a/code/game/bg_public.h
 +++ b/code/game/bg_public.h
 @@ -202,6 +202,13 @@ void Pmove (pmove_t *pmove);
@@ -218,7 +219,7 @@ index 7d203fb0..07bb9af2 100644
  // player_state->stats[] indexes
  // NOTE: may not have more than 16
 diff --git a/code/game/g_active.c b/code/game/g_active.c
-index c8d8dbe5..b27ddbd0 100644
+index 8c9a7848..ea4133ed 100644
 --- a/code/game/g_active.c
 +++ b/code/game/g_active.c
 @@ -78,13 +78,6 @@ void P_DamageFeedback( gentity_t *player ) {
@@ -235,7 +236,7 @@ index c8d8dbe5..b27ddbd0 100644
  }
  
  
-@@ -1189,6 +1182,13 @@ void ClientEndFrame( gentity_t *ent ) {
+@@ -1183,6 +1176,13 @@ void ClientEndFrame( gentity_t *ent ) {
  	}
  	SendPendingPredictableEvents( &ent->client->ps );
  
@@ -250,17 +251,10 @@ index c8d8dbe5..b27ddbd0 100644
  //	i = trap_AAS_PointReachabilityAreaIndex( ent->client->ps.origin );
  //	ent->client->areabits[i >> 3] |= 1 << (i & 7);
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 30c404fe..ea324618 100644
+index 3e1d10b4..3ff70bb1 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -229,17 +229,14 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker )
- 	self->client->ps.stats[STAT_DEAD_YAW] = vectoyaw ( dir );
- }
- 
-+#define MAX_KNOCKBACK 200
- /*
- ==================
- KnockbackToKnockbackSpeed
+@@ -236,11 +236,7 @@ KnockbackToKnockbackSpeed
  ==================
  */
  static float KnockbackToKnockbackSpeed( int knockback ) {
@@ -273,17 +267,17 @@ index 30c404fe..ea324618 100644
  }
  
  
-@@ -248,7 +245,8 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
+@@ -249,7 +245,8 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
  GibEntity
  ==================
  */
 -void GibEntity( gentity_t *self, int killer ) {
-+void GibEntity( gentity_t *self, int killer, int damageBloodFallback ) {
++void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
 +	int eventParm = killer;
  	gentity_t *ent;
  	int i;
  
-@@ -267,7 +265,51 @@ void GibEntity( gentity_t *self, int killer ) {
+@@ -268,7 +265,51 @@ void GibEntity( gentity_t *self, int killer ) {
  			break;
  		}
  	}
@@ -336,40 +330,38 @@ index 30c404fe..ea324618 100644
  	self->takedamage = qfalse;
  	self->s.eType = ET_INVISIBLE;
  	self->r.contents = 0;
-@@ -287,7 +329,7 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d
- 		return;
+@@ -291,7 +332,7 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d
+ 	if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
+ 		self->gibScheduled = qtrue;
+ 	} else {
+-		GibEntity( self, 0 );
++		GibEntity( self, 0, damage );
  	}
- 
--	GibEntity( self, 0 );
-+	GibEntity( self, 0, damage );
  }
  
- 
-@@ -646,7 +688,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
- 
- 	if ( (self->health <= GIB_HEALTH && !(contents & CONTENTS_NODROP) && g_blood.integer) || meansOfDeath == MOD_SUICIDE) {
- 		// gib death
--		GibEntity( self, killer );
-+		GibEntity( self, killer, damage );
+@@ -644,7 +685,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
+ 		if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
+ 			self->gibScheduled = qtrue;
+ 		} else {
+-			GibEntity( self, killer );
++			GibEntity( self, killer, damage );
+ 		}
  	} else {
  		// normal death
- 		static int lastDeath;
-@@ -1003,8 +1045,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
- 	}
- 
- 	knockback = damage;
--	if ( knockback > 200 ) {
--		knockback = 200;
-+	if ( knockback > MAX_KNOCKBACK ) {
-+		knockback = MAX_KNOCKBACK;
- 	}
- 	if ( targ->flags & FL_NO_KNOCKBACK ) {
- 		knockback = 0;
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index c7f7d971..25cca91d 100644
+index 05e8c2fc..a09333a0 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
-@@ -726,6 +726,7 @@ extern	vmCvar_t	g_doWarmup;
+@@ -492,7 +492,7 @@ const char *BuildShaderStateConfig( void );
+ //
+ qboolean CanDamage (gentity_t *targ, vec3_t origin);
+ void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod);
+-void GibEntity( gentity_t *self, int killer );
++void GibEntity( gentity_t *self, int killer, const int damageBloodFallback );
+ // The shotgun does `G_Damage` multiple times, per each pellet.
+ // Normally that would mean that if the target is at 1 HP,
+ // only one pellet would hit them.
+@@ -743,6 +743,7 @@ extern	vmCvar_t	g_doWarmup;
  extern	vmCvar_t	g_blood;
  extern	vmCvar_t	g_oldGibs;
  extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
@@ -397,6 +389,22 @@ index ca1e8fe7..05470792 100644
  
  	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
  	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
+diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
+index bca3af51..cbb54c1a 100644
+--- a/code/game/g_weapon.c
++++ b/code/game/g_weapon.c
+@@ -385,7 +385,10 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
+ 			// because vanilla passes `0` as `eventParm if we are gibbing
+ 			// a body from body queue.
+ 			int killer = ent->s.number;
+-			GibEntity( ent2, killer );
++			// Just fall back to "half of all the pellets hit".
++			int damageFallback = DEFAULT_SHOTGUN_DAMAGE * s_quadFactor
++				* DEFAULT_SHOTGUN_DAMAGE / 2;
++			GibEntity( ent2, killer, damageFallback );
+ 		}
+ 		ent2->gibScheduled = qfalse;
+ 	}
 -- 
 2.43.0
 

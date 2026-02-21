@@ -1,4 +1,4 @@
-From 66376e0110788db390fc7b378b0cf89a335534ea Mon Sep 17 00:00:00 2001
+From 204ec4103df388d8fd8bbe981d7eaea52ccd7885 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 5 Feb 2026 19:39:18 +0400
 Subject: [PATCH] fix: gibs: better, more sync, initial angles

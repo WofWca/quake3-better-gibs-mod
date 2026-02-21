@@ -1,4 +1,4 @@
-From a0f9964345dc3123613080deb16a70f15603753e Mon Sep 17 00:00:00 2001
+From ac59e25ffba8216fc39c4e49342d11ac08e2b4ec Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 22 Jan 2026 13:55:28 +0400
 Subject: [PATCH] feat: better gibs direction on missile direct hit
@@ -13,7 +13,7 @@ Related:
  4 files changed, 126 insertions(+), 7 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 4fd874a0..30c404fe 100644
+index 9ed883d0..93c923c8 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -229,6 +229,20 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker )
@@ -37,7 +37,7 @@ index 4fd874a0..30c404fe 100644
  /*
  ==================
  GibEntity
-@@ -792,6 +806,77 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
+@@ -782,6 +796,77 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
  	}
  }
  #endif
@@ -115,7 +115,7 @@ index 4fd874a0..30c404fe 100644
  /*
  ============
  G_Damage
-@@ -822,11 +907,14 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -812,11 +897,14 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  	int			take;
  	int			asave;
  	int			knockback;
@@ -130,7 +130,7 @@ index 4fd874a0..30c404fe 100644
  	if (!targ->takedamage) {
  		return;
  	}
-@@ -927,12 +1015,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -917,12 +1005,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  
  	// figure momentum add, even if the damage won't be taken
  	if ( knockback && targ->client ) {
@@ -144,7 +144,7 @@ index 4fd874a0..30c404fe 100644
  		VectorAdd (targ->client->ps.velocity, kvel, targ->client->ps.velocity);
  
  		// set the timer so that the other client can't cancel
-@@ -1098,6 +1181,22 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -1083,6 +1166,22 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  			if (targ->health < -999)
  				targ->health = -999;
  
@@ -168,10 +168,10 @@ index 4fd874a0..30c404fe 100644
  			targ->die (targ, inflictor, attacker, take, mod);
  			return;
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 10ec8dbf..c7f7d971 100644
+index c83d0cd2..f7d87fff 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
-@@ -724,6 +724,8 @@ extern	vmCvar_t	g_motd;
+@@ -738,6 +738,8 @@ extern	vmCvar_t	g_motd;
  extern	vmCvar_t	g_warmup;
  extern	vmCvar_t	g_doWarmup;
  extern	vmCvar_t	g_blood;

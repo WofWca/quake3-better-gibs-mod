@@ -1,4 +1,4 @@
-From dcebc0b4fe9842cfaf035531251921196cc2759c Mon Sep 17 00:00:00 2001
+From 2e19897ec9f88b83eb4146b2ef5555d51ae38f9c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 18 Nov 2025 12:34:11 +0400
 Subject: [PATCH] fix: corpses don't absorb shotgun pellets
@@ -16,7 +16,7 @@ https://github.com/OpenArena/gamecode/pull/349.
  2 files changed, 25 insertions(+), 5 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 47cf60cd..822bc412 100644
+index e29853ec..1e18a41f 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -607,11 +607,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
