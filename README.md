@@ -210,6 +210,59 @@ from the `baseq3a` branch of this repo.
 
   Also downloadable [on lvlworld.com](https://www.lvlworld.com/mod/id:45).
 
+  GibHappy doesn't have directional gibs, but has a Gib Gun!!
+
+- [Quake 3 Movie Maker's Edition (q3mme)](https://github.com/entdark/q3mme)
+
+  You might have seen it in action while watching some Quake movies.
+
+  (As I discovered after already having made my mod),
+  q3mme implements directional gibs, flexibly scripted
+  with a config file.  
+  The direction is configurable to be either the direction
+  from the killer to the gibbed player,
+  or the gibbed player's velocity (as in our mod).  
+  See
+
+  - <https://github.com/entdark/q3mme/blob/09b42e6b69367538961b3e33ed6c5acb9263d7bd/trunk/code/cgame/cg_event.c#L1073-L1103>
+  - <https://github.com/entdark/q3mme/blob/09b42e6b69367538961b3e33ed6c5acb9263d7bd/trunk/code/cgame/cg_effects.c#L378-L392>
+  - <https://github.com/entdark/q3mme/blob/09b42e6b69367538961b3e33ed6c5acb9263d7bd/trunk/files/scripts/base_player.fx#L93-L144>
+
+- [wolfcamql: quakelive/quake3 demo player](https://github.com/brugal/wolfcamql)
+
+  Implements Quake Live -looking "gibs" (sparks) that have directionality
+  (but also still supports Quake 3 gibs),
+  a bunch of `cg_gib` CVARs
+  (most of which seem to only apply to Quake Live sparks?),
+  and it also supports q3mme scripts.  
+  (As you can tell by the name of the project,
+  it supports Quake Live replays, where `eventParm` of `EV_GIB_PLAYER`
+  is direction.)
+
+  - <https://github.com/brugal/wolfcamql/blob/f33dd8819efc3f837b84ade5aff849acd7503ba0/code/cgame/cg_event.c#L3723-L3786>
+  - <https://github.com/brugal/wolfcamql/blob/cdd9d29cd7c20d7d98f17a58e2bee4186ed4bcd3/code/cgame/cg_effects.c#L1091-L1185>
+  - <https://github.com/brugal/wolfcamql/blob/cdd9d29cd7c20d7d98f17a58e2bee4186ed4bcd3/code/cgame/cg_effects.c#L968-L1049>
+  - <https://github.com/brugal/wolfcamql/blob/f33dd8819efc3f837b84ade5aff849acd7503ba0/code/cgame/cg_main.c#L1387-L1407>
+  - <https://github.com/brugal/wolfcamql/blob/77c7c5752cecaeb3f1d7467e205bd2076f39ea40/package-files/wolfcam-ql/scripts/q3mme.fx#L214-L370>
+
+- [Wolfenstein: Enemy Territory](https://github.com/id-Software/Enemy-Territory),
+  or [ET: Legacy](https://github.com/etlegacy/etlegacy)
+
+  Implements proper initial position of individual gibs
+  matching the player model's parts (as we try to do in this mod),
+  and directionality.
+
+  - <https://github.com/etlegacy/etlegacy/blob/61dd79d9781d081e679a46c7d03aabbba0cb51e0/src/cgame/cg_event.c#L2604-L2613>
+  - <https://github.com/etlegacy/etlegacy/blob/61dd79d9781d081e679a46c7d03aabbba0cb51e0/src/cgame/cg_effects.c#L573-L746>
+
+- Maybe you could find other
+  [id Tech 3 -based games](https://en.wikipedia.org/wiki/Id_Tech_3)
+  or mods for those games that modify `CG_GibPlayer`?  
+  id Tech forks are truly innumerable...  
+  One can start with
+  <https://github.com/search?q=%22CG_GibPlayer%22+path%3Acg_effects.c&type=code>,
+  and hide identical files.
+
 ## License
 
 These patches are dual-licensed under either
