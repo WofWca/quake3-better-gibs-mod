@@ -15,7 +15,7 @@ e.g. the fact that in the original game the shotgun gibs very rarely
 (namely it only gibs when you aim at the enemy's feet).
 See the individual `.patch` files.
 
-And yes, if you simply want ***MOAR GIBS***,
+And yes, if you simply want **_MOAR GIBS_**,
 we got you covered: `\set cg_gibs 10; set cg_gibsExtraRandomVelocity 1000` (or however much you need instead of `10`):
 
 ![Screenshot of 100 pieces of gibs flying off](https://github.com/user-attachments/assets/78f975ca-a204-4e87-867f-1f9118869893)
