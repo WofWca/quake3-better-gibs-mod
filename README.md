@@ -167,6 +167,16 @@ set gibsFunCmd_9 "echo Gibs settings: 9/9 Instapuddle;														set gibsFunC
 
 </details>
 
+## How it works
+
+Nothing too special.
+The most important feature that mod introduces
+is that gibs inherit player velocity (`cg_gibsInheritPlayerVelocity`).
+And player velocity data is already available client-side.
+Players velocity gets changed as the player receives damage.
+More damage = more velocity.
+That's it.
+
 ## Integrating into other mods
 
 As was said, this mod modifies `vm/cgame.qvm` and `vm/qagame.qvm`,
