@@ -200,6 +200,12 @@ There might be conflicts, which should not be too hard to resolve.
 Then apply the copyright notice, `Copyright (C) 2025, 2026  WofWca`,
 wherever you have them.
 
+However, it might be simpler to resolve the conflicts
+at once and not for each commit separately.
+To achieve that, you can apply the patches to one of the earlier commits
+of your mod, and then merge the resulting branch
+into the main branch of your mod.
+
 Also see the `ioq3` branch in this repo,
 which already applied these patches on top of ioquake3.
 In fact, the `.patch` files have been generated from that branch,
