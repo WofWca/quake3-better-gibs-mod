@@ -190,8 +190,8 @@ and compile the `.qvm` files.
 To do that:
 
 ```bash
+git clone https://github.com/WofWca/quake3-better-gibs-mod.git
 cd my-mod-dir
-git clone https://github.com/WofWca/quake3-better-gibs-mod.git` ../quake3-better-gibs-mod
 git am ../quake3-better-gibs-mod/patches/*.patch
 ```
 
