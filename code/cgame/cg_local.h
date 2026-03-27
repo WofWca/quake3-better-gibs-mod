@@ -1256,6 +1256,7 @@ extern	vmCvar_t		cg_gibsExtraRandomVelocity;
 extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
 extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
 extern	vmCvar_t		cg_gibsBounceFactor;
+extern	vmCvar_t		cg_gibsBounceFactorRandomness;
 extern	vmCvar_t		cg_gibsRotationFactor;
 extern	vmCvar_t		cg_gibsBetterCameraOnGib;
 extern	vmCvar_t		cg_drawTimer;

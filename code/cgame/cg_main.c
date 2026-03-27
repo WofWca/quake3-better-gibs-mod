@@ -158,6 +158,7 @@ vmCvar_t	cg_gibsExtraRandomVelocity;
 vmCvar_t	cg_gibsRandomVelocityFromKnockback;
 vmCvar_t	cg_gibsExtraVerticalVelocity;
 vmCvar_t	cg_gibsBounceFactor;
+vmCvar_t	cg_gibsBounceFactorRandomness;
 vmCvar_t	cg_gibsRotationFactor;
 vmCvar_t	cg_gibsBetterCameraOnGib;
 vmCvar_t	cg_drawTimer;
@@ -326,6 +327,7 @@ static cvarTable_t cgameCvarTable[] = {
 	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.15", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "150", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE, RANGE_BOOL },
 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, RANGE_BOOL },
