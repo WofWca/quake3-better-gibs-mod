@@ -968,7 +968,7 @@ char *PlayerConnect( int playerNum, qboolean firstTime, qboolean isBot, int conn
 	// for statistics
 //	player->areabits = areabits;
 //	if ( !player->areabits )
-//		player->areabits = trap_Alloc( (trap_AAS_PointReachabilityAreaIndex( NULL ) + 7) / 8, NULL );
+//		player->areabits = trap_HeapMalloc( (trap_AAS_PointReachabilityAreaIndex( NULL ) + 7) / 8 );
 
 	return NULL;
 }
