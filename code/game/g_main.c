@@ -72,6 +72,7 @@ vmCvar_t	g_blood;
 vmCvar_t	g_oldGibs;
 vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
 vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
+vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
 vmCvar_t	g_podiumDist;
 vmCvar_t	g_podiumDrop;
 vmCvar_t	g_allowVote;
@@ -168,6 +169,7 @@ static cvarTable_t		gameCvarTable[] = {
 	// but also the camera velocity of the gibbed player.
 	{ &g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse },
+	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
 
 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
 	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
