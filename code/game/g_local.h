@@ -303,6 +303,8 @@ struct gclient_s {
 	int			latched_buttons;
 
 	vec3_t		oldOrigin;
+	// The `ps.velocity` before the latest `Pmove()`.
+	vec3_t		oldVelocity;
 
 	// sum up damage over an entire frame, so
 	// shotgun blasts give a single big kick
@@ -787,6 +789,7 @@ extern	vmCvar_t	g_blood;
 extern	vmCvar_t	g_oldGibs;
 extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
 extern	vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
+extern	vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
 extern	vmCvar_t	g_allowVote;
 extern	vmCvar_t	g_teamAutoJoin;
 extern	vmCvar_t	g_teamForceBalance;
