@@ -76,6 +76,12 @@ G_CVAR( g_oldGibs, "g_oldGibs", "0", CVAR_ARCHIVE, 0, qfalse, qfalse )
 // but also the camera velocity of the gibbed player.
 G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse, qfalse )
 G_CVAR( g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse, qfalse )
+// If a dead player loses this much or more speed
+// as a result of collision with something (e.g. floor, wall),
+// deal `g_gibsOnCollisionBaseDamage` or more damage to them
+// (damage increases with the square of the speed).
+G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, 0, qfalse, qfalse )
+G_CVAR( g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "100", CVAR_ARCHIVE, 0, qfalse, qfalse )
 G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse, qfalse )
 
 G_CVAR( g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse, qfalse )
