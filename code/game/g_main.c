@@ -73,6 +73,8 @@ vmCvar_t	g_oldGibs;
 vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
 vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
 vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
+vmCvar_t	g_gibsOnCollisionMinSpeed;
+vmCvar_t	g_gibsOnCollisionBaseDamage;
 vmCvar_t	g_podiumDist;
 vmCvar_t	g_podiumDrop;
 vmCvar_t	g_allowVote;
@@ -170,6 +172,12 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse },
 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
+	// If a dead player loses this much or more speed
+	// as a result of collision with something (e.g. floor, wall),
+	// deal `g_gibsOnCollisionBaseDamage` or more damage to them
+	// (damage increases with the square of the speed).
+	{ &g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_ARCHIVE, 0, qfalse },
 
 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
 	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
