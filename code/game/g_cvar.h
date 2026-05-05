@@ -82,6 +82,8 @@ G_CVAR( g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1
 // (damage increases with the square of the speed).
 G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, 0, qfalse, qfalse )
 G_CVAR( g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_ARCHIVE, 0, qfalse, qfalse )
+// This one affects gameplay significantly, and is basically just for fun.
+G_CVAR( g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, qtrue, qfalse )
 G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse, qfalse )
 
 G_CVAR( g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse, qfalse )
