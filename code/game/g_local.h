@@ -792,6 +792,7 @@ extern	vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
 extern	vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
 extern	vmCvar_t	g_gibsOnCollisionMinSpeed;
 extern	vmCvar_t	g_gibsOnCollisionBaseDamage;
+extern	vmCvar_t	g_gibsOnCollisionAffectLivePlayers;
 extern	vmCvar_t	g_allowVote;
 extern	vmCvar_t	g_teamAutoJoin;
 extern	vmCvar_t	g_teamForceBalance;

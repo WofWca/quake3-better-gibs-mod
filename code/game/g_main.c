@@ -98,6 +98,7 @@ vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
 vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
 vmCvar_t	g_gibsOnCollisionMinSpeed;
 vmCvar_t	g_gibsOnCollisionBaseDamage;
+vmCvar_t	g_gibsOnCollisionAffectLivePlayers;
 vmCvar_t	g_podiumDist;
 vmCvar_t	g_podiumDrop;
 vmCvar_t	g_allowVote;
@@ -200,6 +201,8 @@ static cvarTable_t		gameCvarTable[] = {
 	// (damage increases with the square of the speed).
 	{ &g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, 0, RANGE_ALL },
 	{ &g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "100", CVAR_ARCHIVE, 0, RANGE_ALL },
+	// This one affects gameplay significantly, and is basically just for fun.
+	{ &g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, RANGE_ALL },
 
 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, RANGE_ALL },
 	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, RANGE_ALL },
