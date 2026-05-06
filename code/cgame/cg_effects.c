@@ -683,7 +683,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 	float jump =
 		cg_gibsExtraVerticalVelocity.value +
 		cg_gibsVerticalVelocityFromKnockback.value * knockbackSpeed;
-	int numGibs = cg_gibs.value * DEFAULT_NUM_GIBS;
+	float numGibsFactor =
+		// Divide by 1000 so that the CVAR value doesn't have to be
+		// a very small fraction. 1000 is the max knockback speed in vanilla.
+		cg_gibsPiecesFromKnockback.value * knockbackSpeed / 1000.0f;
+	int numGibs = ((numGibsFactor < 1) ? 1 : numGibsFactor) *
+		cg_gibs.value * DEFAULT_NUM_GIBS;
 	qboolean skullLaunched = qfalse; // launch only one skull.
 
 	if ( !cg_blood.integer ) {
