@@ -20,6 +20,17 @@ CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE )
 CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE )
 CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE )
+// For every 100 of knockback speed above 500 (100 damage),
+// add this many pieces of gibs, times the value of `cg_gibs`.
+//
+// With higher damage gibs fly further apart, so one starts to see gibs
+// as individual pieces instead of a "cloud", which IMO is not good.
+// Increasing the amount of gibs with damage fixes this.
+// And overall it makes it more rewarding to deal more damage.
+// Q: "What sense does it make to have more gibs?
+// Did the player got bigger from taking more damage??":
+// A: No, they simlpy got split into more pieces.
+CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE )
