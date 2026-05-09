@@ -267,7 +267,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
 	// we're simply providing the client with the knockback info,
 	// and whether to use that into is up to `cg_oldGibs`.
 	if ( g_gibsNewEvGibPlayerParmProtocol.integer == 1 ) {
-		int damage;
+		int damage, frameDamage;
 		float knockbackSpeed;
 
 		// We prefer actual damage over `client->damage_knockback`
@@ -280,8 +280,14 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
 		// "no knockback" means "the player should not be moved
 		// in any particular direction",
 		// and not that "their gibs should stay put".
-		damage = self->client
-			? self->client->damage_blood + self->client->damage_armor
+		//
+		// In case when `level.intermissionQueued` we don't use
+		// `damage_blood` and `damage_armor` because they would not be set.
+		// See `level.intermissionQueued` and `targ->die == body_die` check
+		// in `G_Damage`.
+		frameDamage = self->client->damage_blood + self->client->damage_armor;
+		damage = self->client && !( level.intermissionQueued && frameDamage == 0 )
+			? frameDamage
 			: damageBloodFallback;
 		if ( damage > MAX_KNOCKBACK ) {
 			damage = MAX_KNOCKBACK;
