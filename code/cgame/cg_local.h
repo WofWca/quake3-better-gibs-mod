@@ -1100,6 +1100,7 @@ extern	vmCvar_t		cg_oldGibs;
 extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
 extern	vmCvar_t		cg_gibsExtraRandomVelocity;
 extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
+extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
 extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
 extern	vmCvar_t		cg_gibsBounceFactor;
 extern	vmCvar_t		cg_gibsBounceFactorRandomness;
