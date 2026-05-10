@@ -147,25 +147,10 @@ set g_gibsNewEvGibPlayerParmProtocol 0
 Add the following to the `baseq3/autoexec.cfg` file,
 then enter a game and press `F8`.
 
-<details><summary>`autoexec.cfg`</summary>
-
 ```cfg
-// For https://github.com/WofWca/quake3-better-gibs-mod
-// `F8` can be replaced with any other key, such as `L` or `KP_PGUP`.
+exec better-gibs-cfgs/autoexec.cfg
 bind F8 "vstr gibsFunCmd"
-set gibsFunCmd "vstr gibsFunCmd_1"
-set gibsFunCmd_1 "echo Gibs settings: 1/9 Normal;															set gibsFunCmd vstr gibsFunCmd_2; set cg_gibs 1.1;	reset cg_oldGibs;	reset g_oldGibs; reset cg_gibsInheritPlayerVelocity;		reset cg_gibsRandomVelocityFromKnockback; 			reset g_gibsMissileDirectionKnockbackWeight; reset g_gibsNewEvGibPlayerParmProtocol; reset cg_gibsExtraRandomVelocity; reset cg_gibsExtraVerticalVelocity; reset cg_gibsBounceFactor; reset cg_gibsRotationFactor; reset cg_bounceMarksMinImpactSpeed; reset cg_bounceSoundMinImpactSpeed;";
-set gibsFunCmd_2 "echo Gibs settings: 2/9 Vanilla;															set gibsFunCmd vstr gibsFunCmd_3; set cg_gibs 1.0;	set cg_oldGibs 1; set g_oldGibs 1;";
-set gibsFunCmd_3 "echo Gibs settings: 3/9 Purely damage-based random velocity;								set gibsFunCmd vstr gibsFunCmd_4; set cg_gibs 1.1;	cg_oldGibs 0; 		reset g_oldGibs; reset cg_gibsInheritPlayerVelocity; 	set cg_gibsRandomVelocityFromKnockback 0.5; 		reset g_gibsMissileDirectionKnockbackWeight; reset g_gibsNewEvGibPlayerParmProtocol; set cg_gibsExtraRandomVelocity 50; set cg_gibsExtraVerticalVelocity 50; reset cg_gibsBounceFactor; reset cg_gibsRotationFactor; reset cg_bounceMarksMinImpactSpeed; reset cg_bounceSoundMinImpactSpeed;";
-set gibsFunCmd_4 "echo Gibs settings: 4/9 I hear a boomer around;											set gibsFunCmd vstr gibsFunCmd_5; set cg_gibs 4;	cg_oldGibs 0;		reset g_oldGibs; set cg_gibsInheritPlayerVelocity 0.25;	set cg_gibsRandomVelocityFromKnockback 0.05; 		reset g_gibsMissileDirectionKnockbackWeight; reset g_gibsNewEvGibPlayerParmProtocol; set cg_gibsExtraRandomVelocity 750; set cg_gibsExtraVerticalVelocity 500; set cg_gibsBounceFactor 0.2; set cg_gibsRotationFactor 0.1; reset cg_bounceMarksMinImpactSpeed; reset cg_bounceSoundMinImpactSpeed;";
-set gibsFunCmd_5 "echo Gibs settings: 5/9 Anatomy 101 a.k.a. Freeze tag;									set gibsFunCmd vstr gibsFunCmd_6; set cg_gibs 1.1;	cg_oldGibs 0;		reset g_oldGibs; reset cg_gibsInheritPlayerVelocity;		reset cg_gibsRandomVelocityFromKnockback; 			reset g_gibsMissileDirectionKnockbackWeight; reset g_gibsNewEvGibPlayerParmProtocol; reset cg_gibsExtraRandomVelocity; set cg_gibsExtraVerticalVelocity -999999999; set cg_gibsBounceFactor 0; set cg_gibsRotationFactor 0; reset cg_bounceMarksMinImpactSpeed; reset cg_bounceSoundMinImpactSpeed;";
-set gibsFunCmd_6 "echo Gibs settings: 6/9 Get spooked a.k.a. You need a hug a.k.a. BFG is a gravity gun;	set gibsFunCmd vstr gibsFunCmd_7; set cg_gibs 1.1;	cg_oldGibs 0;		reset g_oldGibs; set cg_gibsInheritPlayerVelocity -1.0;	set cg_gibsRandomVelocityFromKnockback 0.0; 		reset g_gibsMissileDirectionKnockbackWeight; reset g_gibsNewEvGibPlayerParmProtocol; set cg_gibsExtraRandomVelocity 20; set cg_gibsExtraVerticalVelocity 200; reset cg_gibsBounceFactor; set cg_gibsRotationFactor 0; reset cg_bounceMarksMinImpactSpeed; reset cg_bounceSoundMinImpactSpeed;";
-set gibsFunCmd_7 "echo Gibs settings: 7/9 Sticky gibs;														set gibsFunCmd vstr gibsFunCmd_8; set cg_gibs 1.1;	cg_oldGibs 0;		reset g_oldGibs; reset cg_gibsInheritPlayerVelocity;		reset cg_gibsRandomVelocityFromKnockback; 			reset g_gibsMissileDirectionKnockbackWeight; reset g_gibsNewEvGibPlayerParmProtocol; reset cg_gibsExtraRandomVelocity; reset cg_gibsExtraVerticalVelocity; set cg_gibsBounceFactor -0.985; set cg_gibsRotationFactor 0; set cg_bounceMarksMinImpactSpeed 1000; set cg_bounceSoundMinImpactSpeed 3000;";
-set gibsFunCmd_8 "echo Gibs settings: 8/9 Necromorph metamorphosis;											set gibsFunCmd vstr gibsFunCmd_9; set cg_gibs 1.1;	cg_oldGibs 0;		reset g_oldGibs; set cg_gibsInheritPlayerVelocity -0.2;	set cg_gibsRandomVelocityFromKnockback 0.0; 		reset g_gibsMissileDirectionKnockbackWeight; reset g_gibsNewEvGibPlayerParmProtocol; set cg_gibsExtraRandomVelocity 0; set cg_gibsExtraVerticalVelocity 50; set cg_gibsBounceFactor 1; set cg_gibsRotationFactor 0; set cg_bounceMarksMinImpactSpeed 500; reset cg_bounceSoundMinImpactSpeed;";
-set gibsFunCmd_9 "echo Gibs settings: 9/9 Instapuddle;														set gibsFunCmd vstr gibsFunCmd_1; set cg_gibs 1.1;	cg_oldGibs 0;		reset g_oldGibs; set cg_gibsInheritPlayerVelocity 0.25;	set cg_gibsRandomVelocityFromKnockback 0.5; 		reset g_gibsMissileDirectionKnockbackWeight; reset g_gibsNewEvGibPlayerParmProtocol; set cg_gibsExtraRandomVelocity 250; set cg_gibsExtraVerticalVelocity -1500; set cg_gibsBounceFactor 0.05; set cg_gibsRotationFactor 0.5; reset cg_bounceMarksMinImpactSpeed; set cg_bounceSoundMinImpactSpeed 3000;";
 ```
-
-</details>
 
 ## How it works
 
