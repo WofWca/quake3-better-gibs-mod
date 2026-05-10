@@ -79,5 +79,5 @@ index 5be1e212..38d7b079 100644
  	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
  	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 -- 
-2.43.0
+2.54.0
 

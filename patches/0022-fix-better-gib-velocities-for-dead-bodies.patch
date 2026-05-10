@@ -81,5 +81,5 @@ index 78aa934d..319ad16d 100644
  		VectorCopy( bodyAngles, angles );
  		angles[PITCH] += 15;
 -- 
-2.43.0
+2.54.0
 

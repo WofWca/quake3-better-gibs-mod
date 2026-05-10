@@ -77,5 +77,5 @@ index 21342305..73def7b6 100644
  	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE  },
  	{ &cg_gun_x, "cg_gunX", "0", CVAR_CHEAT },
 -- 
-2.43.0
+2.54.0
 

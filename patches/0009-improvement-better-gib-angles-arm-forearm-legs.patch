@@ -89,5 +89,5 @@ index 09986505..7ae0eb37 100644
  void CG_GibPlayerOld( vec3_t playerOrigin ) {
  	vec3_t	origin, angles, velocity;
 -- 
-2.43.0
+2.54.0
 
