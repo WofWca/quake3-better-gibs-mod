@@ -1,0 +1,41 @@
+From ae685ee8f15d9d3a7bae80a26c43b3a7628165ca Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 22 Feb 2026 13:37:04 +0400
+Subject: [PATCH] fix: gibs velocity when spectating a player
+
+---
+ code/cgame/cg_event.c | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
+index 44233727..8d33f553 100644
+--- a/code/cgame/cg_event.c
++++ b/code/cgame/cg_event.c
+@@ -1229,13 +1229,21 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
+ 
+ 			// Apparently at this point `es->pos.trDelta` doesn't yet have
+ 			// the knockback from the damage that gibbed us,
+-			// so we have to differentiate between self and non-self.
+-			vec3_t *vel = es->number == cg.snap->ps.clientNum
++			// so we have to differentiate between self and non-self
++			// during regular (non-demo non-spectator) gameplay.
++			const qboolean usePredictedPs =
++				es->number == cg.snap->ps.clientNum &&
++				!cg.demoPlayback &&
++				!(cg.snap->ps.pm_flags & PMF_FOLLOW);
++			vec3_t *vel = usePredictedPs
+ 				? &cg.predictedPlayerState.velocity
+ 				: &es->pos.trDelta;
+ 
+ 			lerpFrame_t torsoAnimation = es->number == cg.snap->ps.clientNum
+-				// `cent->pe.torso` appears to be not good for self.
++				// `cent->pe.torso` appears to be not good for self,
++				// unlike `cg.predictedPlayerEntity`,
++				// even during `demoPlayback` and `PMF_FOLLOW`,
++				// so we're not using `usePredictedPs` here.
+ 				? cg.predictedPlayerEntity.pe.torso
+ 				: cent->pe.torso;
+ 			vec3_t torsoAngles;
+-- 
+2.54.0
+
