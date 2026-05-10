@@ -209,7 +209,7 @@ into the main branch of your mod.
 Also see the `ioq3` branch in this repo,
 which already applied these patches on top of ioquake3.
 In fact, the `.patch` files have been generated from that branch,
-with `git format-patch --output-directory=../quake3-better-gibs-mod/patches --no-numbered ioquake/main`.
+with `git format-patch --output-directory=./patches --no-numbered ioquake/main..ioq3`.
 To build a vanillaq3-compatible version in CI,
 replace `COMMAND ${Q3ASM} -o ${QVM_FILE} ${ASM_FILES}`
 with `COMMAND ${Q3ASM} -vq3 -o ${QVM_FILE} ${ASM_FILES}`.
