@@ -86,13 +86,6 @@ void P_DamageFeedback( gentity_t *ent ) {
 
 
 	player->ps.damageCount = count;
-
-	//
-	// clear totals
-	//
-	player->damage_blood = 0;
-	player->damage_armor = 0;
-	player->damage_knockback = 0;
 }
 
 
@@ -315,6 +308,42 @@ void	G_TouchTriggers( gentity_t *ent ) {
 		ent->player->ps.jumppad_frame = 0;
 		ent->player->ps.jumppad_ent = 0;
 	}
+}
+
+static void CheckCollisionDamage( gentity_t *ent, const vec3_t oldVelocity ) {
+	gplayer_t	*player = ent->player;
+	vec3_t		velChange;
+	int			damage;
+	float		div;
+	float		baseDamage = g_gibsOnCollisionBaseDamage.value *
+		(player->ps.pm_type == PM_DEAD
+			? 1
+			: g_gibsOnCollisionAffectLivePlayers.value);
+
+	if ( baseDamage == 0 ) {
+		return;
+	}
+
+	VectorSubtract( player->ps.velocity, oldVelocity, velChange );
+
+	// Impact energy is proportional to the square of the speed.
+	// Also using `VectorLengthSquared` is computationally faster.
+	div = Square( g_gibsOnCollisionMinSpeed.value );
+	if ( div == 0 ) {
+		div = 1.0f / 0x10000;
+	}
+	damage = VectorLengthSquared( velChange )
+		/ div
+		* baseDamage;
+
+	// If the player already has -39 health,
+	// gibbing from a 2-centimeter fall would not look good.
+	// So we gotta have a threshold.
+	if ( damage < baseDamage ) {
+		return;
+	}
+
+	G_Damage (ent, NULL, NULL, NULL, NULL, damage, 0, MOD_FALLING);
 }
 
 /*
@@ -864,8 +893,8 @@ void PlayerThink_real( gentity_t *ent ) {
 	// check for invulnerability expansion before doing the Pmove
 	if (player->ps.powerups[PW_INVULNERABILITY] ) {
 		if ( !(player->ps.pm_flags & PMF_INVULEXPAND) ) {
-			vec3_t mins = { -42, -42, -42 };
-			vec3_t maxs = { 42, 42, 42 };
+			vec3_t mins = { -INVUL_RADIUS, -INVUL_RADIUS, -INVUL_RADIUS };
+			vec3_t maxs = { INVUL_RADIUS, INVUL_RADIUS, INVUL_RADIUS };
 			vec3_t oldmins, oldmaxs;
 
 			VectorCopy (ent->s.mins, oldmins);
@@ -913,6 +942,7 @@ void PlayerThink_real( gentity_t *ent ) {
 	pm.pmove_overbounce = pmove_overbounce.integer;
 
 	VectorCopy( player->ps.origin, player->oldOrigin );
+	VectorCopy( player->ps.velocity, player->oldVelocity );
 
 #ifdef MISSIONPACK
 	if ( level.intermissionQueued != 0 && g_singlePlayer.integer ) {
@@ -955,6 +985,18 @@ void PlayerThink_real( gentity_t *ent ) {
 
 	// execute player events
 	PlayerEvents( ent, oldEventSequence );
+
+	// We run this _after_ `PlayerEvents()` because that's where
+	// the normal fall damage is dealt.
+	// We want that because if a player has died from a high fall
+	// then we want to immediately gib them.
+	//
+	// On the other hand maybe we should run this
+	// before `BG_PlayerStateToEntityState`, which seems like a function
+	// that should be run when "finishing things up".
+	if ( !g_oldGibs.integer && g_gibsOnCollisionBaseDamage.integer ) {
+		CheckCollisionDamage( ent, player->oldVelocity );
+	}
 
 	// link entity now, after any personal teleporters have been used
 	trap_LinkEntity (ent);
@@ -1172,6 +1214,13 @@ void PlayerEndFrame( gentity_t *ent ) {
 
 	// store the client's position for backward reconciliation later
 	G_StoreHistory( ent );
+
+	//
+	// clear damage totals
+	//
+	ent->player->damage_blood = 0;
+	ent->player->damage_armor = 0;
+	ent->player->damage_knockback = 0;
 
 	// set the bit for the reachability area the player is currently in
 //	i = trap_AAS_PointReachabilityAreaIndex( ent->player->ps.origin );

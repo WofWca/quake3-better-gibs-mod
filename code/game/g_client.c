@@ -754,6 +754,9 @@ void PlayerUserinfoChanged( int playerNum ) {
 	s = Info_ValueForKey( userinfo, "cg_antiLag" );
 	player->pers.antiLag = atoi( s );
 
+	player->pers.cg_gibsBetterCameraOnGib =
+		atoi( Info_ValueForKey( userinfo, "cg_gibsBetterCameraOnGib" ) );
+
 	// set name
 	Q_strncpyz ( oldname, player->pers.netname, sizeof( oldname ) );
 	s = Info_ValueForKey (userinfo, "name");

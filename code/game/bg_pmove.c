@@ -1265,12 +1265,12 @@ static void PM_CheckDuck (void)
 	if ( pm->ps->powerups[PW_INVULNERABILITY] ) {
 		if ( pm->ps->pm_flags & PMF_INVULEXPAND ) {
 			// invulnerability sphere has a 42 units radius
-			VectorSet( pm->ps->mins, -42, -42, -42 );
-			VectorSet( pm->ps->maxs, 42, 42, 42 );
+			VectorSet( pm->ps->mins, -INVUL_RADIUS, -INVUL_RADIUS, -INVUL_RADIUS );
+			VectorSet( pm->ps->maxs, INVUL_RADIUS, INVUL_RADIUS, INVUL_RADIUS );
 		}
 		else {
-			VectorSet( pm->ps->mins, -15, -15, MINS_Z );
-			VectorSet( pm->ps->maxs, 15, 15, 16 );
+			VectorSet( pm->ps->mins, -PLAYER_WIDTH, -PLAYER_WIDTH, MINS_Z );
+			VectorSet( pm->ps->maxs, PLAYER_WIDTH, PLAYER_WIDTH, 16 );
 		}
 		pm->ps->pm_flags |= PMF_DUCKED;
 		pm->ps->viewheight = CROUCH_VIEWHEIGHT;
@@ -1278,18 +1278,49 @@ static void PM_CheckDuck (void)
 	}
 	pm->ps->pm_flags &= ~PMF_INVULEXPAND;
 
-	pm->ps->mins[0] = -15;
-	pm->ps->mins[1] = -15;
+	pm->ps->mins[0] = -PLAYER_WIDTH;
+	pm->ps->mins[1] = -PLAYER_WIDTH;
 
-	pm->ps->maxs[0] = 15;
-	pm->ps->maxs[1] = 15;
+	pm->ps->maxs[0] = PLAYER_WIDTH;
+	pm->ps->maxs[1] = PLAYER_WIDTH;
 
 	pm->ps->mins[2] = MINS_Z;
 
 	if (pm->ps->pm_type == PM_DEAD)
 	{
-		pm->ps->maxs[2] = -8;
-		pm->ps->viewheight = DEAD_VIEWHEIGHT;
+		// Note that we want to support vanilla clients and servers,
+		// which do not have this `if` (they always run the `else` branch).
+		// On the server we check `cg_gibsBetterCameraOnGib` userinfo
+		// before setting `viewheight = NEW_GIBBED_VIEWHEIGHT`.
+		// Vanilla servers never set `viewheight` to `NEW_GIBBED_VIEWHEIGHT`,
+		// so on the client side this check is enough.
+		if ( pm->ps->viewheight == NEW_GIBBED_VIEWHEIGHT ) {
+			// Make the camera fly farther away when getting gibbed,
+			// by making the player's bounding box smaller
+			// and lifting it off the ground,
+			// as if the player became just their head.
+			//
+			// This also fixes the issue with gibs
+			// flying parallel to the ground even when knockback direction
+			// is towards the ground:
+			// https://github.com/WofWca/quake3-better-gibs-mod/issues/3.
+			//
+			// Note that we don't need to change `groundEntityNum` and stuff,
+			// because there is `PM_GroundTraceMissed()`
+			// right after `PM_CheckDuck()`.
+			pm->ps->mins[2] = NEW_GIBBED_MINS_Z;
+			pm->ps->maxs[2] = NEW_GIBBED_MAXS_Z;
+			// Also make them slimmer, because they're just a piece of meat now,
+			// and not an entire body.
+			pm->ps->mins[0] = -PLAYER_WIDTH * 3 / 4;
+			pm->ps->mins[1] = -PLAYER_WIDTH * 3 / 4;
+			pm->ps->maxs[0] = PLAYER_WIDTH * 3 / 4;
+			pm->ps->maxs[1] = PLAYER_WIDTH * 3 / 4;
+		} else {
+			pm->ps->maxs[2] = DEAD_MAXS_Z;
+			pm->ps->viewheight = DEAD_VIEWHEIGHT;
+		}
+
 		return;
 	}
 
@@ -1302,7 +1333,7 @@ static void PM_CheckDuck (void)
 		if (pm->ps->pm_flags & PMF_DUCKED)
 		{
 			// try to stand up
-			pm->ps->maxs[2] = 32;
+			pm->ps->maxs[2] = MAXS_Z;
 			pm->trace (&trace, pm->ps->origin, pm->ps->mins, pm->ps->maxs, pm->ps->origin, pm->ps->playerNum, pm->tracemask );
 			if (!trace.allsolid)
 				pm->ps->pm_flags &= ~PMF_DUCKED;
@@ -1311,12 +1342,12 @@ static void PM_CheckDuck (void)
 
 	if (pm->ps->pm_flags & PMF_DUCKED)
 	{
-		pm->ps->maxs[2] = 16;
+		pm->ps->maxs[2] = CROUCH_MAXS_Z;
 		pm->ps->viewheight = CROUCH_VIEWHEIGHT;
 	}
 	else
 	{
-		pm->ps->maxs[2] = 32;
+		pm->ps->maxs[2] = MAXS_Z;
 		pm->ps->viewheight = DEFAULT_VIEWHEIGHT;
 	}
 }

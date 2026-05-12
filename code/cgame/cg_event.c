@@ -1232,7 +1232,86 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		// eventParm 1 = living player gibbed
 		// eventParm 2 = corpse gibbed
 		if ( es->eventParm >= 1 ) {
-			CG_GibPlayer( cent->lerpOrigin );
+			if (cg_oldGibs.integer) {
+				CG_GibPlayerOld( cent->lerpOrigin );
+			} else {
+				// TODO(merge) `g_gibsNewEvGibPlayerParmProtocol` doesn't work,
+				// because in Mint Arena `eventParm` has a different meaning...
+				int knockbackSpeed = (cgs.g_gibsNewEvGibPlayerParmProtocol == 1 && qfalse)
+					? es->eventParm * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
+					// Just use the default knockback speed for 100 damage.
+					: 100 * 1000 / COMBAT_PLAYER_MASS;
+
+				// Apparently at this point `es->pos.trDelta` doesn't yet have
+				// the knockback from the damage that gibbed us,
+				// so we have to differentiate between self and non-self
+				// during regular (non-demo non-spectator) gameplay.
+				//
+				// TODO(merge) fix: we no longer have `ps`, only `pss`.
+				// Uncomment and adjust these.
+				const qboolean usePredictedPs =
+					// es->number == cg.snap->ps.clientNum &&
+					// !cg.demoPlayback &&
+					// !(cg.snap->ps.pm_flags & PMF_FOLLOW);
+					qfalse;
+				// vec3_t *vel = usePredictedPs
+				// 	? &cg.predictedPlayerState.velocity
+				// 	: &es->pos.trDelta;
+				vec3_t *vel = &es->pos.trDelta;
+
+				// lerpFrame_t torsoAnimation = es->number == cg.snap->ps.clientNum
+				// 	// `cent->pe.torso` appears to be not good for self,
+				// 	// unlike `cg.predictedPlayerEntity`,
+				// 	// even during `demoPlayback` and `PMF_FOLLOW`,
+				// 	// so we're not using `usePredictedPs` here.
+				// 	? cg.predictedPlayerEntity.pe.torso
+				// 	: cent->pe.torso;
+				lerpFrame_t torsoAnimation = cent->pe.torso;
+				vec3_t torsoAngles;
+
+				// TODO fix: things like `origin` and `angles`
+				// are not in complete sync between clients,
+				// so this seed is not always the same for all players.
+				int randSeed = es->number;
+				randSeed = Q_rand(&randSeed) + es->playerNum;
+				randSeed = Q_rand(&randSeed) + es->eventParm;
+				randSeed = Q_rand(&randSeed) + cgs.levelStartTime;
+				// TODO fix: this varies from client to client.
+				// So for now we round it to make it in sync ~95% of the time.
+				randSeed = Q_rand(&randSeed) + cg.snap->serverTime / 2048;
+				if ( pi ) {
+					randSeed = Q_rand(&randSeed) + pi->name[0];
+				}
+
+				// Torso animation angles seem to be in better sync
+				// between the local state and how others see us,
+				// and overall are closer to other player's viewangles
+				// than `cent->lerpAngles`.
+				// `cent->lerpAngles`, seems to sometimes be pointing
+				// in a completely different direction than the player's body
+				// at the time of death.
+				// Moreover, for non-self pitch seems to be always
+				// not very far from 0.
+				// This could be related to `LookAtKiller()`.
+				// Also see `CG_PlayerAngles`.
+				torsoAngles[PITCH] = torsoAnimation.pitchAngle;
+				torsoAngles[YAW] = torsoAnimation.yawAngle;
+				torsoAngles[ROLL] = 0;
+
+				if ( cg_debugGibs.integer & 0x04 ) {
+					CG_Printf("EV_GIB_PLAYER:");
+					CG_Printf(" time "S_COLOR_GREEN"%i",
+						cg.time );
+					CG_Printf(", playerNum "S_COLOR_GREEN"%i",
+						es->playerNum );
+					CG_Printf(", usePredictedPlayerState %s%i\n",
+						usePredictedPs ? S_COLOR_GREEN : S_COLOR_CYAN,
+						usePredictedPs );
+				}
+
+				CG_GibPlayer( cent->lerpOrigin, torsoAngles, *vel, knockbackSpeed,
+					&torsoAnimation, randSeed );
+			}
 
 			if ( cg_blood.integer && cg_gibs.integer ) {
 				// don't play gib sound when using the kamikaze because it interferes

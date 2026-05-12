@@ -305,12 +305,25 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker ) 
 	self->player->ps.stats[STAT_DEAD_YAW] = vectoyaw ( dir );
 }
 
+#define MAX_KNOCKBACK 200
+/*
+==================
+KnockbackToKnockbackSpeed
+==================
+*/
+static float KnockbackToKnockbackSpeed( int knockback ) {
+	return g_knockback.value * (float)knockback / COMBAT_PLAYER_MASS;
+}
+
+
 /*
 ==================
 GibEntity
 ==================
 */
-void GibEntity( gentity_t *self ) {
+void GibEntity( gentity_t *self, const int damageBloodFallback ) {
+	// TODO sooo, now eventParm is unused...
+	int eventParm;
 	gentity_t *ent;
 	int i;
 
@@ -334,6 +347,56 @@ void GibEntity( gentity_t *self ) {
 			break;
 		}
 	}
+
+	// In vanilla Quake the meaning of the `EV_GIB_PLAYER` eventParm
+	// is `killer`.
+	// But it is unused client-side, so it's safe for us to change its meaning
+	// (i.e. to change the network protocol).
+	// However, some mods might in fact rely on it,
+	// so let's have a CVAR to keep the old behavior.
+	//
+	// Note that we're not checking `g_oldGibs`, because in itself
+	// this does not affect behavior:
+	// we're simply providing the client with the knockback info,
+	// and whether to use that into is up to `cg_oldGibs`.
+	if ( g_gibsNewEvGibPlayerParmProtocol.integer == 1 ) {
+		int damage, frameDamage;
+		float knockbackSpeed;
+
+		// We prefer actual damage over `client->damage_knockback`
+		// because `damage_knockback` is sometimes undesirably 0. Namely:
+		// - when the target is a dead body, with `FL_NO_KNOCKBACK`.
+		// - when the knockback `dir` is not provided to `G_Damage`,
+		//   such as with crushers.
+		//
+		// Most of the time (but not always e.g. with lava)
+		// "no knockback" means "the player should not be moved
+		// in any particular direction",
+		// and not that "their gibs should stay put".
+		//
+		// In case when `level.intermissionQueued` we don't use
+		// `damage_blood` and `damage_armor` because they would not be set.
+		// See `level.intermissionQueued` and `targ->die == body_die` check
+		// in `G_Damage`.
+		frameDamage = self->player->damage_blood + self->player->damage_armor;
+		damage = self->player && !( level.intermissionQueued && frameDamage == 0 )
+			? frameDamage
+			: damageBloodFallback;
+		if ( damage > MAX_KNOCKBACK ) {
+			damage = MAX_KNOCKBACK;
+		}
+
+		knockbackSpeed = KnockbackToKnockbackSpeed( damage );
+
+		// Fit it into one byte.
+		eventParm = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
+		if (eventParm > 255) {
+			eventParm = 255;
+		}
+	} else {
+		// eventParm = killer;
+	}
+
 	self->takedamage = qfalse;
 	self->s.eFlags |= EF_GIBBED;
 	self->s.contents = 0;
@@ -341,6 +404,18 @@ void GibEntity( gentity_t *self ) {
 	if (self->player) {
 		self->player->ps.eFlags |= EF_GIBBED;
 		self->player->ps.contents = 0;
+	}
+
+	// See `NEW_GIBBED_VIEWHEIGHT` references in `bg_pmove.c`.
+	//
+	// Note that we only do this when gibbed and not on any death,
+	// because otherwise, due to the change to `mins[2]`,
+	// the body would immediately visually fall under ground.
+	if ( self->player && self->player->pers.cg_gibsBetterCameraOnGib & 0x1
+		// If we already died, we don't want to change
+		// the camera position again.
+		&& self->player->deathTime == level.time ) {
+		self->player->ps.viewheight = NEW_GIBBED_VIEWHEIGHT;
 	}
 }
 
@@ -354,10 +429,14 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d
 		return;
 	}
 
-	GibEntity( self );
+	if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
+		self->gibScheduled = qtrue;
+	} else {
+		GibEntity( self, damage );
 
-	// add corpse gibbed event
-	G_AddEvent( self, EV_DEATH1, 2 );
+		// add corpse gibbed event
+		G_AddEvent( self, EV_DEATH1, 2 );
+	}
 }
 
 
@@ -553,6 +632,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}
 #endif
 	self->player->ps.pm_type = PM_DEAD;
+	self->player->deathTime = level.time;
 
 	if ( attacker ) {
 		killer = attacker->s.number;
@@ -694,7 +774,14 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	self->s.loopSound = 0;
 
-	self->player->ps.maxs[2] = self->s.maxs[2] = -8;
+	// `SetDeadHeight` makes the corpse shorter.
+	// Executing this line unconditionally would cause a bug
+	// where the shotgun doesn't gib unless you aim at the feet,
+	// because, since the body is shorter, it would stop getting hit
+	// by other pellets from the same shot.
+	if ( !ShouldPostponeDeathOrGib( meansOfDeath ) ) {
+		SetDeadHeight( self );
+	}
 
 	// don't allow respawn until the death anim is done
 	// g_forcerespawn may force spawning at some later time
@@ -710,7 +797,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	if ( gibPlayer ) {
 		// gib death
-		GibEntity( self );
+		if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
+			self->gibScheduled = qtrue;
+		} else {
+			GibEntity( self, damage );
+		}
 
 		// do normal death for clients with gibs disable
 	} else {
@@ -842,8 +933,7 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
 	}
 	VectorCopy(dir, vec);
 	VectorInverse(vec);
-	// sphere model radius = 42 units
-	n = RaySphereIntersections( targ->player->ps.origin, 42, point, vec, intersections);
+	n = RaySphereIntersections( targ->player->ps.origin, INVUL_RADIUS, point, vec, intersections);
 	if (n > 0) {
 		impact = G_TempEntity( targ->player->ps.origin, EV_INVUL_IMPACT );
 		VectorSubtract(intersections[0], targ->player->ps.origin, vec);
@@ -865,6 +955,77 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
 	}
 }
 #endif
+
+/*
+================
+AdjustKnockbackIfDirectMissileHit
+
+Adjusts knockback direction from missiles' direct hits so gibs look better.
+By default the knockback direction is the direction
+in which the missile is flying (see `G_MissileImpact`),
+which is not great when the missile hits just the edge of the player's feet.
+One would expect that the gibs fly up then.
+Which is what this function ensures.
+
+Assumes that the new `targ->health` is already set.
+================
+*/
+static void AdjustKnockbackIfDirectMissileHit( const gentity_t *targ,
+	const gentity_t *inflictor, const vec3_t dir, const vec3_t point,
+	int knockback, const vec3_t oldKvel, int dflags, int mod, vec3_t velChange )
+{
+	vec3_t	dir2; // Direction from the explosion to the player's center.
+	vec3_t	kvel2, finalDir;
+
+	VectorClear( velChange );
+
+	if (!(
+		knockback && targ->player &&
+		inflictor &&
+		inflictor->s.eType == ET_MISSILE &&
+		// Make sure it has big splash radius,
+		// which e.g. is not the case for the nailgun
+		// (only damages on direct hit) and plasmagun (small explosion radius).
+		inflictor->splashRadius > 40 && inflictor->splashDamage > 0 &&
+		// But we only handle direct hits here.
+		!( dflags & DAMAGE_RADIUS )
+		// Another way to check for direct hits.
+		// mod != inflictor->splashMethodOfDeath
+	)) {
+		return;
+	}
+
+	// Note that the missile direction and the direction
+	// from the explosion to the origin could be quite different,
+	// so we need to calculate the direction first
+	// instead of applying velocities right away,
+	// which would have resulted in less knockback speed.
+
+	// Copy-pasted from `G_RadiusDamage`.
+	VectorSubtract (targ->r.currentOrigin, point, dir2);
+	// Set a value lower than the original 24
+	// because that more closely corresponds to the position of the chest.
+	// dir2[2] += 24;
+	dir2[2] += 20;
+	if ( VectorNormalize( dir2 ) <= 0.0 ) {
+		return;
+	}
+
+	VectorClear( finalDir );
+	VectorMA( finalDir, g_gibsMissileDirectionKnockbackWeight.value, dir, finalDir );
+	VectorMA( finalDir, (1 - g_gibsMissileDirectionKnockbackWeight.value), dir2, finalDir );
+	if ( VectorNormalize( finalDir ) <= 0.0 ) {
+		// No particular direction, so let's just apply no knockback at all.
+		VectorScale( oldKvel, -1, velChange );
+		return;
+	}
+
+	// "Cancel" the old knockback.
+	VectorScale( oldKvel, -1, velChange );
+	VectorScale (finalDir, KnockbackToKnockbackSpeed( knockback ), kvel2);
+	VectorAdd (velChange, kvel2, velChange);
+}
+
 /*
 ============
 G_Damage
@@ -895,10 +1056,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	int			take;
 	int			asave;
 	int			knockback;
+	vec3_t		kvel;
 	int			max;
 #ifdef MISSIONPACK
 	vec3_t		bouncedir, impactpoint;
 #endif
+
+	VectorClear( kvel );
 
 	if (!targ->takedamage) {
 		return;
@@ -907,6 +1071,29 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// the intermission has already been qualified for, so don't
 	// allow any extra scoring
 	if ( level.intermissionQueued ) {
+
+		// With a special exception for gibbing bodies.
+		// This was introduced in https://github.com/ec-/baseq3a/pull/50.
+		if (targ->die == body_die) {
+			// Note that this also affects the situation where the last frag
+			// is done with the shotgun. Because each pellet calls `G_Damage`
+			// separately. That is, if we don't do this,
+			// the shotgun will never gib if it's the last frag.
+			//
+			// Note that this does not check for friendly fire, quad,
+			// battlesuit, handicap, armor, etc.
+			// We could simply continue normal execution of G_Damage
+			// instead of returning, but let's play it safe
+			// and only do what's necessary.
+
+			targ->health = targ->health - damage;
+			if ( targ->health <= 0 ) {
+				// `body_die` doesn't use any of its arguments (except `targ`),
+				// so it's fine if they're `NULL`.
+				targ->die (targ, inflictor, attacker, damage, mod);
+			}
+		}
+
 		return;
 	}
 #ifdef MISSIONPACK
@@ -965,8 +1152,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
 	knockback = damage;
-	if ( knockback > 200 ) {
-		knockback = 200;
+	if ( knockback > MAX_KNOCKBACK ) {
+		knockback = MAX_KNOCKBACK;
 	}
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
 		knockback = 0;
@@ -977,12 +1164,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 	// figure momentum add, even if the damage won't be taken
 	if ( knockback && targ->player ) {
-		vec3_t	kvel;
-		float	mass;
-
-		mass = 200;
-
-		VectorScale (dir, g_knockback.value * (float)knockback / mass, kvel);
+		VectorScale (dir, KnockbackToKnockbackSpeed( knockback ), kvel);
 		VectorAdd (targ->player->ps.velocity, kvel, targ->player->ps.velocity);
 
 		// set the timer so that the other player can't cancel
@@ -1116,11 +1298,117 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 			
 		if ( targ->health <= 0 ) {
-			if ( player )
-				targ->flags |= FL_NO_KNOCKBACK;
+			// Not checking `ShouldPostponeDeathOrGib` would cause a bug:
+			// when fragging with the shotgun,
+			// the dead body would not gain momentum (knockback)
+			// from the pellets that come after the pellet
+			// that made the health go below 0.
+			// This would result in the dead body not getting pushed
+			// as far as it should have been, and, most importantly,
+			// the gibs not getting enough momentum. See
+			// https://github.com/ec-/baseq3a/pull/53.
+			//
+			// Note that if the body gets gibbed,
+			// then it will still stop absorbing pellets,
+			// i.e. this fix only adds at most `GIB_HEALTH` worth of knockback.
+			//
+			// This issiue is similar to
+			// https://github.com/ioquake/ioq3/issues/794.
+			if ( player && !ShouldPostponeDeathOrGib( mod ) ) {
+				SetFlNoKnockback( targ );
+			}
 
 			if (targ->health < -999)
 				targ->health = -999;
+
+			if (
+				// If it's not a gib death, do not apply this adjustment,
+				// because some might say that it would affect gameplay.
+				// Namely that dead bodies can e.g. absorb missiles,
+				// so it _does_ matter where they fly.
+				// The condition is copy-pasted from `player_die` (partially).
+				targ->health <= GIB_HEALTH &&
+				!g_oldGibs.integer &&
+				g_gibsMissileDirectionKnockbackWeight.value != 1.0 &&
+				targ->player ) {
+				vec3_t velChange;
+				AdjustKnockbackIfDirectMissileHit( targ, inflictor, dir, point,
+					knockback, kvel, dflags, mod, velChange );
+				VectorAdd(targ->player->ps.velocity, velChange, targ->player->ps.velocity);
+			}
+			// If we already got to max knockback, don't apply any more of it.
+			// Otherwise one quad shotgun shot can get you 330 knockback,
+			// resuling in gibs flying too fast, much faster
+			// than from e.g. a railgun shot.
+			// It would make sense to do this adjustment always,
+			// but let's only apply this to shotgun gib deaths,
+			// to be closer to how the original game works.
+			//
+			// Note that we're using `damage_knockback`, which is only cleared
+			// in `CliendEndFrame` and not immediately after the shot.
+			// But it's good enough since this is basically only about
+			// gib and camera speed.
+			if (
+				targ->health <= GIB_HEALTH &&
+				!g_oldGibs.integer &&
+				mod == MOD_SHOTGUN &&
+				targ->player && targ->player->damage_knockback > MAX_KNOCKBACK ) {
+				int excess = targ->player->damage_knockback - MAX_KNOCKBACK;
+				if ( excess > knockback ) {
+					// It's excess knockback from this particular shot,
+					// not total excess knockback.
+					excess = knockback;
+				}
+				VectorMA( targ->player->ps.velocity,
+					KnockbackToKnockbackSpeed( -excess ), dir,
+					targ->player->ps.velocity );
+			}
+			if (
+				targ->health <= GIB_HEALTH &&
+				!g_oldGibs.integer &&
+				g_gibsOnCollisionInheritPlayerVelocity.value != 0 &&
+				mod == MOD_FALLING &&
+				player
+			) {
+				// Set player velocity to what it was before they hit the ground
+				// so that the gibs inherit this velocity
+				// (see `cg_gibsInheritPlayerVelocity`).
+				// Note that this only seems to work on other players
+				// and not self (probably due to prediction).
+				//
+				// Note that there is a more accurate crash landing
+				// velocity calculation in `PM_CrashLand`,
+				// but for the purposes of throwing gibs around
+				// `oldVelocity` provides good enough accuracy.
+				VectorScale( player->oldVelocity,
+					g_gibsOnCollisionInheritPlayerVelocity.value,
+					player->ps.velocity );
+
+				// However, there is an issue. When the player
+				// is already landed,
+				// applying downwards velocity redirects that velocity
+				// parallel to the ground instead of clipping it (same as
+				// https://github.com/WofWca/quake3-better-gibs-mod/issues/3),
+				// causing the player camera fly off weirdly.
+				// This is caused by the
+				// "don't decrease velocity when going up or down a slope"
+				// part in `bg_pmove.c`.
+				//
+				// To fix that let's just lift the player off of the ground.
+				//
+				// Note that hypothetically the player camera can end up
+				// in a solid: we shouldn't be so crudely manipulating
+				// player position. However this is, again, good enough
+				// since the player is already dead
+				// and this only affects their camera position.
+				if ( player->ps.groundEntityNum != ENTITYNUM_NONE ) {
+					// There is a 0.25 margin in `PM_GroundTrace`,
+					// this value must be higher than that.
+					// But let's increase by 1 for "snapping"
+					// to save network bandwidth (see `SnapVector`).
+					player->ps.origin[2] += 1;
+				}
+			}
 
 			targ->enemy = attacker;
 			targ->die (targ, inflictor, attacker, take, mod);

@@ -169,6 +169,17 @@ vmCvar_t	cg_bobroll;
 vmCvar_t	cg_swingSpeed;
 vmCvar_t	cg_shadows;
 vmCvar_t	cg_gibs;
+vmCvar_t	cg_oldGibs;
+vmCvar_t	cg_gibsInheritPlayerVelocity;
+vmCvar_t	cg_gibsPiecesFromKnockback;
+vmCvar_t	cg_gibsExtraRandomVelocity;
+vmCvar_t	cg_gibsRandomVelocityFromKnockback;
+vmCvar_t	cg_gibsVerticalVelocityFromKnockback;
+vmCvar_t	cg_gibsExtraVerticalVelocity;
+vmCvar_t	cg_gibsBounceFactor;
+vmCvar_t	cg_gibsBounceFactorRandomness;
+vmCvar_t	cg_gibsRotationFactor;
+vmCvar_t	cg_gibsBetterCameraOnGib;
 vmCvar_t	cg_drawTimer;
 vmCvar_t	cg_drawFPS;
 vmCvar_t	cg_drawSnapshot;
@@ -188,12 +199,15 @@ vmCvar_t	cg_animSpeed;
 vmCvar_t	cg_debugAnim;
 vmCvar_t	cg_debugPosition;
 vmCvar_t	cg_debugEvents;
+vmCvar_t	cg_debugGibs;
 vmCvar_t	cg_errorDecay;
 vmCvar_t	cg_nopredict;
 vmCvar_t	cg_noPlayerAnims;
 vmCvar_t	cg_showmiss;
 vmCvar_t	cg_footsteps;
 vmCvar_t	cg_addMarks;
+vmCvar_t	cg_bounceMarksMinImpactSpeed;
+vmCvar_t	cg_bounceSoundMinImpactSpeed;
 vmCvar_t	cg_brassTime;
 vmCvar_t	cg_viewsize;
 vmCvar_t	cg_gun_frame;
@@ -374,7 +388,25 @@ static cvarTable_t cgameCvarTable[] = {
 	{ &cg_weaponFov, "cg_weaponFov", "90", CVAR_ARCHIVE, RANGE_FLOAT( 0, 160 ) },
 	{ &cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE, RANGE_INT( 30, 100 ) },
 	{ &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, RANGE_ALL  },
-	{ &cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE, RANGE_BOOL },
+	{ &cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, RANGE_BOOL },
+	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, RANGE_ALL },
+	// With higher damage gibs fly further apart, so one starts to see gibs
+	// as individual pieces instead of a "cloud", which IMO is not good.
+	// Increasing the amount of gibs with damage fixes this.
+	// And overall it makes it more rewarding to deal more damage.
+	// Q: "What sense does it make to have more gibs?
+	// Did the player got bigger from taking more damage??":
+	// A: No, they simlpy got split into more pieces.
+	{ &cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.6", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE, RANGE_BOOL },
 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, RANGE_BOOL },
 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE, RANGE_BOOL },
 	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE, RANGE_BOOL },
@@ -395,6 +427,9 @@ static cvarTable_t cgameCvarTable[] = {
 	{ &cg_brassTime, "cg_brassTime", "2500", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_simpleItems, "cg_simpleItems", "0", CVAR_ARCHIVE, RANGE_BOOL },
 	{ &cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE, RANGE_BOOL },
+	// Note that ~290 corresponds to a free fall with no bounce from player height.
+	{ &cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "350", CVAR_ARCHIVE, RANGE_ALL },
+	{ &cg_bounceSoundMinImpactSpeed, "cg_bounceSoundMinImpactSpeed", "450", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE, RANGE_ALL },
 	{ &cg_gun_x, "cg_gunX", "0", CVAR_CHEAT, RANGE_ALL },
 	{ &cg_gun_y, "cg_gunY", "0", CVAR_CHEAT, RANGE_ALL },
@@ -412,6 +447,7 @@ static cvarTable_t cgameCvarTable[] = {
 	{ &cg_debugAnim, "cg_debuganim", "0", CVAR_CHEAT, RANGE_BOOL },
 	{ &cg_debugPosition, "cg_debugposition", "0", CVAR_CHEAT, RANGE_BOOL },
 	{ &cg_debugEvents, "cg_debugevents", "0", CVAR_CHEAT, RANGE_BOOL },
+	{ &cg_debugGibs, "cg_debugGibs", "0", CVAR_CHEAT, RANGE_INT(0, 7) },
 	{ &cg_errorDecay, "cg_errordecay", "100", 0, RANGE_ALL },
 	{ &cg_nopredict, "cg_nopredict", "0", 0, RANGE_BOOL },
 	{ &cg_noPlayerAnims, "cg_noplayeranims", "0", CVAR_CHEAT, RANGE_BOOL },
@@ -2765,6 +2801,7 @@ void CG_Ingame_Init( int serverMessageNum, int serverCommandSequence, int maxSpl
 
 
 	CG_ParseServerinfo();
+	CG_ParseSysteminfo();
 
 	// load the new map
 	CG_LoadingString( "collision map" );

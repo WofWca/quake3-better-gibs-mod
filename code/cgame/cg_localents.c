@@ -177,9 +177,11 @@ void CG_FragmentBounceMark( localEntity_t *le, trace_t *trace ) {
 	}
 
 
-	// don't allow a fragment to make multiple marks, or they
-	// pile up while settling
-	le->leMarkType = LEMT_NONE;
+	// This is no longer needed, because we now decide whether to leave a mark
+	// purely based on impact velocity.
+	// // don't allow a fragment to make multiple marks, or they
+	// // pile up while settling
+	// le->leMarkType = LEMT_NONE;
 }
 
 /*
@@ -207,21 +209,30 @@ void CG_FragmentBounceSound( localEntity_t *le, trace_t *trace ) {
 
 	}
 
-	// don't allow a fragment to make multiple bounce sounds,
-	// or it gets too noisy as they settle
-	le->leBounceSoundType = LEBS_NONE;
+	// This is no longer needed, because we now decide whether to play a sound
+	// purely based on impact velocity.
+	// // don't allow a fragment to make multiple bounce sounds,
+	// // or it gets too noisy as they settle
+	// le->leBounceSoundType = LEBS_NONE;
 }
 
 
 /*
 ================
 CG_ReflectVelocity
+
+Modifies velocity of `le` and writes the difference to `velocityDifference`
 ================
 */
-void CG_ReflectVelocity( localEntity_t *le, trace_t *trace ) {
+void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDifference ) {
 	vec3_t	velocity;
 	float	dot;
 	int		hitTime;
+	float	bounceFactor = le->bounceFactor;
+
+	if (velocityDifference) {
+		VectorClear( velocityDifference );
+	}
 
 	if ( !trace->allsolid ) {
 		// reflect the velocity on the trace plane
@@ -230,7 +241,16 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace ) {
 		dot = DotProduct( velocity, trace->plane.normal );
 		VectorMA( velocity, -2*dot, trace->plane.normal, le->pos.trDelta );
 
-		VectorScale( le->pos.trDelta, le->bounceFactor, le->pos.trDelta );
+		if ( le->leBounceSoundType == LEBS_BLOOD ) {
+			// Get a tighter distribution rather than uniform.
+			float r = ( random() + random() ) / 2;
+			bounceFactor *= 1 - r * cg_gibsBounceFactorRandomness.value;
+		}
+		VectorScale( le->pos.trDelta, bounceFactor, le->pos.trDelta );
+
+		if (velocityDifference) {
+			VectorSubtract( le->pos.trDelta, velocity, velocityDifference );
+		}
 	}
 
 	VectorCopy( trace->endpos, le->pos.trBase );
@@ -256,7 +276,7 @@ CG_AddFragment
 ================
 */
 void CG_AddFragment( localEntity_t *le ) {
-	vec3_t	newOrigin;
+	vec3_t	newOrigin, impactVelocityDiff;
 	trace_t	trace;
 
 	if ( le->pos.trType == TR_STATIONARY ) {
@@ -359,14 +379,18 @@ void CG_AddFragment( localEntity_t *le ) {
 		return;
 	}
 
-	// leave a mark
-	CG_FragmentBounceMark( le, &trace );
-
-	// do a bouncy sound
-	CG_FragmentBounceSound( le, &trace );
-
 	// reflect the velocity on the trace plane
-	CG_ReflectVelocity( le, &trace );
+	CG_ReflectVelocity( le, &trace, impactVelocityDiff );
+
+	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceMarksMinImpactSpeed.value ) ) {
+		// leave a mark
+		CG_FragmentBounceMark( le, &trace );
+	}
+
+	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceSoundMinImpactSpeed.value ) ) {
+		// do a bouncy sound
+		CG_FragmentBounceSound( le, &trace );
+	}
 
 	CG_AddRefEntityWithMinLight( &le->refEntity );
 }
@@ -763,7 +787,26 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
 	}
 	if ( t > 5000 ) {
 		le->endTime = 0;
-		CG_GibPlayer( le->refEntity.origin );
+		if (cg_oldGibs.integer) {
+			CG_GibPlayerOld( le->refEntity.origin );
+		} else {
+			vec3_t angles;
+			// Just use the default knockback speed for 200 damage.
+			int knockbackSpeed = 200 * 1000 / COMBAT_PLAYER_MASS;
+			int randSeed;
+			// Angles don't matter much here.
+			VectorClear( angles );
+			// Since the player with invulnerability is not moving,
+			// we expect its position to be the same for all players,
+			// so we can use it as a seed.
+			randSeed = le->refEntity.origin[0] * 1024;
+			randSeed = Q_rand(&randSeed) + le->refEntity.origin[1] * 1024;
+			randSeed = Q_rand(&randSeed) + le->refEntity.origin[2] * 1024;
+			randSeed = Q_rand(&randSeed) + cgs.levelStartTime;
+
+			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta,
+				knockbackSpeed, NULL, randSeed );
+		}
 	}
 	else {
 		CG_AddRefEntityWithMinLight( &le->refEntity );

@@ -85,7 +85,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define	MAX_STEP_CHANGE		32
 
 #define	MAX_VERTS_ON_POLY	10
-#define	MAX_MARK_POLYS		256
+#define	MAX_MARK_POLYS		1024
 
 #define STAT_MINUS			10	// num frame for '-' stats digit
 
@@ -1255,6 +1255,9 @@ typedef struct {
 	int				maxplayers;
 	char			mapname[MAX_QPATH];
 
+	// parsed from systeminfo
+	int				g_gibsNewEvGibPlayerParmProtocol;
+
 	int				voteTime;
 	int				voteYes;
 	int				voteNo;
@@ -1334,6 +1337,17 @@ extern	vmCvar_t		cg_bobroll;
 extern	vmCvar_t		cg_swingSpeed;
 extern	vmCvar_t		cg_shadows;
 extern	vmCvar_t		cg_gibs;
+extern	vmCvar_t		cg_oldGibs;
+extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
+extern	vmCvar_t		cg_gibsPiecesFromKnockback;
+extern	vmCvar_t		cg_gibsExtraRandomVelocity;
+extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
+extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
+extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
+extern	vmCvar_t		cg_gibsBounceFactor;
+extern	vmCvar_t		cg_gibsBounceFactorRandomness;
+extern	vmCvar_t		cg_gibsRotationFactor;
+extern	vmCvar_t		cg_gibsBetterCameraOnGib;
 extern	vmCvar_t		cg_drawTimer;
 extern	vmCvar_t		cg_drawFPS;
 extern	vmCvar_t		cg_drawSnapshot;
@@ -1355,6 +1369,7 @@ extern	vmCvar_t		cg_animSpeed;
 extern	vmCvar_t		cg_debugAnim;
 extern	vmCvar_t		cg_debugPosition;
 extern	vmCvar_t		cg_debugEvents;
+extern	vmCvar_t		cg_debugGibs;
 extern	vmCvar_t		cg_railTrailTime;
 extern	vmCvar_t		cg_errorDecay;
 extern	vmCvar_t		cg_nopredict;
@@ -1362,6 +1377,8 @@ extern	vmCvar_t		cg_noPlayerAnims;
 extern	vmCvar_t		cg_showmiss;
 extern	vmCvar_t		cg_footsteps;
 extern	vmCvar_t		cg_addMarks;
+extern	vmCvar_t		cg_bounceMarksMinImpactSpeed;
+extern	vmCvar_t		cg_bounceSoundMinImpactSpeed;
 extern	vmCvar_t		cg_brassTime;
 extern	vmCvar_t		cg_gun_frame;
 extern	vmCvar_t		cg_gun_x;
@@ -1827,7 +1844,7 @@ localEntity_t *CG_SmokePuff( const vec3_t p,
 				   int leFlags,
 				   qhandle_t hShader );
 void CG_BubbleTrail( vec3_t start, vec3_t end, float spacing );
-int CG_SpawnBubbles( localEntity_t **bubbles, vec3_t origin, float baseSize, int numBubbles );
+int CG_SpawnBubbles( localEntity_t **bubbles, const vec3_t origin, float baseSize, int numBubbles );
 void CG_SpawnEffect( vec3_t org );
 #ifdef MISSIONPACK
 void CG_KamikazeEffect( vec3_t org );
@@ -1839,7 +1856,10 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
 #endif
 void CG_ScorePlum( int playerNum, vec3_t org, int score );
 
-void CG_GibPlayer( vec3_t playerOrigin );
+void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+				const vec3_t playerVelocity, const int knockbackSpeed,
+				const lerpFrame_t *bodyAnimation, const int randSeed );
+void CG_GibPlayerOld( vec3_t playerOrigin );
 void CG_BigExplode( vec3_t playerOrigin );
 
 void CG_Bleed( vec3_t origin, int entityNum );
@@ -1929,6 +1949,7 @@ void CG_StopCinematic_f( void );
 //
 void CG_ExecuteNewServerCommands( int latestSequence );
 void CG_ParseServerinfo( void );
+void CG_ParseSysteminfo( void );
 void CG_SetConfigValues( void );
 void CG_ShaderStateChanged(void);
 #ifdef MISSIONPACK
