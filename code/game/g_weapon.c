@@ -388,10 +388,12 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
 			// Just fall back to "half of all the pellets hit".
 			int damageFallback = DEFAULT_SHOTGUN_DAMAGE * s_quadFactor
 				* DEFAULT_SHOTGUN_DAMAGE / 2;
-			GibEntity( ent2, damageFallback );
-			// TODO(merge): apparently the eventParm must depend
-			// on whether the player was alive before taking the gib damage?
-			G_AddEvent( ent2, EV_DEATH1, 2 );
+			GibEntity( ent2 );
+			// TODO(merge): apparently the first 2 bits of eventParm
+			// must depend on whether the player was alive
+			// before taking the gib damage?
+			G_AddEvent( ent2, EV_DEATH1,
+				2 | GetGibKnockbackBits( ent2, damageFallback ) );
 		}
 		ent2->gibScheduled = qfalse;
 	}

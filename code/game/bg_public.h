@@ -542,11 +542,11 @@ void Pmove (pmove_t *pmove);
 //===================================================================================
 
 #define COMBAT_PLAYER_MASS 200
-// A divisor of knockback speed, to fit it into one byte.
-// By dividing by 8 we can represent a speed of up to (255 * 8) = 2040.
+// A divisor of knockback speed, to fit it into ~~one byte~~ 6 bits.
+// By dividing by 16 we can represent a speed of up to (64 * 16) = 1024.
 // For comparison, with `g_knockback` of 1000 and `MAX_KNOCKBACK` of 200
 // the max knockback speed in most situations is 1000.
-#define COMBAT_EV_GIB_PLAYER_ARG_DIVISOR 8
+#define COMBAT_EV_GIB_PLAYER_ARG_DIVISOR 16
 
 
 // player_state->stats[] indexes

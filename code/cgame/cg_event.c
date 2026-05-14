@@ -1226,19 +1226,22 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	case EV_DEATH1:
 	case EV_DEATH2:
 	case EV_DEATH3:
+	{
+		#define MASK 0x3
+		int gibType = es->eventParm & MASK;
 		DEBUGNAME2("EV_DEATH%d", event - EV_DEATH1 + 1);
 
 		// check if gibbed
-		// eventParm 1 = living player gibbed
-		// eventParm 2 = corpse gibbed
-		if ( es->eventParm >= 1 ) {
+		// gibType 1 = living player gibbed
+		// gibType 2 = corpse gibbed
+		if ( gibType >= 1 ) {
 			if (cg_oldGibs.integer) {
 				CG_GibPlayerOld( cent->lerpOrigin );
 			} else {
-				// TODO(merge) `g_gibsNewEvGibPlayerParmProtocol` doesn't work,
-				// because in Mint Arena `eventParm` has a different meaning...
-				int knockbackSpeed = (cgs.g_gibsNewEvGibPlayerParmProtocol == 1 && qfalse)
-					? es->eventParm * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
+				int knockbackSpeed = cgs.g_gibsNewEvGibPlayerParmProtocol == 1
+					// 6 most significant bits of the byte.
+					? ( ( es->eventParm & ~MASK & 0xff ) >> 2 )
+						* COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
 					// Just use the default knockback speed for 100 damage.
 					: 100 * 1000 / COMBAT_PLAYER_MASS;
 
@@ -1326,7 +1329,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 			}
 
 			// don't play death sound if already dead
-			if ( es->eventParm == 2 ) {
+			if ( gibType == 2 ) {
 				break;
 			}
 		}
@@ -1338,6 +1341,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		}
 
 		break;
+	}
 
 
 	case EV_OBITUARY:
