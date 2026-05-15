@@ -492,6 +492,23 @@ playerState_t *CG_LocalPlayerState(int playerNum) {
 
 /*
 =============
+CG_LocalPlayer
+=============
+*/
+localPlayer_t *CG_LocalPlayer(int playerNum) {
+	int i;
+
+	for (i = 0; i < CG_MaxSplitView(); i++) {
+		if (cg.localPlayers[i].playerNum != -1 && cg.localPlayers[i].playerNum == playerNum) {
+			return &cg.localPlayers[i];
+		}
+	}
+
+	return NULL;
+}
+
+/*
+=============
 CG_NumLocalPlayers
 =============
 */

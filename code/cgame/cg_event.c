@@ -1238,6 +1238,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 			if (cg_oldGibs.integer) {
 				CG_GibPlayerOld( cent->lerpOrigin );
 			} else {
+				playerState_t *ps = CG_LocalPlayerState( es->number );
+				localPlayer_t *lp = CG_LocalPlayer( es->number );
 				int knockbackSpeed = cgs.g_gibsNewEvGibPlayerParmProtocol == 1
 					// 6 most significant bits of the byte.
 					? ( ( es->eventParm & ~MASK & 0xff ) >> 2 )
@@ -1249,27 +1251,21 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 				// the knockback from the damage that gibbed us,
 				// so we have to differentiate between self and non-self
 				// during regular (non-demo non-spectator) gameplay.
-				//
-				// TODO(merge) fix: we no longer have `ps`, only `pss`.
-				// Uncomment and adjust these.
 				const qboolean usePredictedPs =
-					// es->number == cg.snap->ps.clientNum &&
-					// !cg.demoPlayback &&
-					// !(cg.snap->ps.pm_flags & PMF_FOLLOW);
-					qfalse;
-				// vec3_t *vel = usePredictedPs
-				// 	? &cg.predictedPlayerState.velocity
-				// 	: &es->pos.trDelta;
-				vec3_t *vel = &es->pos.trDelta;
+					ps && lp &&
+					!cg.demoPlayback &&
+					!(ps->pm_flags & PMF_FOLLOW);
+				vec3_t *vel = usePredictedPs
+					? &lp->predictedPlayerState.velocity
+					: &es->pos.trDelta;
 
-				// lerpFrame_t torsoAnimation = es->number == cg.snap->ps.clientNum
-				// 	// `cent->pe.torso` appears to be not good for self,
-				// 	// unlike `cg.predictedPlayerEntity`,
-				// 	// even during `demoPlayback` and `PMF_FOLLOW`,
-				// 	// so we're not using `usePredictedPs` here.
-				// 	? cg.predictedPlayerEntity.pe.torso
-				// 	: cent->pe.torso;
-				lerpFrame_t torsoAnimation = cent->pe.torso;
+				lerpFrame_t torsoAnimation = ps
+					// `cent->pe.torso` appears to be not good for self,
+					// unlike `cg.predictedPlayerEntity`,
+					// even during `demoPlayback` and `PMF_FOLLOW`,
+					// so we're not using `usePredictedPs` here.
+					? lp->predictedPlayerEntity.pe.torso
+					: cent->pe.torso;
 				vec3_t torsoAngles;
 
 				// TODO fix: things like `origin` and `angles`

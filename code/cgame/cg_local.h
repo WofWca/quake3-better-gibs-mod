@@ -1875,6 +1875,7 @@ void CG_ProcessSnapshots( qboolean initialOnly );
 void CG_RestoreSnapshot( void );
 void CG_TransitionEntity( centity_t *cent );
 playerState_t *CG_LocalPlayerState( int playerNum );
+localPlayer_t *CG_LocalPlayer(int playerNum);
 int CG_NumLocalPlayers( void );
 
 
