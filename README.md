@@ -25,7 +25,6 @@ we got you covered: `\set cg_gibs 10; set cg_gibsExtraRandomVelocity 1000` (or h
 The installation steps for this mod are the same as for almost every other mod.
 
 1. Download the mod file
-
    - For vanilla (original) Quake III Arena:
 
      [`pak999-vanillaq3-baseq3-better-gibs-mod.pk3`](https://github.com/WofWca/quake3-better-gibs-mod/releases/latest/download/pak999-vanillaq3-baseq3-better-gibs-mod.pk3)
@@ -101,10 +100,13 @@ so you can enjoy it on basically any server
   set to 1.3 to launch 3 more pieces of gibs,
   or to 0.5 to half the amount of gibs
 - `cg_gibsInheritPlayerVelocity`
-- `cg_gibsExtraRandomVelocity`
+- `cg_gibsPiecesFromKnockback`
 - `cg_gibsRandomVelocityFromKnockback`
+- `cg_gibsVerticalVelocityFromKnockback`
+- `cg_gibsExtraRandomVelocity`
 - `cg_gibsExtraVerticalVelocity`
 - `cg_gibsBounceFactor`
+- `cg_gibsBounceFactorRandomness`
 - `cg_gibsRotationFactor`
 - `cg_gibsBetterCameraOnGib`
 - `cg_bounceMarksMinImpactSpeed`
@@ -120,6 +122,11 @@ so you can enjoy it on basically any server
   But in vanilla Quake 3 the argument is anyway unused so it is fine.
   However, if some other mod does rely on this argument,
   you can set this CVAR to 0 to revert this change.
+- `g_gibsOnCollisionMinSpeed`
+- `g_gibsOnCollisionBaseDamage`
+- `g_gibsOnCollisionAffectLivePlayers`
+  For fooling around (off by default).
+- `g_gibsOnCollisionInheritPlayerVelocity`
 - (maybe I've missed some: search the code for `+vmCvar_t`)
 
 Another way to (almost) restore the old behavior:
@@ -224,7 +231,6 @@ from the `baseq3a` branch of this repo.
   from the killer to the gibbed player,
   or the gibbed player's velocity (as in our mod).  
   See
-
   - <https://github.com/entdark/q3mme/blob/09b42e6b69367538961b3e33ed6c5acb9263d7bd/trunk/code/cgame/cg_event.c#L1073-L1103>
   - <https://github.com/entdark/q3mme/blob/09b42e6b69367538961b3e33ed6c5acb9263d7bd/trunk/code/cgame/cg_effects.c#L378-L392>
   - <https://github.com/entdark/q3mme/blob/09b42e6b69367538961b3e33ed6c5acb9263d7bd/trunk/files/scripts/base_player.fx#L93-L144>
@@ -239,7 +245,6 @@ from the `baseq3a` branch of this repo.
   (As you can tell by the name of the project,
   it supports Quake Live replays, where `eventParm` of `EV_GIB_PLAYER`
   is direction.)
-
   - <https://github.com/brugal/wolfcamql/blob/f33dd8819efc3f837b84ade5aff849acd7503ba0/code/cgame/cg_event.c#L3723-L3786>
   - <https://github.com/brugal/wolfcamql/blob/cdd9d29cd7c20d7d98f17a58e2bee4186ed4bcd3/code/cgame/cg_effects.c#L1091-L1185>
   - <https://github.com/brugal/wolfcamql/blob/cdd9d29cd7c20d7d98f17a58e2bee4186ed4bcd3/code/cgame/cg_effects.c#L968-L1049>
@@ -252,7 +257,6 @@ from the `baseq3a` branch of this repo.
   Implements proper initial position of individual gibs
   matching the player model's parts (as we try to do in this mod),
   and directionality.
-
   - <https://github.com/etlegacy/etlegacy/blob/61dd79d9781d081e679a46c7d03aabbba0cb51e0/src/cgame/cg_event.c#L2604-L2613>
   - <https://github.com/etlegacy/etlegacy/blob/61dd79d9781d081e679a46c7d03aabbba0cb51e0/src/cgame/cg_effects.c#L573-L746>
 
