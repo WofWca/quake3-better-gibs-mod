@@ -33,9 +33,9 @@ cd -
 rm ./build -r || true
 ./build-ioq3-vq3.sh
 cd build/Release
-mkdir ioquake3-or-vanillaq3
-cp -r baseq3 missionpack ioquake3-or-vanillaq3/
-7z u ${ZIP_OPTS} -- ../../${ZIP_NAME} ioquake3-or-vanillaq3/**/*.pk3
+mkdir vanillaq3-or-ioquake3
+cp -r baseq3 missionpack vanillaq3-or-ioquake3/
+7z u ${ZIP_OPTS} -- ../../${ZIP_NAME} vanillaq3-or-ioquake3/**/*.pk3
 cd -
 
 # cp ${ZIP_NAME} ~/Downloads/
