@@ -103,6 +103,8 @@ static void CG_Obituary( entityState_t *ent ) {
 
 	// check for single client messages
 
+	// TODO maybe handle the stomping here?
+	// We also don't print "you fragged ...".
 	switch( mod ) {
 	case MOD_SUICIDE:
 		message = "suicides";
