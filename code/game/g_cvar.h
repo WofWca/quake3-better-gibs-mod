@@ -85,6 +85,8 @@ G_CVAR( g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "100", CVAR_
 // This one affects gameplay significantly, and is basically just for fun.
 G_CVAR( g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, qtrue, qfalse )
 G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse, qfalse )
+G_CVAR( g_gibsKnockback, "g_gibsKnockback", "1.5", CVAR_ARCHIVE, 0, qfalse, qfalse )
+G_CVAR( g_gibsMaxKnockback, "g_gibsMaxKnockback", "1.5", CVAR_ARCHIVE, 0, qfalse, qfalse )
 
 G_CVAR( g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse, qfalse )
 G_CVAR( g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse, qfalse )

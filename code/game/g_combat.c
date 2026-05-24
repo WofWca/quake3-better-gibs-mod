@@ -289,8 +289,9 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
 		damage = self->client && !( level.intermissionQueued && frameDamage == 0 )
 			? frameDamage
 			: damageBloodFallback;
-		if ( damage > MAX_KNOCKBACK ) {
-			damage = MAX_KNOCKBACK;
+		damage *= g_gibsKnockback.value;
+		if ( damage > MAX_KNOCKBACK * g_gibsMaxKnockback.value ) {
+			damage = MAX_KNOCKBACK * g_gibsMaxKnockback.value;
 		}
 
 		knockbackSpeed = KnockbackToKnockbackSpeed( damage );
@@ -1205,6 +1206,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 			
 		if ( targ->health <= 0 ) {
+			int maxKb = MAX_KNOCKBACK * g_gibsMaxKnockback.value;
 			// Not checking `ShouldPostponeDeathOrGib` would cause a bug:
 			// when fragging with the shotgun,
 			// the dead body would not gain momentum (knockback)
@@ -1243,6 +1245,56 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 					knockback, kvel, dflags, mod, velChange );
 				VectorAdd(targ->client->ps.velocity, velChange, targ->client->ps.velocity);
 			}
+			// TODO again, max knockback is not respected. > 1600 for shotgun.
+			// Maybe this needs to be before the prev line.
+			//
+			// TODO CVAR to apply this not just to gibs but to regular deaths.
+			// It's cool that this makes it easier to trigger gib on collision.
+			//
+			// TODO consider how this relates to `AdjustKnockbackIfDirectMissileHit`.
+			//
+			// TODO probably update default gib speed CVARs' values?
+			// Orr I think it's OK already, scales well with damage,
+			// and all we do here is just increase that damage.
+			if (
+				// targ->health <= GIB_HEALTH && g_blood.integer &&
+				!g_oldGibs.integer &&
+				targ->client ) {
+				// targ->client->damage_knockback;
+				// VectorScale (dir, KnockbackToKnockbackSpeed( knockback ), kvel);
+				int extra = knockback * ( g_gibsKnockback.value - 1 );
+
+				// int newTotal = extra + targ->client->damage_knockback;
+				// if ( newTotal > MAX_KNOCKBACK * g_gibsMaxKnockback.value ) {
+				// 	newTotal = MAX_KNOCKBACK * g_gibsMaxKnockback.value;
+				// }
+				// extra = newTotal - targ->client->damage_knockback;
+				// if ( extra < 0) {
+				// 	extra = 0;
+				// }
+				// += extra
+				// G_Printf("extra %i newTotal %i damage_knockback %i\n",
+				// 	extra, newTotal, targ->client->damage_knockback );
+
+				// VectorMA(targ->client->ps.velocity, 0.5, kvel, targ->client->ps.velocity);
+				VectorMA( targ->client->ps.velocity,
+					KnockbackToKnockbackSpeed( extra ),
+					dir,
+					targ->client->ps.velocity );
+
+				G_Printf("old %i new %i\n",
+					targ->client->damage_knockback,
+					targ->client->damage_knockback + extra );
+
+				// TODO reconsider this. Gonna be too much?
+				targ->client->damage_knockback += extra;
+				knockback += extra;
+
+
+				// VectorMA( targ->client->ps.velocity,
+				// 	KnockbackToKnockbackSpeed( knockback ), dir,
+				// 	targ->client->ps.velocity );
+			}
 			// If we already got to max knockback, don't apply any more of it.
 			// Otherwise one quad shotgun shot can get you 330 knockback,
 			// resuling in gibs flying too fast, much faster
@@ -1259,8 +1311,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				targ->health <= GIB_HEALTH && g_blood.integer &&
 				!g_oldGibs.integer &&
 				mod == MOD_SHOTGUN &&
-				targ->client && targ->client->damage_knockback > MAX_KNOCKBACK ) {
-				int excess = targ->client->damage_knockback - MAX_KNOCKBACK;
+				targ->client && targ->client->damage_knockback > maxKb ) {
+				int excess = targ->client->damage_knockback - maxKb;
 				if ( excess > knockback ) {
 					// It's excess knockback from this particular shot,
 					// not total excess knockback.
@@ -1270,6 +1322,39 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 					KnockbackToKnockbackSpeed( -excess ), dir,
 					targ->client->ps.velocity );
 			}
+			// // TODO again, max knockback is not respected. > 1600 for shotgun.
+			// // Maybe this needs to be before the prev line.
+			// if (
+			// 	// targ->health <= GIB_HEALTH && g_blood.integer &&
+			// 	!g_oldGibs.integer &&
+			// 	targ->client ) {
+			// 	// targ->client->damage_knockback;
+			// 	// VectorScale (dir, KnockbackToKnockbackSpeed( knockback ), kvel);
+			// 	int extra = knockback * ( g_gibsKnockback.value - 1 );
+
+			// 	int newTotal = extra + targ->client->damage_knockback;
+			// 	if ( newTotal > MAX_KNOCKBACK * g_gibsMaxKnockback.value ) {
+			// 		newTotal = MAX_KNOCKBACK * g_gibsMaxKnockback.value;
+			// 	}
+			// 	extra = newTotal - targ->client->damage_knockback;
+			// 	if ( extra < 0) {
+			// 		extra = 0;
+			// 	}
+			// 	// += extra
+			// 	G_Printf("extra %i newTotal %i damage_knockback %i\n",
+			// 		extra, newTotal, targ->client->damage_knockback );
+
+			// 	// VectorMA(targ->client->ps.velocity, 0.5, kvel, targ->client->ps.velocity);
+			// 	VectorMA( targ->client->ps.velocity,
+			// 		KnockbackToKnockbackSpeed( extra ),
+			// 		dir,
+			// 		targ->client->ps.velocity );
+
+
+			// 	// VectorMA( targ->client->ps.velocity,
+			// 	// 	KnockbackToKnockbackSpeed( knockback ), dir,
+			// 	// 	targ->client->ps.velocity );
+			// }
 			if (
 				targ->health <= GIB_HEALTH && g_blood.integer &&
 				!g_oldGibs.integer &&
