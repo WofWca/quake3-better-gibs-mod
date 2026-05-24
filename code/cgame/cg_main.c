@@ -256,7 +256,7 @@ static cvarTable_t cvarTable[] = {
 	{ &cg_simpleItems, "cg_simpleItems", "0", CVAR_ARCHIVE },
 	{ &cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE },
 	// Note that ~290 corresponds to a free fall with no bounce from player height.
-	{ &cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "350", CVAR_ARCHIVE },
+	{ &cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "200", CVAR_ARCHIVE },
 	{ &cg_bounceSoundMinImpactSpeed, "cg_bounceSoundMinImpactSpeed", "450", CVAR_ARCHIVE },
 	{ &cg_lagometer, "cg_lagometer", "1", CVAR_ARCHIVE },
 	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE  },
