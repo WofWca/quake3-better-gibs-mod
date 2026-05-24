@@ -529,6 +529,208 @@ void ClientIntermissionThink( gclient_t *client ) {
 }
 
 
+#define MAX_NUM_STOMPED 100
+static void CheckStomp( gentity_t *attacker ) {
+	// TODO sort vars.
+	gclient_t	*client = attacker->client;
+	trace_t		tr;
+	vec3_t		start, end;
+	vec3_t		mins, maxs;
+	vec3_t		down = {0,0,-1};
+	// vec3_t		damageDir;
+	gentity_t	*traceEnt;
+	int			numStomped;
+	int			numDamaged = 0;
+	// const int	MAX_NUM_STOMPED = 3;
+	int			stompedList[MAX_NUM_STOMPED];
+	int			i;
+	// TODO but armor can prevent gib? DAMAGE_NOARMOR?
+	// TODO damage depending on old vecocity.
+	int 		damage = 150;
+
+	// TODO don't run this if it's not a live player and stuff?
+
+	if ( !client ) {
+		return;
+	}
+
+	// TODO check if the attacker is dead?
+
+	// if ( VectorLengthSquared( client->oldVelocity ) != 0 ) {
+	// 	VectorNormalize2( client->oldVelocity , dir );
+	// } else {
+	// 	VectorCopy( down, dir );
+	// }
+
+	// TODO perf: only do this when we are about to gib someone.
+
+	// if ( VectorNormalize2( client->oldVelocity , damageDir ) == 0 ) {
+	// 	VectorCopy( down, damageDir );
+	// }
+	
+#if 0
+	VectorCopy( client->ps.origin, start );
+	VectorCopy( client->ps.origin, end );
+	VectorCopy( ent->r.mins, mins );
+	VectorCopy( ent->r.maxs, maxs );
+	// Increase the stomp area.
+	// TODO hmmmm but doesn't this make us hit a wall
+	// if we're touch it?
+	// Fuck I think it does...
+	// Maybe running two traces - one regular and one bigger
+	// - would be a solution?
+	//
+	// Orrrrr you know what? For first trace ignore solids,
+	// and then run a second trace to check if the body
+	// is behind a wall or something, i.e. check line of sight.
+	// Or then we can just `trap_EntitiesInBox`.
+	VectorScale( mins, 3, mins );
+	VectorScale( maxs, 3, maxs );
+
+	mins[2] = 0;
+	maxs[2] = 0;
+	// start[2] += MINS_Z / 2.0;
+	end[2] += MINS_Z;
+	// Add a bit below our feet, in case the target corpse
+	// is on a slope and we are a little above it.
+	// This is fine because we'll anyway stop
+	// if we encounter the floor in our trace.
+	end[2] += MINS_Z / 4.0;
+
+	// TODO quad multiplier?
+
+	// TODO hmmm I think we need different mins/ maxs?
+
+	// MASK_SHOT
+	// trap_Trace( &tr, client->ps.origin, NULL, NULL, end, ent->s.number, MASK_SHOT/* CONTENTS_CORPSE|CONTENTS_SOLID */ );
+	trap_Trace( &tr, start, mins, maxs, end, ent->s.number, MASK_SHOT/* CONTENTS_CORPSE|CONTENTS_SOLID */ );
+	if ( tr.fraction == 1.0 ) {
+		return;
+	}
+	traceEnt = &g_entities[ tr.entityNum ];
+	G_Printf("trace %i, contents %i\n", tr.entityNum, traceEnt->r.contents);
+	if ( !( traceEnt->r.contents & CONTENTS_CORPSE) ) {
+		return;
+	}
+
+	// if ( traceEnt->client )
+
+	// TODO maybe restore this value after dealing the damage?
+	// Also don't deal it if we're not gonna actually gib the ent?
+	// traceEnt->flags &= ~FL_NO_KNOCKBACK;
+
+	// TODO check `groundEntityNum`? As in g_damage.
+	// TODO ah we can't be doing this probably.
+	// Because this affects player camera.
+	// if ( traceEnt->client ) {
+	// 	traceEnt->client->ps.origin[2] += 10;
+	// 	G_Printf("have client\n");
+	// }
+	// traceEnt->s.origin[2] += 10;
+
+	// TODO wait or should it be telefrag? Or MOD_CRUSH?
+	G_Damage( traceEnt, ent, ent, down, tr.endpos, damage, 0, MOD_GAUNTLET );
+
+#else
+	// Some volume around our feet.
+	// TODO CVAR for radius.
+	VectorMA( client->ps.origin, 3, attacker->r.mins, mins );
+	VectorMA( client->ps.origin, 3, attacker->r.maxs, maxs );
+	// start[2] += MINS_Z / 2.0;
+	maxs[2] = client->ps.origin[2] + MINS_Z / 2.0;
+	// Add a bit below our feet, in case the target corpse
+	// is on a slope and we are a little above it.
+	// This is fine because we'll anyway stop
+	// if we encounter the floor in our trace.
+	mins[2] += MINS_Z / 4.0;
+
+	numStomped = trap_EntitiesInBox( mins, maxs, stompedList, MAX_NUM_STOMPED);
+	numDamaged = 0;
+	for ( i = 0 ; i < numStomped ; i++ ) {
+		gentity_t	*targ = &g_entities[ stompedList[ i ] ];
+		trace_t		tr;
+		vec3_t		targMaxsPos;
+		vec3_t		velDiff;
+		float		speedDiff;
+		float		stompEnergy;
+		int			targetMask;
+
+
+		// TODO check line of sight.
+
+		// if ( !( targ->r.contents & CONTENTS_CORPSE) ) {
+		targetMask = CONTENTS_CORPSE;
+		if ( g_gibsOnStompAffectLivePlayers.value != 0 ) {
+			targetMask |= CONTENTS_BODY;
+		}
+
+		if ( !( targ->r.contents & targetMask) ) {
+			continue;
+		}
+		if ( targ == attacker ) {
+			continue;
+		}
+		// if ( targ->r.maxs[2] >= client->ps.origin[2] ) {
+		// if ( targ->r.maxs[2] >= (client->ps.origin[2] + attacker->r.maxs[2] / 2 ) ) {
+		// VectorAdd(targ->r.maxs[2], targ->s.pos.trBase, targMaxsPos)
+		if ( (targ->s.pos.trBase[2] + targ->r.maxs[2]) >= client->ps.origin[2] ) {
+			// The entity's top is higher than our center.
+			// Can happen if we landed near an alive player.
+			continue;
+		}
+#define ONLY_VERT
+#ifndef ONLY_VERT
+		// TODO probably need to only take vertical velocity into account?
+		// How fast you're moving horizontally shouldn' matter,
+		// because you don't transfer that energy to the enemy.
+		VectorSubtract( client->oldVelocity, targ->s.pos.trDelta, velDiff );
+		G_Printf("velDiff %f\n", VectorLength( velDiff ));
+		if ( VectorLengthSquared( velDiff ) < Square( g_gibsOnStompMinSpeed.value ) ) {
+			continue;
+		}
+#else
+		speedDiff = client->oldVelocity[2] - targ->s.pos.trDelta[2];
+		G_Printf("speedDiff %f\n", speedDiff);
+		if ( Square( speedDiff ) < Square( g_gibsOnStompMinSpeed.value ) ) {
+			continue;
+		}
+#endif
+
+		// Check that it's not behind a wall or the floor or something.
+		trap_Trace( &tr, client->ps.origin, NULL, NULL, targ->s.pos.trBase, ENTITYNUM_NONE, CONTENTS_SOLID );
+		if ( tr.fraction != 1.0 ) {
+			continue;
+		}
+
+		damage = 40;
+#ifndef ONLY_VERT
+		damage += VectorLengthSquared( velDiff )
+#else
+		damage += Square( speedDiff )
+#endif
+			/ Square( g_speed.value != 0 ? g_speed.value : 0.0000001 )
+			* 15;
+		if ( client->ps.powerups[PW_QUAD] ) {
+			damage *= g_quadfactor.value;
+		}
+		if ( targ->r.contents & CONTENTS_BODY ) {
+			damage *= g_gibsOnStompAffectLivePlayers.value;
+		}
+		// TODO make `point` the line of sight? Or doesn't matter?
+		// TODO or is it supposed to be `s.pos`??
+		// TODO add `damageDir`.
+		G_Damage( targ, attacker, attacker, NULL, NULL /* targ->s.pos.trBase */, damage, 0, MOD_CRUSH );
+		// numDamaged++;
+		// if ( numDamaged >= 3) {
+		// 	// Don't damage any more than 3 entities.
+		// 	break;
+		// }
+	}
+#endif
+}
+
+#define CHECK_STOMP_ENTITYNUM
+
 /*
 ================
 ClientEvents
@@ -556,8 +758,17 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 		event = client->ps.events[ i & (MAX_PS_EVENTS-1) ];
 
 		switch ( event ) {
+		case EV_FALL_SHORT:
+#ifndef CHECK_STOMP_ENTITYNUM
+			CheckStomp( ent );
+#endif
+			break;
+
 		case EV_FALL_MEDIUM:
 		case EV_FALL_FAR:
+#ifndef CHECK_STOMP_ENTITYNUM
+			CheckStomp( ent );
+#endif
 			if ( ent->s.eType != ET_PLAYER ) {
 				break;		// not in the player model
 			}
@@ -569,6 +780,11 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 			} else {
 				damage = 5;
 			}
+			// damage = 300;
+
+			// if ( ent->client && ent->client->ps.pm_type == PM_DEAD ) {
+			// 	damage = 80;
+			// }
 			ent->pain_debounce_time = level.time + 200;	// no normal pain sound
 			G_Damage (ent, NULL, NULL, NULL, NULL, damage, 0, MOD_FALLING);
 			break;
@@ -760,6 +976,7 @@ void ClientThink_real( gentity_t *ent ) {
 	gclient_t	*client;
 	pmove_t		pm;
 	int			oldEventSequence;
+	int			oldGroundEntityNum;
 	int			msec;
 	usercmd_t	*ucmd;
 
@@ -931,6 +1148,7 @@ void ClientThink_real( gentity_t *ent ) {
 
 	VectorCopy( client->ps.origin, client->oldOrigin );
 	VectorCopy( client->ps.velocity, client->oldVelocity );
+	oldGroundEntityNum = client->ps.groundEntityNum;
 
 #ifdef MISSIONPACK
 		if (level.intermissionQueued != 0 && g_singlePlayer.integer) {
@@ -986,6 +1204,20 @@ void ClientThink_real( gentity_t *ent ) {
 	if ( !g_oldGibs.integer && g_gibsOnCollisionBaseDamage.integer ) {
 		CheckCollisionDamage( ent, client->oldVelocity );
 	}
+
+#ifdef CHECK_STOMP_ENTITYNUM
+	// TODO explain why not use "land" events.
+
+	// TODO CVAR for velocity. Or maybe have that inside of the function.
+
+	// if ( oldGroundEntityNum == ENTITYNUM_NONE &&
+	// 	client->ps.groundEntityNum != ENTITYNUM_NONE )
+
+	if ( g_gibsOnStompMinSpeed.value != 0 && pm.crashLandEnergy > 2.0f )
+	{
+		CheckStomp( ent );
+	}
+#endif
 
 	// link entity now, after any personal teleporters have been used
 	trap_LinkEntity (ent);

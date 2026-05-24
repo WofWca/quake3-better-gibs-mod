@@ -969,6 +969,8 @@ static void PM_CrashLand( void ) {
 		return;
 	}
 
+	pm->crashLandEnergy = delta;
+
 	// create a local entity event to play the sound
 
 	// SURF_NODAMAGE is used for bounce pads where you don't ever
@@ -984,9 +986,12 @@ static void PM_CrashLand( void ) {
 		} else if ( delta > 7 ) {
 			PM_AddEvent( EV_FALL_SHORT );
 		} else {
+			// TODO if have quad then also gib on footstep.
+			// Ah crap but this code only runs for landing.
 			PM_AddEvent( PM_FootstepForSurface() );
 		}
 	}
+	// Com_Printf("delta %f\n", delta);
 
 	// start footstep cycle over
 	pm->ps->bobCycle = 0;

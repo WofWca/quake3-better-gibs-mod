@@ -173,6 +173,7 @@ typedef struct {
 	// results (out)
 	int			numtouch;
 	int			touchents[MAXTOUCH];
+	float		crashLandEnergy;
 
 	vec3_t		mins, maxs;			// bounding box size
 
