@@ -1,4 +1,4 @@
-From 2958a0f2a5d06de99d58a8772205ec0d7f4629c0 Mon Sep 17 00:00:00 2001
+From 6ad470b5611f34daf24e4abd482505e1e56a7a69 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 20 Feb 2026 14:12:27 +0400
 Subject: [PATCH] feat: make camera fly farther on gib + fix a bug

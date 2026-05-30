@@ -1,4 +1,4 @@
-From a7014265484401484542b01acd1237db50dbad0e Mon Sep 17 00:00:00 2001
+From adbd2d0622d57694c1b36c33fb8f4c8b24325c21 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 5 Feb 2026 12:01:40 +0400
 Subject: [PATCH] feat: try to make all players see the same gibs
@@ -11,7 +11,7 @@ Subject: [PATCH] feat: try to make all players see the same gibs
  4 files changed, 96 insertions(+), 65 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 7d7035a3..2a571aac 100644
+index ecf6796e..d45fb750 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -524,10 +524,13 @@ void CG_Bleed( vec3_t origin, int entityNum ) {
@@ -60,7 +60,7 @@ index 7d7035a3..2a571aac 100644
  		}
  	}
  
-@@ -628,6 +632,10 @@ void AdjustPositionIfDeathAnimation( const lerpFrame_t *anim, vec3_t origin,
+@@ -638,6 +642,10 @@ void AdjustPositionIfDeathAnimation( const lerpFrame_t *anim, vec3_t origin,
  CG_GibPlayer
  
  Generated a bunch of gibs launching out from the bodies location
@@ -71,7 +71,7 @@ index 7d7035a3..2a571aac 100644
  ===================
  */
  #define	DEFAULT_NUM_GIBS	10
-@@ -635,7 +643,7 @@ Generated a bunch of gibs launching out from the bodies location
+@@ -645,7 +653,7 @@ Generated a bunch of gibs launching out from the bodies location
  #define	GIB_JUMP			250
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  					const vec3_t playerVelocity, const int knockbackSpeed,
@@ -80,7 +80,7 @@ index 7d7035a3..2a571aac 100644
  	vec3_t	baseOrigin, origin, velocity;
  	// Generally only the head should have pitch,
  	// the rest of the body is upright.
-@@ -651,6 +659,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -661,6 +669,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	float baseRandomVelocity =
  		cg_gibsExtraRandomVelocity.value +
  		cg_gibsRandomVelocityFromKnockback.value * knockbackSpeed;
@@ -88,7 +88,7 @@ index 7d7035a3..2a571aac 100644
  
  	vec3_t playerVelocityScaled;
  	float jump = cg_gibsExtraVerticalVelocity.value;
-@@ -680,21 +689,21 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -690,21 +699,21 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorCopy( baseOrigin, origin );
  		VectorMA(origin, MINS_Z + 0.95 * playerHeight, up, origin);
  		VectorClear( velocity );
@@ -117,7 +117,7 @@ index 7d7035a3..2a571aac 100644
  		}
  		if (--numGibs <= 0) {
  			return;
-@@ -703,11 +712,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -713,11 +722,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorCopy( baseOrigin, origin );
  		VectorMA( origin, MINS_Z + 0.65 * playerHeight, up, origin );
  		VectorClear( velocity );
@@ -133,7 +133,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -717,15 +726,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -727,15 +736,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( origin, 0.8 * playerRadius, right, origin );
  		VectorMA( origin, -0.3 * playerRadius, forward, origin );
  		VectorClear( velocity );
@@ -153,7 +153,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -735,11 +744,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -745,11 +754,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorClear( velocity );
  		// Chest is a more "central" and "heavier" piece,
  		// so it gets less random velocity.
@@ -169,7 +169,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -749,14 +758,14 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -759,14 +768,14 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( origin, 0.8 * playerRadius, right, origin );
  		VectorMA( origin, 0.2 * playerRadius, forward, origin );
  		VectorClear( velocity );
@@ -188,7 +188,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -766,11 +775,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -776,11 +785,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( origin, -0.5 * playerRadius, right, origin );
  		VectorMA( origin, -0.5 * playerRadius, forward, origin );
  		VectorClear( velocity );
@@ -204,7 +204,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -780,15 +789,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -790,15 +799,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( origin, -0.6 * playerRadius, right, origin );
  		VectorMA( origin, +0.2 * playerRadius, forward, origin );
  		VectorClear( velocity );
@@ -224,7 +224,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -796,11 +805,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -806,11 +815,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorCopy( baseOrigin, origin );
  		VectorMA( origin, MINS_Z + 0.57 * playerHeight, up, origin );
  		VectorClear( velocity );
@@ -240,7 +240,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -810,15 +819,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -820,15 +829,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( origin, 0.5 * playerRadius, right, origin );
  		VectorMA( origin, 0.1 * playerRadius, forward, origin );
  		VectorClear( velocity );
@@ -260,7 +260,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -828,14 +837,14 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -838,14 +847,14 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( origin, -0.5 * playerRadius, right, origin );
  		VectorMA( origin, -0.2 * playerRadius, forward, origin );
  		VectorClear( velocity );
@@ -279,7 +279,7 @@ index 7d7035a3..2a571aac 100644
  		if (--numGibs <= 0) {
  			return;
  		}
-@@ -855,9 +864,9 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
+@@ -865,9 +874,9 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
  	if ( rand() & 1 ) {
@@ -291,7 +291,7 @@ index 7d7035a3..2a571aac 100644
  	}
  
  	// allow gibs to be turned off for speed
-@@ -869,55 +878,55 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
+@@ -879,55 +888,55 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
  	velocity[0] = crandom()*GIB_VELOCITY;
  	velocity[1] = crandom()*GIB_VELOCITY;
  	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;

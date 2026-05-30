@@ -1,4 +1,4 @@
-From fa4b0f49d5f6c1fa1e7ed8744e843e9c18f70cd6 Mon Sep 17 00:00:00 2001
+From 1aaf813b3586aab58f5b4dbe2439d74c902cf2db Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 6 May 2026 23:29:47 +0400
 Subject: [PATCH] feat: add `cg_debugGibs`
@@ -11,10 +11,10 @@ Subject: [PATCH] feat: add `cg_debugGibs`
  4 files changed, 36 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 7a304df9..98a9a7a8 100644
+index 604bbcb7..f81c3b41 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -690,6 +690,28 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -700,6 +700,28 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  
  	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocityScaled );
  
@@ -78,7 +78,7 @@ index 4ffdfd47..a5ae714d 100644
  extern	vmCvar_t		cg_errorDecay;
  extern	vmCvar_t		cg_nopredict;
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 6a9964da..32a23a5c 100644
+index 3469f2d6..94a6787f 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
 @@ -129,6 +129,7 @@ vmCvar_t	cg_animSpeed;

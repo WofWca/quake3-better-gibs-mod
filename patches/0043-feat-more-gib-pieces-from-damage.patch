@@ -1,4 +1,4 @@
-From b7bc0292481f36a2b9779ba4fb0e9b1b23e9fb2d Mon Sep 17 00:00:00 2001
+From fae496b4d76bede7b38461681609e2bb3505dc42 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 6 May 2026 22:18:20 +0400
 Subject: [PATCH] feat: more gib pieces from damage
@@ -10,10 +10,10 @@ Subject: [PATCH] feat: more gib pieces from damage
  3 files changed, 16 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 74dfd82f..7a304df9 100644
+index 5be8a097..604bbcb7 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -666,7 +666,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -676,7 +676,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	float jump =
  		cg_gibsExtraVerticalVelocity.value +
  		cg_gibsVerticalVelocityFromKnockback.value * knockbackSpeed;
@@ -40,7 +40,7 @@ index 5d8e0146..4ffdfd47 100644
  extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
  extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 671e1ae1..6a9964da 100644
+index c3a9ccf1..3469f2d6 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
 @@ -101,6 +101,7 @@ vmCvar_t	cg_shadows;

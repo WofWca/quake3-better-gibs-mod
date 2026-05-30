@@ -1,4 +1,4 @@
-From e669ad32193767291cf6fcadd49affd2d406829d Mon Sep 17 00:00:00 2001
+From f96219d3c1d8a44f9e125e9d26e3972572b3508b Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 4 May 2026 00:21:38 +0400
 Subject: [PATCH] improvement: adjust random speed CVARs' defaults
@@ -17,7 +17,7 @@ The low spread was especially noticeable with quad damage kills.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index ef40256c..47e535bf 100644
+index 28ed3cfb..8276b2f5 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
 @@ -229,8 +229,8 @@ static cvarTable_t cvarTable[] = {

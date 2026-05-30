@@ -1,4 +1,4 @@
-From 9bb24547ca4fc42596c3c6a94bdf87fb148f0926 Mon Sep 17 00:00:00 2001
+From 33cff2f27efbc89033fb54277ac181702ee6daa4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 2 Feb 2026 14:41:58 +0400
 Subject: [PATCH] feat: gibs: damage-based random velocity
@@ -28,10 +28,10 @@ because `P_DamageFeedback` early-returns when `PM_DEAD`.
  12 files changed, 110 insertions(+), 25 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 319ad16d..7d7035a3 100644
+index 1065eaa8..ecf6796e 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -634,7 +634,7 @@ Generated a bunch of gibs launching out from the bodies location
+@@ -644,7 +644,7 @@ Generated a bunch of gibs launching out from the bodies location
  #define	GIB_VELOCITY		250
  #define	GIB_JUMP			250
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -40,7 +40,7 @@ index 319ad16d..7d7035a3 100644
  					const lerpFrame_t *bodyAnimation ) {
  	vec3_t	baseOrigin, origin, velocity;
  	// Generally only the head should have pitch,
-@@ -648,7 +648,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -658,7 +658,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	// to account for crounching.
  	float playerHeight = 32 - MINS_Z;
  	float playerRadius = PLAYER_WIDTH;

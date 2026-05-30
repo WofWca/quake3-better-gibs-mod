@@ -1,4 +1,4 @@
-From 367461dd5d652a20408d58cbd3da8642df943e89 Mon Sep 17 00:00:00 2001
+From f313213836bc4a3baafcd1261ba4d25b4e0f019e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 9 May 2026 22:53:46 +0400
 Subject: [PATCH] feat: `cg_gibsVerticalVelocityFromKnockback`
@@ -13,10 +13,10 @@ for 200+ damage it becomes 250.
  3 files changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 2a571aac..131b01df 100644
+index d45fb750..79a6ff28 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -662,7 +662,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -672,7 +672,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	int seed = randSeed;
  
  	vec3_t playerVelocityScaled;
@@ -40,7 +40,7 @@ index 1d92556d..5d8e0146 100644
  extern	vmCvar_t		cg_gibsBounceFactor;
  extern	vmCvar_t		cg_gibsBounceFactorRandomness;
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 47e535bf..671e1ae1 100644
+index 8276b2f5..c3a9ccf1 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
 @@ -103,6 +103,7 @@ vmCvar_t	cg_oldGibs;
