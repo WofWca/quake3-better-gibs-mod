@@ -1394,7 +1394,7 @@ localEntity_t *CG_SmokePuff( const vec3_t p,
 				   int leFlags,
 				   qhandle_t hShader );
 void CG_BubbleTrail( const vec3_t start, const vec3_t end, float spacing );
-void CG_SpawnEffect( const vec3_t origin );
+refEntity_t *CG_SpawnEffect( const vec3_t origin, qboolean firstPerson );
 
 #ifdef MISSIONPACK
 void CG_KamikazeEffect( vec3_t org );

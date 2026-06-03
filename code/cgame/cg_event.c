@@ -893,13 +893,13 @@ void CG_EntityEvent( centity_t *cent, vec3_t position, int entityNum ) {
 	// other events
 	//
 	case EV_PLAYER_TELEPORT_IN:
-		trap_S_StartSound (NULL, es->number, CHAN_AUTO, cgs.media.teleInSound );
-		CG_SpawnEffect( position);
+		trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.teleInSound );
+		CG_SpawnEffect( position, cg.snap->ps.clientNum == clientNum && cg_thirdPerson.integer == 0 );
 		break;
 
 	case EV_PLAYER_TELEPORT_OUT:
-		trap_S_StartSound (NULL, es->number, CHAN_AUTO, cgs.media.teleOutSound );
-		CG_SpawnEffect(  position);
+		trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.teleOutSound );
+		CG_SpawnEffect( position, qfalse );
 		break;
 
 	case EV_ITEM_POP:
