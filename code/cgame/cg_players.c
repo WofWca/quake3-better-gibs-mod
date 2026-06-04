@@ -1403,6 +1403,7 @@ static void CG_RunLerpFrame( clientInfo_t *ci, lerpFrame_t *lf, int newAnimation
 
 	// see if the animation sequence is switching
 	if ( newAnimation != lf->animationNumber || !lf->animation ) {
+		CG_Printf("CG_RunLerpFrame %i\n", newAnimation);
 		CG_SetLerpFrameAnimation( ci, lf, newAnimation );
 	}
 
@@ -1481,6 +1482,7 @@ CG_ClearLerpFrame
 */
 static void CG_ClearLerpFrame( clientInfo_t *ci, lerpFrame_t *lf, int animationNumber ) {
 	lf->frameTime = lf->oldFrameTime = cg.time;
+	CG_Printf("CG_ClearLerpFrame %i\n", animationNumber);
 	CG_SetLerpFrameAnimation( ci, lf, animationNumber );
 	lf->oldFrame = lf->frame = lf->animation->firstFrame;
 }
@@ -2904,6 +2906,7 @@ void CG_ResetPlayerEntity( centity_t *cent ) {
 	cent->errorTime = -99999;		// guarantee no error decay added
 	cent->extrapolated = qfalse;	
 
+	CG_Printf("CG_ResetPlayerEntity %i %i\n", cent->currentState.legsAnim, cg.predictedPlayerState.legsAnim );
 	CG_ClearLerpFrame( &cgs.clientinfo[ cent->currentState.clientNum ], &cent->pe.legs, cent->currentState.legsAnim );
 	CG_ClearLerpFrame( &cgs.clientinfo[ cent->currentState.clientNum ], &cent->pe.torso, cent->currentState.torsoAnim );
 

@@ -2825,6 +2825,9 @@ void CG_TrackClientTeamChange( void )
 			spec_team = curr_team;
 
 		CG_ApplyClientChange();
+		// BG_PlayerStateToEntityState( &cg.predictedPlayerState,
+		// 	&cg.predictedPlayerEntity.currentState, qfalse );
+		CG_Printf("CG_TrackClientTeamChange 1 %i\n", cg.predictedPlayerState.legsAnim );
 		CG_ResetPlayerEntity( &cg.predictedPlayerEntity );
 		return;
 	}
@@ -2837,6 +2840,9 @@ void CG_TrackClientTeamChange( void )
 			spec_client = cg.snap->ps.clientNum;
 
 			CG_ApplyClientChange();
+			// BG_PlayerStateToEntityState( &cg.predictedPlayerState,
+			// 	&cg.predictedPlayerEntity.currentState, qfalse );
+			CG_Printf("CG_TrackClientTeamChange 2 %i\n", cg.predictedPlayerState.legsAnim );
 			CG_ResetPlayerEntity( &cg.predictedPlayerEntity );
 			return;
 		}
@@ -2858,6 +2864,9 @@ void CG_TrackClientTeamChange( void )
 			spec_team = cgs.clientinfo[ cg.snap->ps.clientNum ].team;
 
 		CG_ApplyClientChange();
+		// BG_PlayerStateToEntityState( &cg.predictedPlayerState,
+		// 	&cg.predictedPlayerEntity.currentState, qfalse );
+		CG_Printf("CG_TrackClientTeamChange 3 %i\n", cg.predictedPlayerState.legsAnim );
 		CG_ResetPlayerEntity( &cg.predictedPlayerEntity );
 	}
 }

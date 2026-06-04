@@ -75,6 +75,8 @@ G_CVAR( g_oldGibs, "g_oldGibs", "0", CVAR_ARCHIVE, 0, qfalse, qfalse )
 // Note that this affects not just the gibs
 // but also the camera velocity of the gibbed player.
 G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse, qfalse )
+// FUUUUUUUUUUCK this is an archived var. What do we do?
+// Ah, just delete it, and make a new one?
 G_CVAR( g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse, qfalse )
 // If a dead player loses this much or more speed
 // as a result of collision with something (e.g. floor, wall),

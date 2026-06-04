@@ -233,6 +233,7 @@ GibEntity
 */
 void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
 	int eventParm = killer;
+	int dirByte = 255;
 #ifdef MISSIONPACK
 	gentity_t *ent;
 	int i;
@@ -303,7 +304,26 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
 	} else {
 		eventParm = killer;
 	}
-	G_AddEvent( self, EV_GIB_PLAYER, eventParm );
+	G_AddEvent( self, EV_GIB_PLAYER, killer );
+	// G_AddEvent( self, EV_GIB_PLAYER, eventParm );
+
+	if ( self->client && !self->client->damage_fromWorld && 
+		self->client->damage_knockback > 0 )
+	{
+		dirByte = DirToByte( self->client->damage_from );
+	}
+
+	self->s.torsoAnim = eventParm;
+	self->s.legsAnim = dirByte;
+	if ( self->client )
+	{
+		// Fuck shit. This causes crashes on baseq3a,
+		// Bad animation number:
+		self->client->ps.torsoAnim = eventParm;
+		// TODO `damage_from` doesn't work when already dead I think?
+		// Plus there could be 0 of it.
+		self->client->ps.legsAnim = dirByte;
+	}
 
 	self->takedamage = qfalse;
 	self->s.eType = ET_INVISIBLE;

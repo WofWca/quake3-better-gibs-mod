@@ -1033,10 +1033,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 }
 void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 					const clientInfo_t *ci ) {
-	int knockbackSpeed = cgs.g_gibsNewEvGibPlayerParmProtocol == 1
-		? es->eventParm * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
-		// Just use the default knockback speed for 100 damage.
-		: 100 * 1000 / COMBAT_PLAYER_MASS;
+	const float mul = 1.25;
+	// int knockbackSpeed = cgs.g_gibsNewEvGibPlayerParmProtocol & 0x2
+	// 	? es->eventParm * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
+	// 	// Just use the default knockback speed for 100 damage.
+	// 	: 100 * 1000 / COMBAT_PLAYER_MASS;
+	// int knockbackSpeed = cgs.g_gibsNewEvGibPlayerParmProtocol & 0x2
 
 	// Apparently at this point `es->pos.trDelta` doesn't yet have
 	// the knockback from the damage that gibbed us,
@@ -1046,9 +1048,24 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 		es->number == cg.snap->ps.clientNum &&
 		!cg.demoPlayback &&
 		!(cg.snap->ps.pm_flags & PMF_FOLLOW);
-	const vec3_t *vel = usePredictedPs
-		? (const vec3_t*)&cg.predictedPlayerState.velocity
-		: &es->pos.trDelta;
+	vec3_t *vel = usePredictedPs
+		? &cg.predictedPlayerState.velocity
+		: (vec3_t*)&es->pos.trDelta;
+	vec3_t dir;
+	// vec3_t vel;
+
+	const int torsoAnim = usePredictedPs
+		? cg.predictedPlayerState.torsoAnim
+		: es->torsoAnim;
+	const int legsAnim = usePredictedPs
+		? cg.predictedPlayerState.legsAnim
+		: es->legsAnim;
+
+	// int knockbackSpeed = (cgs.g_gibsNewEvGibPlayerParmProtocol == 1
+	int knockbackSpeed = mul * (cgs.g_gibsNewEvGibPlayerParmProtocol == 1
+		? torsoAnim * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
+		// Just use the default knockback speed for 100 damage.
+		: 100 * 1000 / COMBAT_PLAYER_MASS);
 
 	lerpFrame_t torsoAnimation = es->number == cg.snap->ps.clientNum
 		// `cent->pe.torso` appears to be not good for self,
@@ -1057,6 +1074,13 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 		// so we're not using `usePredictedPs` here.
 		? cg.predictedPlayerEntity.pe.torso
 		: cent->pe.torso;
+	// const centity_t *cent2 = es->number == cg.snap->ps.clientNum
+	// 	// `cent->pe.torso` appears to be not good for self,
+	// 	// unlike `cg.predictedPlayerEntity`,
+	// 	// even during `demoPlayback` and `PMF_FOLLOW`,
+	// 	// so we're not using `usePredictedPs` here.
+	// 	? &cg.predictedPlayerEntity
+	// 	: cent;
 	vec3_t torsoAngles;
 
 	// TODO fix: things like `origin` and `angles`
@@ -1072,6 +1096,17 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 	if ( ci ) {
 		randSeed = Q_rand(&randSeed) + ci->name[0];
 	}
+
+	// TODO check `g_gibsNewEvGibPlayerParmProtocol`.
+	// TODO for self this is different, need to use `predictedPlayerEntity`.
+	if ( ( legsAnim & 0xFF ) != 0xFF ) {
+		ByteToDir( legsAnim & 0xFF, dir );
+	} else {
+		// TODO consider NULL instead.
+		VectorClear( dir );
+	}
+	// TODO don't apply to self probably.
+	VectorMA( *vel, (mul - 1)*knockbackSpeed, dir, *vel );
 
 	// Torso animation angles seem to be in better sync
 	// between the local state and how others see us,
@@ -1094,12 +1129,17 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 			cg.time );
 		CG_Printf(", clientNum "S_COLOR_GREEN"%i",
 			es->clientNum );
+		CG_Printf(", dmg "S_COLOR_GREEN"%i",
+			torsoAnim );
+		CG_Printf(", dir "S_COLOR_GREEN"%i",
+			legsAnim );
 		CG_Printf(", usePredictedPlayerState %s%i\n",
 			usePredictedPs ? S_COLOR_GREEN : S_COLOR_CYAN,
 			usePredictedPs );
 	}
 
 	CG_GibPlayer( cent->lerpOrigin, torsoAngles, *vel, knockbackSpeed,
+	// CG_GibPlayer( cent->lerpOrigin, torsoAngles, vel, knockbackSpeed,
 		&torsoAnimation, randSeed );
 }
 
