@@ -1018,7 +1018,7 @@ typedef struct {
 	char			blueTeam[MAX_QPATH];
 
 	// parsed from systeminfo
-	int				g_gibsNewEvGibPlayerParmProtocol;
+	int				g_gibsNewEvGibPlayerProtocol;
 
 	int				voteTime;
 	int				voteYes;
