@@ -144,6 +144,12 @@ struct gentity_s {
 	int			health;
 
 	qboolean	takedamage;
+	// Whether to change `legsAnim` and `torsoAnim`,
+	// and fire a `EV_DEATH*` event
+	// after applying all the pellets of a shotgun shot.
+	// 0 means "nothing is scheduled",
+	// otherwise this represents (animation index + 1).
+	int			setDeathAnimScheduled;
 	// Whether to `GibEntity` after applying all the pellets of a shotgun shot.
 	qboolean	gibScheduled;
 
@@ -748,7 +754,7 @@ extern	vmCvar_t	g_doWarmup;
 extern	vmCvar_t	g_blood;
 extern	vmCvar_t	g_oldGibs;
 extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
-extern	vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
+extern	vmCvar_t	g_gibsNewEvGibPlayerProtocol;
 extern	vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
 extern	vmCvar_t	g_gibsOnCollisionMinSpeed;
 extern	vmCvar_t	g_gibsOnCollisionBaseDamage;
