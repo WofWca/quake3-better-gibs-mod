@@ -71,7 +71,7 @@ vmCvar_t	g_logfileSync;
 vmCvar_t	g_blood;
 vmCvar_t	g_oldGibs;
 vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
-vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
+vmCvar_t	g_gibsNewEvGibPlayerProtocol;
 vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
 vmCvar_t	g_gibsOnCollisionMinSpeed;
 vmCvar_t	g_gibsOnCollisionBaseDamage;
@@ -171,7 +171,13 @@ static cvarTable_t		gameCvarTable[] = {
 	// Note that this affects not just the gibs
 	// but also the camera velocity of the gibbed player.
 	{ &g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse },
+	// This is not really intended to be changed by users to a value different from
+	// the default or 0, unless they're having mod compatibility issues
+	// and really know what they're doing.
+	// We could have simply made this a binary value to tell clients
+	// that the server is running Better Gibs mod. But let's make it flag-like,
+	// for forwards compatibility.
+	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, 0, qfalse },
 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
 	// If a dead player loses this much or more speed
 	// as a result of collision with something (e.g. floor, wall),
