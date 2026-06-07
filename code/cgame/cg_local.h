@@ -1138,7 +1138,7 @@ typedef struct {
 	int				pmove_msec;
 
 	qboolean		synchronousClients;
-	int				g_gibsNewEvGibPlayerParmProtocol;
+	int				g_gibsNewEvGibPlayerProtocol;
 
 	int				ospEnc;
 	qboolean		defrag;
