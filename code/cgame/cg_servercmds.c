@@ -147,6 +147,7 @@ void CG_ParseServerinfo( void ) {
 
 void CG_ParseSysteminfo( void ) {
 	const char	*info;
+	char		*s;
 
 	info = CG_ConfigString( CS_SYSTEMINFO );
 
@@ -159,8 +160,15 @@ void CG_ParseSysteminfo( void ) {
 	}
 
 	cgs.synchronousClients = ( atoi( Info_ValueForKey( info, "g_synchronousClients" ) ) ) ? qtrue : qfalse;
-	cgs.g_gibsNewEvGibPlayerParmProtocol =
-		atoi( Info_ValueForKey( info, "g_gibsNewEvGibPlayerParmProtocol" ) );
+	s = Info_ValueForKey( info, "g_gibsNewEvGibPlayerProtocol" );
+	if ( s[0] == '\0' ) {
+		// Try the old name.
+		// This is to support servers and replays with the old version
+		// of the Better Gibs mod.
+		// Not super necessary but why not.
+		s = Info_ValueForKey( info, "g_gibsNewEvGibPlayerParmProtocol" );
+	}
+	cgs.g_gibsNewEvGibPlayerProtocol = atoi( s );
 }
 
 
