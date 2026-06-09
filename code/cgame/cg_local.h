@@ -1106,6 +1106,7 @@ extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
 extern	vmCvar_t		cg_gibsBounceFactor;
 extern	vmCvar_t		cg_gibsBounceFactorRandomness;
 extern	vmCvar_t		cg_gibsRotationFactor;
+extern	vmCvar_t		cg_gibsBloodTrailPeriod;
 extern	vmCvar_t		cg_gibsBetterCameraOnGib;
 extern	vmCvar_t		cg_drawTimer;
 extern	vmCvar_t		cg_drawFPS;
