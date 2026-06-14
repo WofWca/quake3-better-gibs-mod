@@ -35,6 +35,21 @@ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback
 CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE )
+// Whether to use the exact position where the player got gibbed
+// as the initial gibs position, instead of the position of the gibbed player
+// on the screen, i.e. the position of the player on the next server frame
+// (lerpOrigin).
+//
+// Can be a fractional value between 0 and 1,
+// but you probably want either 0 or 1.
+// To get vanilla behavior, set to 0.
+//
+// Has no effect on vanilla servers (`g_gibsNewEvGibPlayerProtocol 0`).
+//
+// Using the original position might make it seem
+// like the player "telepoted" one snapshot back (50ms at `snaps 20`)
+// if they're already movnig at high speed.
+CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0 )
 CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE )
