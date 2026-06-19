@@ -1101,6 +1101,7 @@ extern	vmCvar_t		cg_shadows;
 extern	vmCvar_t		cg_gibs;
 extern	vmCvar_t		cg_oldGibs;
 extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
+extern	vmCvar_t		cg_gibsKnockback;
 extern	vmCvar_t		cg_gibsPiecesFromKnockback;
 extern	vmCvar_t		cg_gibsExtraRandomVelocity;
 extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
@@ -1443,7 +1444,8 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
 void CG_ScorePlum( int client, vec3_t org, int score );
 
 void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
-				const vec3_t playerVelocityOriginal, const int knockbackSpeed,
+				const vec3_t playerVelocityOriginal,
+				const vec3_t knockbackDir, const int knockbackSpeedOriginal,
 				const lerpFrame_t *bodyAnimation, const int randSeed );
 // Same as `CG_GibPlayer`, but takes different params.
 void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
