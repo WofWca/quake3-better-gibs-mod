@@ -177,7 +177,7 @@ static cvarTable_t		gameCvarTable[] = {
 	// We could have simply made this a binary value to tell clients
 	// that the server is running Better Gibs mod. But let's make it flag-like,
 	// for forwards compatibility.
-	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, 0, qfalse },
+	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR_SYSTEMINFO, 0, qfalse },
 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
 	// If a dead player loses this much or more speed
 	// as a result of collision with something (e.g. floor, wall),
