@@ -20,6 +20,11 @@ CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE )
 CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE )
 CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE )
+// On vanilla servers this only has effect on random and vertical velocity
+// but not on directional velocity.
+// Remember that this also affects own gibs, so having a value too high
+// will make gibs fly faster than the camera.
+CG_CVAR( cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0 )
 // For every 100 of knockback speed above 500 (100 damage),
 // add this many pieces of gibs, times the value of `cg_gibs`.
 //
