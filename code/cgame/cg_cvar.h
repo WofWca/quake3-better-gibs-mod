@@ -25,6 +25,7 @@ CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CV
 // Remember that this also affects own gibs, so having a value too high
 // will make gibs fly faster than the camera.
 CG_CVAR( cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0 )
+CG_CVAR( cg_gibsExtraKnockback, "cg_gibsExtraKnockback", "0", 0 )
 // For every 100 of knockback speed above 500 (100 damage),
 // add this many pieces of gibs, times the value of `cg_gibs`.
 //
