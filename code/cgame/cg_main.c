@@ -102,6 +102,7 @@ vmCvar_t	cg_gibs;
 vmCvar_t	cg_oldGibs;
 vmCvar_t	cg_gibsInheritPlayerVelocity;
 vmCvar_t	cg_gibsKnockback;
+vmCvar_t	cg_gibsExtraKnockback;
 vmCvar_t	cg_gibsPiecesFromKnockback;
 vmCvar_t	cg_gibsExtraRandomVelocity;
 vmCvar_t	cg_gibsRandomVelocityFromKnockback;
@@ -243,6 +244,7 @@ static cvarTable_t cvarTable[] = {
 	// Remember that this also affects own gibs, so having a value too high
 	// will make gibs fly faster than the camera.
 	{ &cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0  },
+	{ &cg_gibsExtraKnockback, "cg_gibsExtraKnockback", "0", 0  },
 	// For every 100 of knockback speed above 500 (100 damage),
 	// add this many pieces of gibs, times the value of `cg_gibs`.
 	//
