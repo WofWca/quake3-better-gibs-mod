@@ -42,6 +42,23 @@ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback
 CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE )
+// How much to slow down the player depending on how much damage (knockback)
+// they took.
+// This makes the original player velocity have less effect
+// on the final gib velocity, thus giving more emphasis to the damage direction.
+//
+// Unlike reducing `cg_gibsInheritPlayerVelocity`,
+// this works better if the player is already moving at high speed
+// (e.g. on a jump pad), or falling.
+// This will not reduce player velocity if the knockback was low
+// or if damage had no direction (e.g. falling).
+//
+// Has no effect on vanilla servers.
+CG_CVAR( cg_gibsPlayerSpeedFromKnockback, "cg_gibsPlayerSpeedFromKnockback", "-0.25", 0 )
+// If knockback is big, this helps keep at least some fraction of player speed.
+// For example, if this is -0.75, we'll always keep at least 25%
+// of original player velocity.
+CG_CVAR( cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnockbackMaxFraction", "-0.5", 0 )
 // Whether to use the exact position where the player got gibbed
 // as the initial gibs position, instead of the position of the gibbed player
 // on the screen, i.e. the position of the player on the next server frame
