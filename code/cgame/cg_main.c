@@ -112,6 +112,7 @@ vmCvar_t	cg_gibsExtraVerticalVelocity;
 vmCvar_t	cg_gibsPlayerSpeedFromKnockback;
 vmCvar_t	cg_gibsPlayerSpeedFromKnockbackMaxFraction;
 vmCvar_t	cg_gibsOriginalOrigin;
+vmCvar_t	cg_gibsNoLerpDelay;
 vmCvar_t	cg_gibsBounceFactor;
 vmCvar_t	cg_gibsBounceFactorRandomness;
 vmCvar_t	cg_gibsRotationFactor;
@@ -291,11 +292,26 @@ static cvarTable_t cvarTable[] = {
 	// To get vanilla behavior, set to 0.
 	//
 	// Has no effect on vanilla servers (`g_gibsNewEvGibPlayerProtocol 0`).
+	// Basically has no effect when `cg_gibsNoLerpDelay 1`.
 	//
 	// Using the original position might make it seem
 	// like the player "telepoted" one snapshot back (50ms at `snaps 20`)
 	// if they're already movnig at high speed.
 	{ &cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0  },
+	// Don't wait for next snapshot to arrive (normally 50ms)
+	// before gibbing players.
+	// Consequently, this affects the position from which the gibs are launched,
+	// due to the gibbed player (or, rather, their camera) moving during those 50ms.
+	// See `cg_gibsOriginalOrigin`.
+	//
+	// Note that when looking at another player (or missile) gibbing someone
+	// it will look like the player gets gibbed
+	// 50ms before the actual shot is fired.
+	// That is, the gib even will happen ahead of the displayed state of the game.
+	//
+	// Set this to 3 (2nd bit) to also do this on vanilla servers.
+	// To get vanilla behavior, set to 0.
+	{ &cg_gibsNoLerpDelay, "cg_gibsNoLerpDelay", "0", 0  },
 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
 	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE  },
 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
