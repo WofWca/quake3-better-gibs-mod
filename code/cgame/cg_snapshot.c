@@ -171,6 +171,78 @@ static void CG_TransitionSnapshot( void ) {
 
 /*
 ===================
+CG_TransitionNoLerpEntities
+
+Some events do not need interpolation and can do their thing
+as soon as they appear in `cg.nextSnap`,
+without waiting to transition from `cg.nextSnap` to `cg.snap`
+(`CG_TransitionSnapshot`).
+===================
+*/
+static void CG_TransitionNoLerpEntities( const snapshot_t *snap ) {
+	if ( cg_gibsNoLerpDelay.integer && !cg_oldGibs.integer ) {
+		int num;
+
+		for ( num = 0 ; num < snap->numEntities ; num++ ) {
+			const entityState_t *es = &snap->entities[num];
+			centity_t *cent = &cg_entities[ es->number ];
+			// We have roughly the same calculations in `CG_GibPlayer2`.
+			int targNum =
+				es->eType == ET_EVENTS + EV_GIB_PLAYER &&
+				cgs.g_gibsNewEvGibPlayerProtocol & 0x04
+					? es->otherEntityNum
+					: es->number;
+			centity_t *targCent = targNum == cg.snap->ps.clientNum
+				? &cg.predictedPlayerEntity
+				: &cg_entities[ targNum ];
+			vec3_t posBase;
+			int nextStateEvent;
+
+			if ( es->eType != ET_EVENTS + EV_GIB_PLAYER &&
+				// For vanilla servers.
+				!(
+					( es->event & ~EV_EVENT_BITS ) == EV_GIB_PLAYER &&
+					cg_gibsNoLerpDelay.integer & 0x02
+				) )
+			{
+				continue;
+			}
+
+			if ( cg_debugGibs.integer & 0x08 ) {
+				CG_Printf("Running gib event without lerp delay (cg_gibsNoLerpDelay). ent %i targ %i t %i server time %i\n",
+					es->number, targNum, cg.time, snap->serverTime );
+			}
+
+			// TODO fix: with vanilla servers (old protocol)
+			// this will basically teleport the player
+			// to their position on `nextSnap`, without interpolation.
+			// So it will look like gibs originated from a position
+			// different from the player body's position.
+			// Noticeable with quad shotgun and low `snaps` value.
+			//
+			// Probably can be fixed by only running `CG_GibPlayer`
+			// and not touching `cent->currentState`
+			// (`CG_TransitionEntity()` does it).
+
+			// This will run `CG_GibPlayer()`.
+			CG_TransitionEntity( cent );
+			// Copied from the other occurrence of `CG_TransitionEntity`.
+			// Otherwise it seems that `CG_GibPlayer()` runs twice.
+			cent->snapShotTime = cg.snap->serverTime;
+
+			// We've run the "gib" event for this entity ahead of time,
+			// so we also need to make it invisible ahead of time,
+			// otherwise both gibs and the player body will be visible
+			// at the same time for a few frames, until the next snap.
+			if ( !( cg_gibsNoLerpDelay.integer & 0x4 ) ) {
+				targCent->currentState.eType = targCent->nextState.eType;
+			}
+		}
+	}
+}
+
+/*
+===================
 CG_SetNextSnap
 
 A new snapshot has just been read in from the client system.
@@ -230,6 +302,8 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 
 	// sort out solid entities
 	CG_BuildSolidList();
+
+	CG_TransitionNoLerpEntities( snap );
 }
 
 
