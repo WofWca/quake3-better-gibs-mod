@@ -37,6 +37,7 @@ CG_CVAR( cg_gibsExtraKnockback, "cg_gibsExtraKnockback", "0", 0 )
 // Did the player got bigger from taking more damage??":
 // A: No, they simlpy got split into more pieces.
 CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_ARCHIVE )
+CG_CVAR( cg_gibsLinearVelocityFromKnockback, "cg_gibsLinearVelocityFromKnockback", "1.0", 0 )
 CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE )
 CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE )
