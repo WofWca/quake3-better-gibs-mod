@@ -1104,6 +1104,7 @@ extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
 extern	vmCvar_t		cg_gibsKnockback;
 extern	vmCvar_t		cg_gibsExtraKnockback;
 extern	vmCvar_t		cg_gibsPiecesFromKnockback;
+extern	vmCvar_t		cg_gibsLinearVelocityFromKnockback;
 extern	vmCvar_t		cg_gibsExtraRandomVelocity;
 extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
 extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;

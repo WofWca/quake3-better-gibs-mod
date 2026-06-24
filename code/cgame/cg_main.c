@@ -104,6 +104,7 @@ vmCvar_t	cg_gibsInheritPlayerVelocity;
 vmCvar_t	cg_gibsKnockback;
 vmCvar_t	cg_gibsExtraKnockback;
 vmCvar_t	cg_gibsPiecesFromKnockback;
+vmCvar_t	cg_gibsLinearVelocityFromKnockback;
 vmCvar_t	cg_gibsExtraRandomVelocity;
 vmCvar_t	cg_gibsRandomVelocityFromKnockback;
 vmCvar_t	cg_gibsVerticalVelocityFromKnockback;
@@ -256,6 +257,7 @@ static cvarTable_t cvarTable[] = {
 	// Did the player got bigger from taking more damage??":
 	// A: No, they simlpy got split into more pieces.
 	{ &cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_ARCHIVE  },
+	{ &cg_gibsLinearVelocityFromKnockback, "cg_gibsLinearVelocityFromKnockback", "1.0", 0  },
 	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE  },
 	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE  },
 	{ &cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE  },
