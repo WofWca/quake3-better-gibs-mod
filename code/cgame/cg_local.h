@@ -82,6 +82,8 @@
 #define GL_EXPLOSION_RADIUS		300
 #define RL_EXPLOSION_RADIUS		300
 #define BFG_EXPLOSION_RADIUS	300
+// Special value, not used for actual light
+#define LIGHT_GIB_FIRE_TRAIL	-0xffff
 
 // holdable powerups
 #define POWERUP_GLOW_RADIUS		200
