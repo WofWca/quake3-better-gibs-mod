@@ -92,6 +92,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DEFAULT_REDTEAM_NAME		"Stroggs"
 #define DEFAULT_BLUETEAM_NAME		"Pagans"
 
+// Special value, not used for actual light
+#define LIGHT_GIB_FIRE_TRAIL	-0xffff
+
 typedef enum {
 	FOOTSTEP_NORMAL,
 	FOOTSTEP_BOOT,
@@ -1107,6 +1110,9 @@ extern	vmCvar_t		cg_gibsBounceFactor;
 extern	vmCvar_t		cg_gibsBounceFactorRandomness;
 extern	vmCvar_t		cg_gibsRotationFactor;
 extern	vmCvar_t		cg_gibsBloodTrailPeriod;
+extern	vmCvar_t		cg_gibsFireTrailPeriod;
+extern	vmCvar_t		cg_gibsFireTrailDuration;
+extern	vmCvar_t		cg_gibsFireTrailMinKnockback;
 extern	vmCvar_t		cg_gibsBetterCameraOnGib;
 extern	vmCvar_t		cg_drawTimer;
 extern	vmCvar_t		cg_drawFPS;

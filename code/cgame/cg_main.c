@@ -110,6 +110,9 @@ vmCvar_t	cg_gibsBounceFactor;
 vmCvar_t	cg_gibsBounceFactorRandomness;
 vmCvar_t	cg_gibsRotationFactor;
 vmCvar_t	cg_gibsBloodTrailPeriod;
+vmCvar_t	cg_gibsFireTrailPeriod;
+vmCvar_t	cg_gibsFireTrailDuration;
+vmCvar_t	cg_gibsFireTrailMinKnockback;
 vmCvar_t	cg_gibsBetterCameraOnGib;
 vmCvar_t	cg_drawTimer;
 vmCvar_t	cg_drawFPS;
@@ -253,6 +256,9 @@ static cvarTable_t cvarTable[] = {
 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
 	// Not archived because experimental
 	{ &cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0  },
+	{ &cg_gibsFireTrailPeriod, "cg_gibsFireTrailPeriod", "30", 0  },
+	{ &cg_gibsFireTrailDuration, "cg_gibsFireTrailDuration", "1024", 0  },
+	{ &cg_gibsFireTrailMinKnockback, "cg_gibsFireTrailMinKnockback", "-1", 0  },
 	{ &cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE  },
 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
