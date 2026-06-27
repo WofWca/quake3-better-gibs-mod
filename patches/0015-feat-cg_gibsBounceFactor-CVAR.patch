@@ -1,0 +1,59 @@
+From 0506be86d9231c3ce252c1008afa4ceacfa9e614 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 11 Nov 2025 11:39:56 +0400
+Subject: [PATCH] feat: `cg_gibsBounceFactor` CVAR
+
+---
+ code/cgame/cg_effects.c | 2 +-
+ code/cgame/cg_local.h   | 1 +
+ code/cgame/cg_main.c    | 2 ++
+ 3 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index 1cff2800..800f089a 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -547,7 +547,7 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
+ 	VectorCopy( velocity, le->pos.trDelta );
+ 	le->pos.trTime = cg.time;
+ 
+-	le->bounceFactor = 0.6f;
++	le->bounceFactor = cg_oldGibs.integer ? 0.6f : cg_gibsBounceFactor.value;
+ 
+ 	le->leBounceSoundType = LEBS_BLOOD;
+ 	le->leMarkType = LEMT_BLOOD;
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index a47c00ea..68378808 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1097,6 +1097,7 @@ extern	vmCvar_t		cg_oldGibs;
+ extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
+ extern	vmCvar_t		cg_gibsExtraRandomVelocity;
+ extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
++extern	vmCvar_t		cg_gibsBounceFactor;
+ extern	vmCvar_t		cg_drawTimer;
+ extern	vmCvar_t		cg_drawFPS;
+ extern	vmCvar_t		cg_drawSnapshot;
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index 73def7b6..cdf014a2 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -103,6 +103,7 @@ vmCvar_t	cg_oldGibs;
+ vmCvar_t	cg_gibsInheritPlayerVelocity;
+ vmCvar_t	cg_gibsExtraRandomVelocity;
+ vmCvar_t	cg_gibsExtraVerticalVelocity;
++vmCvar_t	cg_gibsBounceFactor;
+ vmCvar_t	cg_drawTimer;
+ vmCvar_t	cg_drawFPS;
+ vmCvar_t	cg_drawSnapshot;
+@@ -226,6 +227,7 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE  },
++	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.6", CVAR_ARCHIVE  },
+ 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
+-- 
+2.54.0
+

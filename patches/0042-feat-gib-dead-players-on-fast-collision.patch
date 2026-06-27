@@ -1,0 +1,115 @@
+From 2cfe30bdd7417d4c310105eacbc0efb395b13061 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sat, 2 May 2026 16:37:18 +0400
+Subject: [PATCH] feat: gib dead players on fast collision
+
+---
+ code/game/g_active.c | 44 ++++++++++++++++++++++++++++++++++++++++++++
+ code/game/g_local.h  |  2 ++
+ code/game/g_main.c   |  8 ++++++++
+ 3 files changed, 54 insertions(+)
+
+diff --git a/code/game/g_active.c b/code/game/g_active.c
+index 2be4d948..457fbb51 100644
+--- a/code/game/g_active.c
++++ b/code/game/g_active.c
+@@ -302,6 +302,38 @@ void	G_TouchTriggers( gentity_t *ent ) {
+ 	}
+ }
+ 
++static void CheckCollisionDamage( gentity_t *ent, const vec3_t oldVelocity ) {
++	gclient_t	*client = ent->client;
++	vec3_t		velChange;
++	int			damage;
++	float		div;
++
++	if ( client->ps.pm_type != PM_DEAD ) {
++		return;
++	}
++
++	VectorSubtract( client->ps.velocity, oldVelocity, velChange );
++
++	// Impact energy is proportional to the square of the speed.
++	// Also using `VectorLengthSquared` is computationally faster.
++	div = Square( g_gibsOnCollisionMinSpeed.value );
++	if ( div == 0 ) {
++		div = 1.0f / 0x10000;
++	}
++	damage = VectorLengthSquared( velChange )
++		/ div
++		* g_gibsOnCollisionBaseDamage.value;
++
++	// If the player already has -39 health,
++	// gibbing from a 2-centimeter fall would not look good.
++	// So we gotta have a threshold.
++	if ( damage < g_gibsOnCollisionBaseDamage.integer ) {
++		return;
++	}
++
++	G_Damage (ent, NULL, NULL, NULL, NULL, damage, 0, MOD_FALLING);
++}
++
+ /*
+ =================
+ SpectatorThink
+@@ -963,6 +995,18 @@ void ClientThink_real( gentity_t *ent ) {
+ 	// execute client events
+ 	ClientEvents( ent, oldEventSequence );
+ 
++	// We run this _after_ `ClientEvents()` because that's where
++	// the normal fall damage is dealt.
++	// We want that because if a player has died from a high fall
++	// then we want to immediately gib them.
++	//
++	// On the other hand maybe we should run this
++	// before `BG_PlayerStateToEntityState`, which seems like a function
++	// that should be run when "finishing things up".
++	if ( !g_oldGibs.integer && g_gibsOnCollisionBaseDamage.integer ) {
++		CheckCollisionDamage( ent, client->oldVelocity );
++	}
++
+ 	// link entity now, after any personal teleporters have been used
+ 	trap_LinkEntity (ent);
+ 	if ( !ent->client->noclip ) {
+diff --git a/code/game/g_local.h b/code/game/g_local.h
+index ae6086ff..569b5d42 100644
+--- a/code/game/g_local.h
++++ b/code/game/g_local.h
+@@ -750,6 +750,8 @@ extern	vmCvar_t	g_oldGibs;
+ extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
+ extern	vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
+ extern	vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
++extern	vmCvar_t	g_gibsOnCollisionMinSpeed;
++extern	vmCvar_t	g_gibsOnCollisionBaseDamage;
+ extern	vmCvar_t	g_allowVote;
+ extern	vmCvar_t	g_teamAutoJoin;
+ extern	vmCvar_t	g_teamForceBalance;
+diff --git a/code/game/g_main.c b/code/game/g_main.c
+index e984da91..05a59bbe 100644
+--- a/code/game/g_main.c
++++ b/code/game/g_main.c
+@@ -73,6 +73,8 @@ vmCvar_t	g_oldGibs;
+ vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
+ vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
+ vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
++vmCvar_t	g_gibsOnCollisionMinSpeed;
++vmCvar_t	g_gibsOnCollisionBaseDamage;
+ vmCvar_t	g_podiumDist;
+ vmCvar_t	g_podiumDrop;
+ vmCvar_t	g_allowVote;
+@@ -170,6 +172,12 @@ static cvarTable_t		gameCvarTable[] = {
+ 	{ &g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse },
+ 	{ &g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse },
+ 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
++	// If a dead player loses this much or more speed
++	// as a result of collision with something (e.g. floor, wall),
++	// deal `g_gibsOnCollisionBaseDamage` or more damage to them
++	// (damage increases with the square of the speed).
++	{ &g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, 0, qfalse },
++	{ &g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_ARCHIVE, 0, qfalse },
+ 
+ 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
+ 	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
+-- 
+2.54.0
+

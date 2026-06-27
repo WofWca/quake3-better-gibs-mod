@@ -1,0 +1,72 @@
+From 03da37c97b625b8423eb06908e4edc80ae2168d9 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Fri, 27 Mar 2026 11:50:37 +0400
+Subject: [PATCH] feat: gibs: random bounce factor
+
+---
+ code/cgame/cg_local.h     | 1 +
+ code/cgame/cg_localents.c | 8 +++++++-
+ code/cgame/cg_main.c      | 2 ++
+ 3 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 90994f0d..1d92556d 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1102,6 +1102,7 @@ extern	vmCvar_t		cg_gibsExtraRandomVelocity;
+ extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
+ extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
+ extern	vmCvar_t		cg_gibsBounceFactor;
++extern	vmCvar_t		cg_gibsBounceFactorRandomness;
+ extern	vmCvar_t		cg_gibsRotationFactor;
+ extern	vmCvar_t		cg_gibsBetterCameraOnGib;
+ extern	vmCvar_t		cg_drawTimer;
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index 3a5d407b..7801a108 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -220,6 +220,7 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDiffe
+ 	vec3_t	velocity;
+ 	float	dot;
+ 	int		hitTime;
++	float	bounceFactor = le->bounceFactor;
+ 
+ 	// reflect the velocity on the trace plane
+ 	hitTime = cg.time - cg.frametime + cg.frametime * trace->fraction;
+@@ -227,7 +228,12 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDiffe
+ 	dot = DotProduct( velocity, trace->plane.normal );
+ 	VectorMA( velocity, -2*dot, trace->plane.normal, le->pos.trDelta );
+ 
+-	VectorScale( le->pos.trDelta, le->bounceFactor, le->pos.trDelta );
++	if ( le->leBounceSoundType == LEBS_BLOOD && !cg_oldGibs.value ) {
++		// Get a tighter distribution rather than uniform.
++		float r = ( random() + random() ) / 2;
++		bounceFactor *= 1 - r * cg_gibsBounceFactorRandomness.value;
++	}
++	VectorScale( le->pos.trDelta, bounceFactor, le->pos.trDelta );
+ 
+ 	if (velocityDifference) {
+ 		VectorSubtract( le->pos.trDelta, velocity, velocityDifference );
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index 5318ee6a..ef40256c 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -105,6 +105,7 @@ vmCvar_t	cg_gibsExtraRandomVelocity;
+ vmCvar_t	cg_gibsRandomVelocityFromKnockback;
+ vmCvar_t	cg_gibsExtraVerticalVelocity;
+ vmCvar_t	cg_gibsBounceFactor;
++vmCvar_t	cg_gibsBounceFactorRandomness;
+ vmCvar_t	cg_gibsRotationFactor;
+ vmCvar_t	cg_gibsBetterCameraOnGib;
+ vmCvar_t	cg_drawTimer;
+@@ -232,6 +233,7 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.15", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "150", CVAR_ARCHIVE  },
+ 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
++	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE  },
+ 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
+ 	{ &cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE  },
+ 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
+-- 
+2.54.0
+

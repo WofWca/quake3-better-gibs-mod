@@ -1,0 +1,26 @@
+From b3c9236902d7c7342614988ecfd13b2b0b3b4f97 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 18 Nov 2025 19:14:07 +0400
+Subject: [PATCH] improvement: lower gibs bounceFactor
+
+This makes the gibs feel more "dead" and less frog-like.
+---
+ code/cgame/cg_main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index cdf014a2..e658828e 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -227,7 +227,7 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE  },
+-	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.6", CVAR_ARCHIVE  },
++	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
+ 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
+-- 
+2.54.0
+

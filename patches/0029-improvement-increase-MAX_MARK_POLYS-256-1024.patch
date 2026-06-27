@@ -1,0 +1,27 @@
+From 0b5ad51c5da233641700476fb2f3bc1ec947c100 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Thu, 29 Jan 2026 22:17:24 +0400
+Subject: [PATCH] improvement: increase `MAX_MARK_POLYS` 256 -> 1024
+
+This increases memory usage by 216 kB,
+but makes blood marks not forcefully disappear as new ones are made.
+---
+ code/cgame/cg_local.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 5db7b94b..f1bae3d0 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -58,7 +58,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ #define	MAX_STEP_CHANGE		32
+ 
+ #define	MAX_VERTS_ON_POLY	10
+-#define	MAX_MARK_POLYS		256
++#define	MAX_MARK_POLYS		1024
+ 
+ #define STAT_MINUS			10	// num frame for '-' stats digit
+ 
+-- 
+2.54.0
+

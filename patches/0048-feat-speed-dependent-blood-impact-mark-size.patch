@@ -1,0 +1,65 @@
+From 8d5b5a6eed90f701ef616caadbe76413eff1bfb9 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 24 May 2026 22:49:33 +0400
+Subject: [PATCH] feat: speed-dependent blood impact mark size
+
+---
+ code/cgame/cg_localents.c | 31 ++++++++++++++++++++++++++++---
+ 1 file changed, 28 insertions(+), 3 deletions(-)
+
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index 7801a108..ac5eefaa 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -153,12 +153,37 @@ void CG_BloodTrail( localEntity_t *le ) {
+ CG_FragmentBounceMark
+ ================
+ */
+-void CG_FragmentBounceMark( localEntity_t *le, trace_t *trace ) {
++void CG_FragmentBounceMark( const localEntity_t *le, const trace_t *trace,
++	const vec3_t impactVelocityDiff ) {
+ 	int			radius;
+ 
+ 	if ( le->leMarkType == LEMT_BLOOD ) {
++		float radiusFactor = VectorLengthSquared( impactVelocityDiff )
++			/ Square( 800 );
++		if ( radiusFactor > 1 ) {
++			radiusFactor = 1;
++		}
++		// Smaller pieces make smaller marks.
++		if ( le->refEntity.hModel == cgs.media.gibIntestine ) {
++			radiusFactor *= 0.25;
++		} else if ( le->refEntity.hModel == cgs.media.gibSkull ) {
++			radiusFactor *= 0.5;
++		} else if ( le->refEntity.hModel == cgs.media.gibFist ) {
++			radiusFactor *= 0.5;
++		} else if ( le->refEntity.hModel == cgs.media.gibAbdomen ) {
++			radiusFactor *= 1.25;
++		} else if ( le->refEntity.hModel == cgs.media.gibChest ) {
++			radiusFactor *= 1.25;
++		} else if ( le->refEntity.hModel == cgs.media.gibLeg ) {
++			radiusFactor *= 1.25;
++		}
++
++		if ( cg_oldGibs.integer ) {
++			radius = 16 + (rand()&31);
++		} else {
++			radius = 16 + (radiusFactor + 0.25*crandom()) * 24;
++		}
+ 
+-		radius = 16 + (rand()&31);
+ 		CG_ImpactMark( cgs.media.bloodMarkShader, trace->endpos, trace->plane.normal, random()*360,
+ 			1,1,1,1, qtrue, radius, qfalse );
+ 	} else if ( le->leMarkType == LEMT_BURN ) {
+@@ -343,7 +368,7 @@ void CG_AddFragment( localEntity_t *le ) {
+ 
+ 	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceMarksMinImpactSpeed.value ) ) {
+ 		// leave a mark
+-		CG_FragmentBounceMark( le, &trace );
++		CG_FragmentBounceMark( le, &trace, impactVelocityDiff );
+ 	}
+ 
+ 	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceSoundMinImpactSpeed.value ) ) {
+-- 
+2.54.0
+

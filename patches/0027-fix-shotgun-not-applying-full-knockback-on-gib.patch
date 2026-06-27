@@ -1,0 +1,88 @@
+From 683761484ab8a9faa364116faf41b348991b8a2d Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Wed, 18 Feb 2026 21:29:10 +0400
+Subject: [PATCH] fix: shotgun not applying full knockback on gib
+
+Related:
+- https://github.com/ec-/baseq3a/pull/58.
+- https://github.com/ioquake/ioq3/issues/7.
+---
+ code/game/g_combat.c | 12 ++++++++++--
+ code/game/g_local.h  |  3 +++
+ code/game/g_weapon.c |  9 +++++++++
+ 3 files changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/code/game/g_combat.c b/code/game/g_combat.c
+index e5f4becc..edd3cac0 100644
+--- a/code/game/g_combat.c
++++ b/code/game/g_combat.c
+@@ -287,7 +287,11 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d
+ 		return;
+ 	}
+ 
+-	GibEntity( self, 0 );
++	if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
++		self->gibScheduled = qtrue;
++	} else {
++		GibEntity( self, 0 );
++	}
+ }
+ 
+ 
+@@ -636,7 +640,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
+ 
+ 	if ( (self->health <= GIB_HEALTH && !(contents & CONTENTS_NODROP) && g_blood.integer) || meansOfDeath == MOD_SUICIDE) {
+ 		// gib death
+-		GibEntity( self, killer );
++		if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
++			self->gibScheduled = qtrue;
++		} else {
++			GibEntity( self, killer );
++		}
+ 	} else {
+ 		// normal death
+ 		static int lastDeath;
+diff --git a/code/game/g_local.h b/code/game/g_local.h
+index 6ff91ed0..05e8c2fc 100644
+--- a/code/game/g_local.h
++++ b/code/game/g_local.h
+@@ -144,6 +144,8 @@ struct gentity_s {
+ 	int			health;
+ 
+ 	qboolean	takedamage;
++	// Whether to `GibEntity` after applying all the pellets of a shotgun shot.
++	qboolean	gibScheduled;
+ 
+ 	int			damage;
+ 	int			splashDamage;	// quad will increase this without increasing radius
+@@ -490,6 +492,7 @@ const char *BuildShaderStateConfig( void );
+ //
+ qboolean CanDamage (gentity_t *targ, vec3_t origin);
+ void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod);
++void GibEntity( gentity_t *self, int killer );
+ // The shotgun does `G_Damage` multiple times, per each pellet.
+ // Normally that would mean that if the target is at 1 HP,
+ // only one pellet would hit them.
+diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
+index b05176eb..bca3af51 100644
+--- a/code/game/g_weapon.c
++++ b/code/game/g_weapon.c
+@@ -379,6 +379,15 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
+ 			SetDeadHeight( ent2 );
+ 			SetFlNoKnockback( ent2 );
+ 		}
++
++		if ( ent2->gibScheduled ) {
++			// Note that this is technically differerent from vanilla,
++			// because vanilla passes `0` as `eventParm if we are gibbing
++			// a body from body queue.
++			int killer = ent->s.number;
++			GibEntity( ent2, killer );
++		}
++		ent2->gibScheduled = qfalse;
+ 	}
+ }
+ 
+-- 
+2.54.0
+
