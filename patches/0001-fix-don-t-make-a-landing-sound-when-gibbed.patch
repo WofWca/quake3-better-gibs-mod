@@ -1,0 +1,30 @@
+From 4bed98c7f726773aa6a01ca714b38d2a8b4c484a Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Fri, 26 Jun 2026 15:16:16 +0400
+Subject: [PATCH] fix: don't make a landing sound when gibbed
+
+---
+ code/game/bg_pmove.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/code/game/bg_pmove.c b/code/game/bg_pmove.c
+index c7541743..5d9bbee8 100644
+--- a/code/game/bg_pmove.c
++++ b/code/game/bg_pmove.c
+@@ -927,6 +927,13 @@ static void PM_CrashLand( void ) {
+ 	float		t;
+ 	float		a, b, c, den;
+ 
++	if ( pm->ps->pm_type == PM_DEAD &&
++		pm->ps->stats[STAT_HEALTH] <= GIB_HEALTH )
++	{
++		// gibbed: don't make a sound, and no need to change animations
++		return;
++	}
++
+ 	// decide which landing animation to use
+ 	if ( pm->ps->pm_flags & PMF_BACKWARDS_JUMP ) {
+ 		PM_ForceLegsAnim( LEGS_LANDB );
+-- 
+2.54.0
+
