@@ -1,0 +1,45 @@
+From 358e658b2ed0d5d7843f74cca4d4ddce57ed66ca Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 31 May 2026 23:04:43 +0400
+Subject: [PATCH] improvement: dampen gibs' tumble speed
+
+This basically doesn't affect anything other than gibs:
+machine gun and shotgun shells' tumble doesn't work anyway.
+But if it did, this would probably be good.
+---
+ code/cgame/cg_localents.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index a99fcaea..6417ca1e 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -316,6 +316,25 @@ void CG_AddFragment( localEntity_t *le ) {
+ 	// reflect the velocity on the trace plane
+ 	CG_ReflectVelocity( le, &trace, impactVelocityDiff );
+ 
++	// Reduce (dampen) tumbling speed.
++	if ( le->leFlags & LEF_TUMBLE ) {
++		// Having angular velocity damping synchronized with
++		// linear velocity damping makes sure that they both decay
++		// at the same rate.
++		// Though having angular velocity damping a little smaller
++		// makes the fragment (gibs at least) look a little better
++		// when it stops, (as long as its angular velocity is not too big
++		// compared to its linear velocity).
++		float damping = (1 - le->bounceFactor) * 0.5;
++
++		// Make sure to set the current as the base before we update the delta,
++		// otherwise angles will suddenly jump on the next frame.
++		BG_EvaluateTrajectory( &le->angles, cg.time, le->angles.trBase );
++		le->angles.trTime = cg.time;
++
++		VectorScale( le->angles.trDelta, 1 - damping, le->angles.trDelta );
++	}
++
+ 	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceMarksMinImpactSpeed.value ) ) {
+ 		// leave a mark
+ 		CG_FragmentBounceMark( le, &trace );
+-- 
+2.54.0
+
