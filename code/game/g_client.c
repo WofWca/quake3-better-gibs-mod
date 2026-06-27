@@ -410,6 +410,10 @@ void CopyToBodyQue( gentity_t *ent ) {
 
 	body->die = body_die;
 
+	if ( !g_oldGibs.integer ) {
+		// Not present in vanilla (probably just a bug).
+		body->health = ent->health;
+	}
 	body->takedamage = ent->takedamage;
 
 	VectorCopy ( body->s.pos.trBase, body->r.currentOrigin );
