@@ -1,0 +1,155 @@
+From efdb41fb4be3e5929e20be2503bdb052d52c8919 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 23 Jun 2026 19:44:50 +0400
+Subject: [PATCH] feat: `cg_gibsNoLerpDelay`
+
+---
+ code/cgame/cg_local.h    |  1 +
+ code/cgame/cg_main.c     | 16 +++++++++
+ code/cgame/cg_snapshot.c | 72 ++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 89 insertions(+)
+
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 0d3e3bfc..e034318e 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1112,6 +1112,7 @@ extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
+ extern	vmCvar_t		cg_gibsPlayerSpeedFromKnockback;
+ extern	vmCvar_t		cg_gibsPlayerSpeedFromKnockbackMaxFraction;
+ extern	vmCvar_t		cg_gibsOriginalOrigin;
++extern	vmCvar_t		cg_gibsNoLerpDelay;
+ extern	vmCvar_t		cg_gibsBounceFactor;
+ extern	vmCvar_t		cg_gibsBounceFactorRandomness;
+ extern	vmCvar_t		cg_gibsRotationFactor;
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index 75cc7405..0af86524 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -112,6 +112,7 @@ vmCvar_t	cg_gibsExtraVerticalVelocity;
+ vmCvar_t	cg_gibsPlayerSpeedFromKnockback;
+ vmCvar_t	cg_gibsPlayerSpeedFromKnockbackMaxFraction;
+ vmCvar_t	cg_gibsOriginalOrigin;
++vmCvar_t	cg_gibsNoLerpDelay;
+ vmCvar_t	cg_gibsBounceFactor;
+ vmCvar_t	cg_gibsBounceFactorRandomness;
+ vmCvar_t	cg_gibsRotationFactor;
+@@ -291,11 +292,26 @@ static cvarTable_t cvarTable[] = {
+ 	// To get vanilla behavior, set to 0.
+ 	//
+ 	// Has no effect on vanilla servers (`g_gibsNewEvGibPlayerProtocol 0`).
++	// Basically has no effect when `cg_gibsNoLerpDelay 1`.
+ 	//
+ 	// Using the original position might make it seem
+ 	// like the player "telepoted" one snapshot back (50ms at `snaps 20`)
+ 	// if they're already movnig at high speed.
+ 	{ &cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0  },
++	// Don't wait for next snapshot to arrive (normally 50ms)
++	// before gibbing players.
++	// Consequently, this affects the position from which the gibs are launched,
++	// due to the gibbed player (or, rather, their camera) moving during those 50ms.
++	// See `cg_gibsOriginalOrigin`.
++	//
++	// Note that when looking at another player (or missile) gibbing someone
++	// it will look like the player gets gibbed
++	// 50ms before the actual shot is fired.
++	// That is, the gib even will happen ahead of the displayed state of the game.
++	//
++	// Set this to 3 (2nd bit) to also do this on vanilla servers.
++	// To get vanilla behavior, set to 0.
++	{ &cg_gibsNoLerpDelay, "cg_gibsNoLerpDelay", "0", 0  },
+ 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
+ 	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE  },
+ 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
+diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
+index 11b9a067..5db612c7 100644
+--- a/code/cgame/cg_snapshot.c
++++ b/code/cgame/cg_snapshot.c
+@@ -186,6 +186,76 @@ static void CG_TransitionSnapshot( void ) {
+ }
+ 
+ 
++/*
++===================
++CG_TransitionNoLerpEntities
++
++Some events do not need interpolation and can do their thing
++as soon as they appear in `cg.nextSnap`,
++without waiting to transition from `cg.nextSnap` to `cg.snap`
++(`CG_TransitionSnapshot`).
++===================
++*/
++static void CG_TransitionNoLerpEntities( const snapshot_t *snap ) {
++	if ( cg_gibsNoLerpDelay.integer && !cg_oldGibs.integer ) {
++		int num;
++
++		for ( num = 0 ; num < snap->numEntities ; num++ ) {
++			const entityState_t *es = &snap->entities[num];
++			centity_t *cent = &cg_entities[ es->number ];
++			// We have roughly the same calculations in `CG_GibPlayer2`.
++			int targNum =
++				es->eType == ET_EVENTS + EV_GIB_PLAYER &&
++				cgs.g_gibsNewEvGibPlayerProtocol & 0x04
++					? es->otherEntityNum
++					: es->number;
++			centity_t *targCent = targNum == cg.snap->ps.clientNum
++				? &cg.predictedPlayerEntity
++				: &cg_entities[ targNum ];
++			vec3_t posBase;
++			int nextStateEvent;
++
++			if ( es->eType != ET_EVENTS + EV_GIB_PLAYER &&
++				// For vanilla servers.
++				!(
++					( es->event & ~EV_EVENT_BITS ) == EV_GIB_PLAYER &&
++					cg_gibsNoLerpDelay.integer & 0x02
++				) )
++			{
++				continue;
++			}
++
++			if ( cg_debugGibs.integer & 0x08 ) {
++				CG_Printf("Running gib event without lerp delay (cg_gibsNoLerpDelay). ent %i targ %i t %i server time %i\n",
++					es->number, targNum, cg.time, snap->serverTime );
++			}
++
++			// TODO fix: with vanilla servers (old protocol)
++			// this will basically teleport the player
++			// to their position on `nextSnap`, without interpolation.
++			// So it will look like gibs originated from a position
++			// different from the player body's position.
++			// Noticeable with quad shotgun and low `snaps` value.
++			//
++			// Probably can be fixed by only running `CG_GibPlayer`
++			// and not touching `cent->currentState`
++			// (`CG_TransitionEntity()` does it).
++
++			// This will run `CG_GibPlayer()`.
++			CG_TransitionEntity( cent );
++			// Copied from the other occurrence of `CG_TransitionEntity`.
++			// Otherwise it seems that `CG_GibPlayer()` runs twice.
++			cent->snapShotTime = cg.snap->serverTime;
++
++			// We've run the "gib" event for this entity ahead of time,
++			// so we also need to make it invisible ahead of time,
++			// otherwise both gibs and the player body will be visible
++			// at the same time for a few frames, until the next snap.
++			targCent->currentState.eType = targCent->nextState.eType;
++		}
++	}
++}
++
+ /*
+ ===================
+ CG_SetNextSnap
+@@ -240,6 +310,8 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
+ 
+ 	// sort out solid entities
+ 	CG_BuildSolidList();
++
++	CG_TransitionNoLerpEntities( snap );
+ }
+ 
+ 
+-- 
+2.54.0
+

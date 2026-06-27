@@ -1,0 +1,138 @@
+From e9eea5aebde3e3f5e45bfb4a243ab98d8bd8f324 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 21 Jun 2026 18:33:20 +0400
+Subject: [PATCH] feat: gibs: reduce player speed from knockback
+
+---
+ code/cgame/cg_effects.c | 36 ++++++++++++++++++++++++++++++++++++
+ code/cgame/cg_local.h   |  2 ++
+ code/cgame/cg_main.c    | 19 +++++++++++++++++++
+ 3 files changed, 57 insertions(+)
+
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index f371506b..f340581b 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -675,12 +675,16 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 	const int knockbackSpeed =
+ 		cg_gibsExtraKnockback.integer +
+ 		cg_gibsKnockback.value * knockbackSpeedOriginal;
++	float stoppingSpeed;
+ 	float baseRandomVelocity =
+ 		cg_gibsExtraRandomVelocity.value +
+ 		cg_gibsRandomVelocityFromKnockback.value * knockbackSpeed;
+ 	int seed = randSeed;
+ 
+ 	vec3_t playerVelocity;
++	// Note that this is not too accurate: we derive it based on knockback,
++	// so expect an error of up to ~100.
++	vec3_t pVelBeforeKnockback;
+ 	float jump =
+ 		cg_gibsExtraVerticalVelocity.value +
+ 		cg_gibsVerticalVelocityFromKnockback.value * knockbackSpeed;
+@@ -710,6 +714,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 	}
+ 	AngleVectors( bodyAngles, forward, right, up );
+ 
++	if ( knockbackDir ) {
++		VectorMA( playerVelocityOriginal, -knockbackSpeedOriginal, knockbackDir,
++			pVelBeforeKnockback );
++	} else {
++		VectorCopy( playerVelocityOriginal, pVelBeforeKnockback );
++	}
+ 	VectorCopy( playerVelocityOriginal, playerVelocity );
+ 
+ 	if ( knockbackDir ) {
+@@ -725,6 +735,27 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 			playerVelocity );
+ 	}
+ 
++	stoppingSpeed = -cg_gibsPlayerSpeedFromKnockback.value * knockbackSpeed;
++	if ( knockbackDir && !VectorCompare( knockbackDir, vec3_origin )
++		&& stoppingSpeed )
++	{
++		float speedBeforeKb = VectorLength( pVelBeforeKnockback );
++		float stoppingPower =
++			stoppingSpeed >= speedBeforeKb || speedBeforeKb == 0
++				? 1
++				: stoppingSpeed / speedBeforeKb;
++
++		if ( stoppingPower > -cg_gibsPlayerSpeedFromKnockbackMaxFraction.value ) {
++			stoppingPower = -cg_gibsPlayerSpeedFromKnockbackMaxFraction.value;
++		}
++
++		VectorMA( playerVelocity, -stoppingPower, pVelBeforeKnockback,
++			playerVelocity );
++		stoppingSpeed = speedBeforeKb * stoppingPower;
++	} else {
++		stoppingSpeed = 0;
++	}
++
+ 	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocity );
+ 
+ 	if ( cg_debugGibs.integer & 0x01 ) {
+@@ -750,6 +781,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		CG_Printf( " yaw "S_COLOR_YELLOW"%.1f",
+ 			AngleNormalize360( bodyAngles[YAW] ) );
+ 		CG_Printf( ", knockback speed "S_COLOR_YELLOW"%i", knockbackSpeed );
++		CG_Printf( ", before kb: "S_COLOR_YELLOW"%.1f",
++			VectorLength( pVelBeforeKnockback ) );
++		if ( stoppingSpeed != 0 ) {
++			CG_Printf( ", stopping: "S_COLOR_YELLOW"%.1f", stoppingSpeed );
++		}
+ 		CG_Printf( ", random seed "S_COLOR_YELLOW"%i", seed );
+ 		CG_Printf( "\n" );
+ 	}
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 8c3012f2..0d3e3bfc 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1109,6 +1109,8 @@ extern	vmCvar_t		cg_gibsExtraRandomVelocity;
+ extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
+ extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
+ extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
++extern	vmCvar_t		cg_gibsPlayerSpeedFromKnockback;
++extern	vmCvar_t		cg_gibsPlayerSpeedFromKnockbackMaxFraction;
+ extern	vmCvar_t		cg_gibsOriginalOrigin;
+ extern	vmCvar_t		cg_gibsBounceFactor;
+ extern	vmCvar_t		cg_gibsBounceFactorRandomness;
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index f210e93e..75cc7405 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -109,6 +109,8 @@ vmCvar_t	cg_gibsExtraRandomVelocity;
+ vmCvar_t	cg_gibsRandomVelocityFromKnockback;
+ vmCvar_t	cg_gibsVerticalVelocityFromKnockback;
+ vmCvar_t	cg_gibsExtraVerticalVelocity;
++vmCvar_t	cg_gibsPlayerSpeedFromKnockback;
++vmCvar_t	cg_gibsPlayerSpeedFromKnockbackMaxFraction;
+ vmCvar_t	cg_gibsOriginalOrigin;
+ vmCvar_t	cg_gibsBounceFactor;
+ vmCvar_t	cg_gibsBounceFactorRandomness;
+@@ -262,6 +264,23 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE  },
+ 	{ &cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE  },
++	// How much to slow down the player depending on how much damage (knockback)
++	// they took.
++	// This makes the original player velocity have less effect
++	// on the final gib velocity, thus giving more emphasis to the damage direction.
++	//
++	// Unlike reducing `cg_gibsInheritPlayerVelocity`,
++	// this works better if the player is already moving at high speed
++	// (e.g. on a jump pad), or falling.
++	// This will not reduce player velocity if the knockback was low
++	// or if damage had no direction (e.g. falling).
++	//
++	// Has no effect on vanilla servers.
++	{ &cg_gibsPlayerSpeedFromKnockback, "cg_gibsPlayerSpeedFromKnockback", "-0.25", 0  },
++	// If knockback is big, this helps keep at least some fraction of player speed.
++	// For example, if this is -0.75, we'll always keep at least 25%
++	// of original player velocity.
++	{ &cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnockbackMaxFraction", "-0.5", 0  },
+ 	// Whether to use the exact position where the player got gibbed
+ 	// as the initial gibs position, instead of the position of the gibbed player
+ 	// on the screen, i.e. the position of the player on the next server frame
+-- 
+2.54.0
+

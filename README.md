@@ -100,14 +100,25 @@ so you can enjoy it on basically any server
   set to 1.3 to launch 3 more pieces of gibs,
   or to 0.5 to half the amount of gibs
 - `cg_gibsInheritPlayerVelocity`
+- `cg_gibsKnockback`
+- `cg_gibsExtraKnockback`
 - `cg_gibsPiecesFromKnockback`
+- `cg_gibsLinearVelocityFromKnockback`
 - `cg_gibsRandomVelocityFromKnockback`
 - `cg_gibsVerticalVelocityFromKnockback`
 - `cg_gibsExtraRandomVelocity`
 - `cg_gibsExtraVerticalVelocity`
+- `cg_gibsPlayerSpeedFromKnockback`
+- `cg_gibsPlayerSpeedFromKnockbackMaxFraction`
+- `cg_gibsOriginalOrigin`
+- `cg_gibsNoLerpDelay`
 - `cg_gibsBounceFactor`
 - `cg_gibsBounceFactorRandomness`
 - `cg_gibsRotationFactor`
+- `cg_gibsBloodTrailPeriod`
+- `cg_gibsFireTrailPeriod`
+- `cg_gibsFireTrailDuration`
+- `cg_gibsFireTrailMinKnockback`
 - `cg_gibsBetterCameraOnGib`
 - `cg_bounceMarksMinImpactSpeed`
 - `cg_bounceSoundMinImpactSpeed`
@@ -115,12 +126,12 @@ so you can enjoy it on basically any server
   As you can tell by the `g_` prefix, this variable techically changes gameplay.
   However, this only affects the direction in which the player's camera will fly
   when they get gibbed.
-- `g_gibsNewEvGibPlayerParmProtocol`: this mod technically modifies
-  the network protocol, namely the `EV_GIB_PLAYER` event's argument.
-  Now we pass the knockback speed as the argument,
-  instead of the killer's entity number.
-  But in vanilla Quake 3 the argument is anyway unused so it is fine.
-  However, if some other mod does rely on this argument,
+- `g_gibsNewEvGibPlayerProtocol`: this mod technically modifies
+  the network protocol, namely now the server
+  creates a temp entity for EV_GIB_PLAYER
+  instead of triggering the event by changing the `event` field on the target.
+  This is compatible with vanilla clients.
+  However, if some other mod does rely on vanilla server behavior,
   you can set this CVAR to 0 to revert this change.
 - `g_gibsOnCollisionMinSpeed`
 - `g_gibsOnCollisionBaseDamage`
@@ -143,7 +154,7 @@ set cg_gibsBounceFactor 0.6
 set cg_gibsRotationFactor 0
 set cg_gibsBetterCameraOnGib 0
 set g_gibsMissileDirectionKnockbackWeight 1
-set g_gibsNewEvGibPlayerParmProtocol 0
+set g_gibsNewEvGibPlayerProtocol 0
 // Can't "restore" these
 // cg_bounceMarksMinImpactSpeed
 // cg_bounceSoundMinImpactSpeed

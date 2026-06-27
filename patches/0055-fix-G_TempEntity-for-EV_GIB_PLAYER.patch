@@ -1,0 +1,589 @@
+From 9299008200a12f32fe62417f1dcab7565c4d8223 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 7 Jun 2026 15:45:08 +0400
+Subject: [PATCH] fix: `G_TempEntity` for `EV_GIB_PLAYER`
+
+Closes https://github.com/WofWca/quake3-better-gibs-mod/issues/10.
+Closes https://github.com/WofWca/quake3-better-gibs-mod/issues/16.
+Also closes some of the already closed ones:
+Closes https://github.com/WofWca/quake3-better-gibs-mod/issues/3.
+Closes https://github.com/WofWca/quake3-better-gibs-mod/issues/7.
+Closes https://github.com/WofWca/quake3-better-gibs-mod/issues/13.
+
+Using a temp entity allows us to restore
+the original `eventParm` meaning (see
+github.com/WofWca/quake3-better-gibs-mod/issues/16),
+and to transfer more custom data with the gib event.
+Also fixes some bugs.
+
+This, again, is cross-compatible with vanilla.
+Although yes, this might potentially break some mods,
+this is ultimately the way forward, i.e. using a temp entity
+would be the right thing if we didn't have to worry about compatibility.
+ETLegacy also recently migrated to using a temp entity.
+
+This commit, besides simply migrating to `G_TempEntity()`,
+changes a few other things that are related to that:
+- We removed `CVAR_ARCHIVE` from the relevant server CVAR.
+  Also we renamed the CVAR so that
+  old users who upgrade to a new version will use the new proto.
+- Added `setDeathAnimScheduled`, to avoid adding the death sound
+  on a player that also gets gibbed the next moment.
+  Previously this was not necessary because
+  if the player had the death event on them then adding the gib event
+  would simply override the death event before it's sent to clients.
+- Removed `cg_gibsBetterCameraOnGib` userinfo for bots
+  because the relevant bug
+  https://github.com/WofWca/quake3-better-gibs-mod/issues/3
+  is no longer present.
+  And removed a comment in `Pmove`.
+- Removed the smaller size hack for the foot gib:
+  now the gib event origin is always the exact place
+  where the player was when they got gibbed,
+  which guarantees that they're not sunk into the floor.
+---
+ code/cgame/cg_effects.c    |  82 ++++++++++++++----
+ code/cgame/cg_local.h      |   2 +-
+ code/cgame/cg_localents.c  |   7 +-
+ code/cgame/cg_servercmds.c |  12 ++-
+ code/game/bg_pmove.c       |   5 --
+ code/game/g_bot.c          |   5 --
+ code/game/g_combat.c       | 169 ++++++++++++++++++++++++-------------
+ code/game/g_local.h        |   8 +-
+ code/game/g_main.c         |  10 ++-
+ code/game/g_weapon.c       |  40 ++++++++-
+ 10 files changed, 240 insertions(+), 100 deletions(-)
+
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index 8f8736c4..e272ff86 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -1034,30 +1034,54 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ }
+ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+ 					const clientInfo_t *ci ) {
+-	int knockbackSpeed = cgs.g_gibsNewEvGibPlayerParmProtocol == 1
++	// With the new proto, `cent` is the temp event entity.
++	// We need to get the actual player or corpse.
++	const int targNum = cgs.g_gibsNewEvGibPlayerProtocol & 0x04
++		? es->otherEntityNum
++		: es->number;
++	const centity_t *targCent = targNum == cg.snap->ps.clientNum
++		? &cg.predictedPlayerEntity
++		: &cg_entities[ targNum ];
++	const entityState_t *targEs = &targCent->currentState;
++	const qboolean targEsValid = targCent->currentValid ||
++		targCent == &cg.predictedPlayerEntity;
++	const int killer = es->eventParm;
++
++	int knockbackSpeed = cgs.g_gibsNewEvGibPlayerProtocol & 0x02
++		? es->generic1 * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
++		// Also check the old Better Gibs mod protocol.
++		// This is to support servers and replays with the old version
++		// of the Better Gibs mod.
++		// Not super necessary but why not.
++		: cgs.g_gibsNewEvGibPlayerProtocol & 0x01
+ 		? es->eventParm * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
+ 		// Just use the default knockback speed for 100 damage.
+ 		: 100 * 1000 / COMBAT_PLAYER_MASS;
+ 
+-	// Apparently at this point `es->pos.trDelta` doesn't yet have
++	// Apparently at this point `targEs->pos.trDelta` doesn't yet have
+ 	// the knockback from the damage that gibbed us,
+ 	// so we have to differentiate between self and non-self
+ 	// during regular (non-demo non-spectator) gameplay.
+ 	const qboolean usePredictedPs =
+-		es->number == cg.snap->ps.clientNum &&
++		targNum == cg.snap->ps.clientNum &&
+ 		!cg.demoPlayback &&
+ 		!(cg.snap->ps.pm_flags & PMF_FOLLOW);
+-	const vec3_t *vel = usePredictedPs
+-		? (const vec3_t*)&cg.predictedPlayerState.velocity
+-		: &es->pos.trDelta;
+-
+-	lerpFrame_t torsoAnimation = es->number == cg.snap->ps.clientNum
+-		// `cent->pe.torso` appears to be not good for self,
+-		// unlike `cg.predictedPlayerEntity`,
+-		// even during `demoPlayback` and `PMF_FOLLOW`,
+-		// so we're not using `usePredictedPs` here.
+-		? cg.predictedPlayerEntity.pe.torso
+-		: cent->pe.torso;
++	// The new protocol has `trDelta` set to the player velocity
++	// at the time of gib.
++	// This is different from the velocity of the player or corpse (`targCent`),
++	// which might have changed (due to `Pmove()` or `BG_EvaluateTrajectory()`)
++	// between the gib event and the time when the snapshot was sent.
++	// This is especially important if the knockback moved the player
++	// against an obstacle such as a wall or the floor, clipping their velocity.
++	// See https://github.com/WofWca/quake3-better-gibs-mod/issues/3.
++	const vec3_t *vel =
++		!( cgs.g_gibsNewEvGibPlayerProtocol & 0x08 ) && usePredictedPs
++			? (const vec3_t*)&cg.predictedPlayerState.velocity
++			: &es->pos.trDelta;
++
++	// TODO: need to check `targEsValid`?
++	// Probably not a big deal though.
++	lerpFrame_t torsoAnimation = targCent->pe.torso;
+ 	vec3_t torsoAngles;
+ 
+ 	// TODO fix: things like `origin` and `angles`
+@@ -1090,11 +1114,37 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+ 	torsoAngles[ROLL] = 0;
+ 
+ 	if ( cg_debugGibs.integer & 0x04 ) {
++		vec3_t diff;
++		float l;
++
+ 		CG_Printf("EV_GIB_PLAYER:");
+ 		CG_Printf(" time "S_COLOR_GREEN"%i.%03is",
+ 			cg.time / 1000, cg.time % 1000 );
+-		CG_Printf(", targ "S_COLOR_GREEN"%i",
+-			es->number );
++		// If the server sets `EF_PLAYER_EVENT`, this is never `true`.
++		if ( targNum != es->number ) {
++			CG_Printf(", ent "S_COLOR_GREEN"%i",
++				es->number );
++		}
++		CG_Printf(", targ %s%i",
++			targEsValid ? S_COLOR_GREEN : S_COLOR_RED,
++			targNum );
++
++		// Yellow means a big difference, but usually it means
++		// that it's an innacuracy that we fixed by using the new protocol,
++		// where the position and velocity are fixed at what they were
++		// the moment the player got gibbed on the server,
++		// i.e. they are not interpolated.
++		VectorSubtract( targEs->pos.trBase, es->pos.trBase, diff );
++		l = VectorLength( diff );
++		CG_Printf(", pos diff %s%.1f",
++			l > 750 ? S_COLOR_RED : l > 100 ? S_COLOR_YELLOW : S_COLOR_GREEN,
++			VectorLength( diff ) );
++		VectorSubtract( targEs->pos.trDelta, *vel, diff );
++		l = VectorLength( diff );
++		CG_Printf(", vel diff %s%.1f",
++			l > 1500 ? S_COLOR_RED : l > 100 ? S_COLOR_YELLOW : S_COLOR_GREEN,
++			VectorLength( diff ) );
++
+ 		CG_Printf(", usePredictedPs %s%i\n",
+ 			usePredictedPs ? S_COLOR_GREEN : S_COLOR_CYAN,
+ 			usePredictedPs );
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 9a49ff72..c688daf1 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1018,7 +1018,7 @@ typedef struct {
+ 	char			blueTeam[MAX_QPATH];
+ 
+ 	// parsed from systeminfo
+-	int				g_gibsNewEvGibPlayerParmProtocol;
++	int				g_gibsNewEvGibPlayerProtocol;
+ 
+ 	int				voteTime;
+ 	int				voteYes;
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index 8510b5ab..e631d1c1 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -428,12 +428,7 @@ static void GetFragmentMinsMaxs( const localEntity_t *le, vec3_t mins, vec3_t ma
+ 		} else if ( le->refEntity.hModel == cgs.media.gibLeg ) {
+ 			sizeFactor *= 1.25;
+ 		} else if ( le->refEntity.hModel == cgs.media.gibFoot ) {
+-			// This one is overly small, but otherwise
+-			// it visibly gets stuck in the ground all the time
+-			// when fragging with railgun or shotgun.
+-			// due to `cg_gibsBetterCameraOnGib` causing the player box
+-			// to get interpolated into the ground.
+-			sizeFactor *= 0.25;
++			sizeFactor *= 0.5;
+ 		}
+ 
+ 		VectorScale( mins, sizeFactor, mins );
+diff --git a/code/cgame/cg_servercmds.c b/code/cgame/cg_servercmds.c
+index fe13adec..1a347396 100644
+--- a/code/cgame/cg_servercmds.c
++++ b/code/cgame/cg_servercmds.c
+@@ -176,11 +176,19 @@ void CG_ParseServerinfo( void ) {
+ 
+ void CG_ParseSysteminfo( void ) {
+ 	const char	*info;
++	char		*s;
+ 
+ 	info = CG_ConfigString( CS_SYSTEMINFO );
+ 
+-	cgs.g_gibsNewEvGibPlayerParmProtocol =
+-		atoi( Info_ValueForKey( info, "g_gibsNewEvGibPlayerParmProtocol" ) );
++	s = Info_ValueForKey( info, "g_gibsNewEvGibPlayerProtocol" );
++	if ( s[0] == '\0' ) {
++		// Try the old name.
++		// This is to support servers and replays with the old version
++		// of the Better Gibs mod.
++		// Not super necessary but why not.
++		s = Info_ValueForKey( info, "g_gibsNewEvGibPlayerParmProtocol" );
++	}
++	cgs.g_gibsNewEvGibPlayerProtocol = atoi( s );
+ }
+ 
+ /*
+diff --git a/code/game/bg_pmove.c b/code/game/bg_pmove.c
+index d5c14ec6..d8b07eab 100644
+--- a/code/game/bg_pmove.c
++++ b/code/game/bg_pmove.c
+@@ -1294,11 +1294,6 @@ static void PM_CheckDuck (void)
+ 			// and lifting it off the ground,
+ 			// as if the player became just their head.
+ 			//
+-			// This also fixes the issue with gibs
+-			// flying parallel to the ground even when knockback direction
+-			// is towards the ground:
+-			// https://github.com/WofWca/quake3-better-gibs-mod/issues/3.
+-			//
+ 			// Note that we don't need to change `groundEntityNum` and stuff,
+ 			// because there is `PM_GroundTraceMissed()`
+ 			// right after `PM_CheckDuck()`.
+diff --git a/code/game/g_bot.c b/code/game/g_bot.c
+index 544f96e9..b6b205f1 100644
+--- a/code/game/g_bot.c
++++ b/code/game/g_bot.c
+@@ -727,11 +727,6 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
+ 	// don't send tinfo to bots, they don't parse it
+ 	Info_SetValueForKey( userinfo, "teamoverlay", "0" );
+ 
+-	// Settings this to 1 for bots because this also fixes a bug
+-	// https://github.com/WofWca/quake3-better-gibs-mod/issues/3.
+-	// See `bg_pmove.c`.
+-	Info_SetValueForKey( userinfo, "cg_gibsBetterCameraOnGib", "1" );
+-
+ 	// register the userinfo
+ 	trap_SetUserinfo( clientNum, userinfo );
+ 
+diff --git a/code/game/g_combat.c b/code/game/g_combat.c
+index bcfe513d..6f3713dc 100644
+--- a/code/game/g_combat.c
++++ b/code/game/g_combat.c
+@@ -242,63 +242,100 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
+ 
+ /*
+ ==================
+-GetGibEntityEventParm
++SpawnGibEventTempEntity
++
++Compared to `G_AddEvent()`, which can basically only carry one byte
++of extra parameters (`eventParm`), this allows us to provide clients
++with more info about the gib event.
+ ==================
+ */
+-static int GetGibEntityEventParm( gentity_t *self, const int killer,
++static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
+ 	const int damageBloodFallback ) {
+-	int damage = damageBloodFallback;
+-	int damageByte;
+-	float knockbackSpeed;
+-	// In vanilla Quake the meaning of the `EV_GIB_PLAYER` eventParm
+-	// is `killer`.
+-	// But it is unused client-side, so it's safe for us to change its meaning
+-	// (i.e. to change the network protocol).
+-	// However, some mods might in fact rely on it,
+-	// so let's have a CVAR to keep the old behavior.
+-	//
+-	// Note that we're not checking `g_oldGibs`, because in itself
+-	// this does not affect behavior:
+-	// we're simply providing the client with the knockback info,
+-	// and whether to use that into is up to `cg_oldGibs`.
+-
+-	if ( g_gibsNewEvGibPlayerParmProtocol.integer != 1 ) {
+-		return killer;
+-	}
+-
+-	if ( self->client ) {
+-		// We prefer actual damage over `client->damage_knockback`
+-		// because `damage_knockback` is sometimes undesirably 0. Namely:
+-		// - when the target is a dead body, with `FL_NO_KNOCKBACK`.
+-		// - when the knockback `dir` is not provided to `G_Damage`,
+-		//   such as with crushers.
+-		//
+-		// Most of the time (but not always e.g. with lava)
+-		// "no knockback" means "the player should not be moved
+-		// in any particular direction",
+-		// and not that "their gibs should stay put".
+-		const int frameDamage =
+-			self->client->damage_blood + self->client->damage_armor;
+-		// In case when `level.intermissionQueued` we don't use
+-		// `damage_blood` and `damage_armor` because they would not be set.
+-		// See `level.intermissionQueued` and `targ->die == body_die` check
+-		// in `G_Damage`.
+-		if ( !level.intermissionQueued || frameDamage != 0 ) {
+-			damage = frameDamage;
++	gentity_t* tent = G_TempEntity(
++		self->client
++			? self->client->ps.origin
++			: self->s.pos.trBase,
++		EV_GIB_PLAYER
++	);
++
++	// For super-duper compatibility with possible mods
++	// we could have also utilized `BG_PlayerStateToEntityState`
++	// (and copying the whole `self->s` to the temp entity),
++	// but let's not do that, to save badnwidth.
++	// Most of the fields are anyways irrelevant when the entity is gibbed.
++
++	// Same as in vanilla. Vanilla clients don't read `eventParm`,
++	// but software like WolfcamQL does, so let's specify it.
++	tent->s.eventParm = killer;
++
++	// On the client side this will set `es.number` to the number
++	// of the target entity. We do this for better compatibility.
++	// Maybe we shouldn't be doing such low-level stuff, but should be fine.
++	// Yes, technically this is not a _player_ event,
++	// because the target can also be a corpse.
++	tent->s.eFlags |= EF_PLAYER_EVENT;
++	tent->s.otherEntityNum = self->s.number;
++
++	// Our mod doesn't use this as of now, but, again, other mods might,
++	// e.g. to get the model of the gibbed player or corpse,
++	// so let's specify it.
++	tent->s.clientNum = self->s.clientNum;
++
++	if ( g_gibsNewEvGibPlayerProtocol.integer & 0x2 ) {
++		int damage = damageBloodFallback;
++		float knockbackSpeed;
++
++		if ( self->client ) {
++			// We prefer actual damage over `client->damage_knockback`
++			// because `damage_knockback` is sometimes undesirably 0. Namely:
++			// - when the target is a dead body, with `FL_NO_KNOCKBACK`.
++			// - when the knockback `dir` is not provided to `G_Damage`,
++			//   such as with crushers.
++			//
++			// Most of the time (but not always e.g. with lava)
++			// "no knockback" means "the player should not be moved
++			// in any particular direction",
++			// and not that "their gibs should stay put".
++			const int frameDamage =
++				self->client->damage_blood + self->client->damage_armor;
++			// In case when `level.intermissionQueued` we don't use
++			// `damage_blood` and `damage_armor` because they would not be set.
++			// See `level.intermissionQueued` and `targ->die == body_die` check
++			// in `G_Damage`.
++			if ( !level.intermissionQueued || frameDamage != 0 ) {
++				damage = frameDamage;
++			}
++		}
++		if ( damage > MAX_KNOCKBACK ) {
++			damage = MAX_KNOCKBACK;
++		}
++
++		knockbackSpeed = KnockbackToKnockbackSpeed( damage );
++
++		// Fit it into one byte.
++		tent->s.generic1 = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
++		if (tent->s.generic1 > 255) {
++			tent->s.generic1 = 255;
+ 		}
+-	}
+-	if ( damage > MAX_KNOCKBACK ) {
+-		damage = MAX_KNOCKBACK;
+ 	}
+ 
+-	knockbackSpeed = KnockbackToKnockbackSpeed( damage );
++	if ( g_gibsNewEvGibPlayerProtocol.integer & 0x08 ) {
++		const vec3_t *vel = self->client
++				? (const vec3_t*)&self->client->ps.velocity
++				: (const vec3_t*)&self->s.pos.trDelta;
++		// Despite the fact that clients can obtain the velocity
++		// from the player entity, we should still set it, for compatibility
++		// (as opposed to trying to save network bandwidth):
++		// some mods (like the old versions of Better Gibs mod)
++		// or software like WolfcamQL might expect it to be set on the entity.
++		VectorCopy( *vel, tent->s.pos.trDelta );
++		trap_SnapVector( tent->s.pos.trDelta );
+ 
+-	// Fit it into one byte.
+-	damageByte = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
+-	if (damageByte > 255) {
+-		damageByte = 255;
++		// `TR_INTERPOLATE` is what player entities have,
++		// but here it's not actually different from `TR_STATIONARY`
++		// because we are never going to change `s.pos.trOrigin`.
++		tent->s.pos.trType = TR_STATIONARY;
+ 	}
+-	return damageByte;
+ }
+ /*
+ ==================
+@@ -325,8 +362,22 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
+ 		}
+ 	}
+ 
+-	G_AddEvent( self, EV_GIB_PLAYER,
+-		GetGibEntityEventParm(self, killer, damageBloodFallback) );
++	// We're not checking for `g_oldGibs` because `g_gibsNewEvGibPlayerProtocol`
++	// is `CVAR_SYSTEMINFO`, i.e. we send its value to clients.
++	// If we tell them that we use the new protocol,
++	// then we must use the new protocol,
++	// regardless of the value of `g_oldGibs`.
++	if ( g_gibsNewEvGibPlayerProtocol.integer == 0 ) {
++		G_AddEvent( self, EV_GIB_PLAYER, killer );
++	} else {
++		// TODO fix: there is a small problem with using a temp entity:
++		// when a client gets gibbed, the gib event will be delayed for them
++		// for one snapshot (50ms by default).
++		// This has to do with the fact that regular events fire for self
++		// as soon as they appear in `cg.snap`,
++		// but player events only wait for `cg.nextSnap` (no interpolation).
++		SpawnGibEventTempEntity( self, killer, damageBloodFallback );
++	}
+ 
+ 	self->takedamage = qfalse;
+ 	self->s.eType = ET_INVISIBLE;
+@@ -741,12 +792,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
+ 			self->health = GIB_HEALTH+1;
+ 		}
+ 
+-		self->client->ps.legsAnim = 
+-			( ( self->client->ps.legsAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
+-		self->client->ps.torsoAnim = 
+-			( ( self->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
++		if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
++			self->setDeathAnimScheduled = 1 + anim;
++		} else {
++			self->client->ps.legsAnim = 
++				( ( self->client->ps.legsAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
++			self->client->ps.torsoAnim = 
++				( ( self->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
+ 
+-		G_AddEvent( self, EV_DEATH1 + lastDeath, killer );
++			G_AddEvent( self, EV_DEATH1 + lastDeath, killer );
++		}
+ 
+ 		// the body can still be gibbed
+ 		self->die = body_die;
+@@ -1302,8 +1357,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+ 				// Set player velocity to what it was before they hit the ground
+ 				// so that the gibs inherit this velocity
+ 				// (see `cg_gibsInheritPlayerVelocity`).
+-				// Note that this only seems to work on other players
+-				// and not self (probably due to prediction).
+ 				//
+ 				// Note that there is a more accurate crash landing
+ 				// velocity calculation in `PM_CrashLand`,
+diff --git a/code/game/g_local.h b/code/game/g_local.h
+index eb54ef3b..1d2eb0b2 100644
+--- a/code/game/g_local.h
++++ b/code/game/g_local.h
+@@ -144,6 +144,12 @@ struct gentity_s {
+ 	int			health;
+ 
+ 	qboolean	takedamage;
++	// Whether to change `legsAnim` and `torsoAnim`,
++	// and fire a `EV_DEATH*` event
++	// after applying all the pellets of a shotgun shot.
++	// 0 means "nothing is scheduled",
++	// otherwise this represents (animation index + 1).
++	int			setDeathAnimScheduled;
+ 	// Whether to `GibEntity` after applying all the pellets of a shotgun shot.
+ 	qboolean	gibScheduled;
+ 
+@@ -748,7 +754,7 @@ extern	vmCvar_t	g_doWarmup;
+ extern	vmCvar_t	g_blood;
+ extern	vmCvar_t	g_oldGibs;
+ extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
+-extern	vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
++extern	vmCvar_t	g_gibsNewEvGibPlayerProtocol;
+ extern	vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
+ extern	vmCvar_t	g_gibsOnCollisionMinSpeed;
+ extern	vmCvar_t	g_gibsOnCollisionBaseDamage;
+diff --git a/code/game/g_main.c b/code/game/g_main.c
+index e6542196..4465eef1 100644
+--- a/code/game/g_main.c
++++ b/code/game/g_main.c
+@@ -71,7 +71,7 @@ vmCvar_t	g_logfileSync;
+ vmCvar_t	g_blood;
+ vmCvar_t	g_oldGibs;
+ vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
+-vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
++vmCvar_t	g_gibsNewEvGibPlayerProtocol;
+ vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
+ vmCvar_t	g_gibsOnCollisionMinSpeed;
+ vmCvar_t	g_gibsOnCollisionBaseDamage;
+@@ -171,7 +171,13 @@ static cvarTable_t		gameCvarTable[] = {
+ 	// Note that this affects not just the gibs
+ 	// but also the camera velocity of the gibbed player.
+ 	{ &g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse },
+-	{ &g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse },
++	// This is not really intended to be changed by users to a value different from
++	// the default or 0, unless they're having mod compatibility issues
++	// and really know what they're doing.
++	// We could have simply made this a binary value to tell clients
++	// that the server is running Better Gibs mod. But let's make it flag-like,
++	// for forwards compatibility.
++	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, 0, qfalse },
+ 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
+ 	// If a dead player loses this much or more speed
+ 	// as a result of collision with something (e.g. floor, wall),
+diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
+index cbb54c1a..9dbb13dc 100644
+--- a/code/game/g_weapon.c
++++ b/code/game/g_weapon.c
+@@ -371,6 +371,8 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
+ 	// assert( ShouldPostponeDeathOrGib( MOD_SHOTGUN ) );
+ 	ent2 = &g_entities[0];
+ 	for (i = 0; i < level.num_entities; i++, ent2++) {
++		int killer = ent->s.number;
++
+ 		if ( !ent2->inuse ) {
+ 			continue;
+ 		}
+@@ -381,16 +383,46 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {
+ 		}
+ 
+ 		if ( ent2->gibScheduled ) {
+-			// Note that this is technically differerent from vanilla,
+-			// because vanilla passes `0` as `eventParm if we are gibbing
+-			// a body from body queue.
+-			int killer = ent->s.number;
+ 			// Just fall back to "half of all the pellets hit".
+ 			int damageFallback = DEFAULT_SHOTGUN_DAMAGE * s_quadFactor
+ 				* DEFAULT_SHOTGUN_DAMAGE / 2;
++			// Note that this is technically differerent from vanilla,
++			// because vanilla passes `0` as `eventParm if we are gibbing
++			// a body from body queue.
+ 			GibEntity( ent2, killer, damageFallback );
+ 		}
++		// `else if` because if the player gets gibbed
++		// then we must not play the normal death sound,
++		// and setting the animation is also not needed.
++		// This is also in line with how it works in `player_die`.
++		else if ( ent2->setDeathAnimScheduled ) {
++			// Copy-pasted from `player_die`.
++
++			const int i = ent2->setDeathAnimScheduled - 1;
++			int anim;
++
++			switch ( i ) {
++			case 0:
++				anim = BOTH_DEATH1;
++				break;
++			case 1:
++				anim = BOTH_DEATH2;
++				break;
++			case 2:
++			default:
++				anim = BOTH_DEATH3;
++				break;
++			}
++
++			ent2->client->ps.legsAnim =
++				( ( ent2->client->ps.legsAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
++			ent2->client->ps.torsoAnim =
++				( ( ent2->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
++
++			G_AddEvent( ent2, EV_DEATH1 + i, killer );
++		}
+ 		ent2->gibScheduled = qfalse;
++		ent2->setDeathAnimScheduled = 0;
+ 	}
+ }
+ 
+-- 
+2.54.0
+

@@ -1,0 +1,62 @@
+From fd97952b8a428aab53d1cadc8fd0536c830ef807 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 31 May 2026 17:36:50 +0400
+Subject: [PATCH] fix: better blood trail puffs position offsets
+
+This also makes a "blood cloud" appear at the place
+where the gib occurred.
+---
+ code/cgame/cg_localents.c | 34 +++++++++++++++++++++++++++++++---
+ 1 file changed, 31 insertions(+), 3 deletions(-)
+
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index 10944e80..6b7ad8d4 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -122,12 +122,40 @@ void CG_BloodTrail( localEntity_t *le ) {
+ 	int		t;
+ 	int		t2;
+ 	int		step;
++	int		tBase;
++	int		tOffset;
+ 	vec3_t	newOrigin;
+ 	localEntity_t	*blood;
++	// Changes only when the gib collides with something.
++	int seed = le->startTime
++		+ le->pos.trTime
++		+ le->pos.trBase[0] * 0x100
++		+ le->pos.trBase[1] * 0x100
++		+ le->pos.trBase[2] * 0x100
++		// We could also use these, but we have enough randomness already.
++		// + le->pos.trDelta[0] * 0x100
++		// + le->pos.trDelta[1] * 0x100
++		// + le->pos.trDelta[2] * 0x100
++		;
++
++	// Delay each puff for a bit, so that the initial trails
++	// are spread over a bigger volume, which looks more natural.
++	// At 1000 speed this is 63 units, i.e. a little more than player height
++	// (MAXS_Z - MINS_Z).
++	// Additionally this offsets all future puffs, so that they don't spawn
++	// at the same time for all gibs.
++	tOffset = 63 & Q_rand(&seed);
++
++	tBase = le->startTime + tOffset;
++	if ( cg.time < tBase ) {
++		return;
++	}
+ 
+-	step = 150;
+-	t = step * ( (cg.time - cg.frametime + step ) / step );
+-	t2 = step * ( cg.time / step );
++	// Also a bit of randomness for the step looks more natural,
++	// doesn't give an impression that gib pieces are somehow "synced".
++	step = 134 + (31 & Q_rand(&seed));
++	t = tBase + step * ( ( cg.time - cg.frametime - tBase + step ) / step );
++	t2 = tBase + step * ( ( cg.time - tBase ) / step );
+ 
+ 	for ( ; t <= t2; t += step ) {
+ 		BG_EvaluateTrajectory( &le->pos, t, newOrigin );
+-- 
+2.54.0
+

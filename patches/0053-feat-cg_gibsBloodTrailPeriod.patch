@@ -1,0 +1,76 @@
+From ff0b709b374036886ba519f8766ee95a54e3d197 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 9 Jun 2026 15:50:47 +0400
+Subject: [PATCH] feat: `cg_gibsBloodTrailPeriod`
+
+Allows to disable blood trails, or keep only the initial "cloud"
+(both look kinda cool).
+---
+ code/cgame/cg_local.h     | 1 +
+ code/cgame/cg_localents.c | 9 ++++++++-
+ code/cgame/cg_main.c      | 3 +++
+ 3 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 727cbc94..b2c08cd8 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1106,6 +1106,7 @@ extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
+ extern	vmCvar_t		cg_gibsBounceFactor;
+ extern	vmCvar_t		cg_gibsBounceFactorRandomness;
+ extern	vmCvar_t		cg_gibsRotationFactor;
++extern	vmCvar_t		cg_gibsBloodTrailPeriod;
+ extern	vmCvar_t		cg_gibsBetterCameraOnGib;
+ extern	vmCvar_t		cg_drawTimer;
+ extern	vmCvar_t		cg_drawFPS;
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index 6b7ad8d4..d608a0a5 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -138,6 +138,13 @@ void CG_BloodTrail( localEntity_t *le ) {
+ 		// + le->pos.trDelta[2] * 0x100
+ 		;
+ 
++	// Comparing to 1 and not 0 because step randomness can result
++	// in step being 0.
++	// But anyways, anything below ~20 is not a sane value.
++	if ( cg_gibsBloodTrailPeriod.integer <= 1 ) {
++		return;
++	}
++
+ 	// Delay each puff for a bit, so that the initial trails
+ 	// are spread over a bigger volume, which looks more natural.
+ 	// At 1000 speed this is 63 units, i.e. a little more than player height
+@@ -153,7 +160,7 @@ void CG_BloodTrail( localEntity_t *le ) {
+ 
+ 	// Also a bit of randomness for the step looks more natural,
+ 	// doesn't give an impression that gib pieces are somehow "synced".
+-	step = 134 + (31 & Q_rand(&seed));
++	step = cg_gibsBloodTrailPeriod.integer * (1 + 0.125*Q_crandom(&seed));
+ 	t = tBase + step * ( ( cg.time - cg.frametime - tBase + step ) / step );
+ 	t2 = tBase + step * ( ( cg.time - tBase ) / step );
+ 
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index 9f58c523..b412a50c 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -109,6 +109,7 @@ vmCvar_t	cg_gibsExtraVerticalVelocity;
+ vmCvar_t	cg_gibsBounceFactor;
+ vmCvar_t	cg_gibsBounceFactorRandomness;
+ vmCvar_t	cg_gibsRotationFactor;
++vmCvar_t	cg_gibsBloodTrailPeriod;
+ vmCvar_t	cg_gibsBetterCameraOnGib;
+ vmCvar_t	cg_drawTimer;
+ vmCvar_t	cg_drawFPS;
+@@ -250,6 +251,8 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
+ 	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE  },
+ 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
++	// Not archived because experimental
++	{ &cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0  },
+ 	{ &cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE  },
+ 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
+ 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
+-- 
+2.54.0
+

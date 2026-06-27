@@ -1,0 +1,59 @@
+From f99e032d55b29dd47c63fffd5cb3e032af6589f9 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Wed, 24 Jun 2026 19:08:01 +0400
+Subject: [PATCH] feat: `cg_gibsLinearVelocityFromKnockback`
+
+---
+ code/cgame/cg_effects.c | 2 +-
+ code/cgame/cg_local.h   | 1 +
+ code/cgame/cg_main.c    | 2 ++
+ 3 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index 687643ae..f371506b 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -717,7 +717,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		//
+ 		// This also handles `knockbackDir` being a zero-vector.
+ 		VectorMA( playerVelocity,
+-			knockbackSpeed -
++			cg_gibsLinearVelocityFromKnockback.value * knockbackSpeed -
+ 				// `playerVelocity` already includes original knockback,
+ 				// so don't add it again.
+ 				knockbackSpeedOriginal,
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 1f502791..8c3012f2 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1104,6 +1104,7 @@ extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
+ extern	vmCvar_t		cg_gibsKnockback;
+ extern	vmCvar_t		cg_gibsExtraKnockback;
+ extern	vmCvar_t		cg_gibsPiecesFromKnockback;
++extern	vmCvar_t		cg_gibsLinearVelocityFromKnockback;
+ extern	vmCvar_t		cg_gibsExtraRandomVelocity;
+ extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
+ extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index a11af3ec..f210e93e 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -104,6 +104,7 @@ vmCvar_t	cg_gibsInheritPlayerVelocity;
+ vmCvar_t	cg_gibsKnockback;
+ vmCvar_t	cg_gibsExtraKnockback;
+ vmCvar_t	cg_gibsPiecesFromKnockback;
++vmCvar_t	cg_gibsLinearVelocityFromKnockback;
+ vmCvar_t	cg_gibsExtraRandomVelocity;
+ vmCvar_t	cg_gibsRandomVelocityFromKnockback;
+ vmCvar_t	cg_gibsVerticalVelocityFromKnockback;
+@@ -256,6 +257,7 @@ static cvarTable_t cvarTable[] = {
+ 	// Did the player got bigger from taking more damage??":
+ 	// A: No, they simlpy got split into more pieces.
+ 	{ &cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_ARCHIVE  },
++	{ &cg_gibsLinearVelocityFromKnockback, "cg_gibsLinearVelocityFromKnockback", "1.0", 0  },
+ 	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE  },
+ 	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE  },
+ 	{ &cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE  },
+-- 
+2.54.0
+

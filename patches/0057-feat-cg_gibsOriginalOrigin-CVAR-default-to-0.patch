@@ -1,0 +1,150 @@
+From 13c2ebc3f6d5deffe12420d42c8a18d1db91d314 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 14 Jun 2026 23:37:56 +0400
+Subject: [PATCH] feat: `cg_gibsOriginalOrigin` CVAR (default to 0)
+
+---
+ code/cgame/cg_effects.c | 38 ++++++++++++++++++++++++++++++++------
+ code/cgame/cg_local.h   |  1 +
+ code/cgame/cg_main.c    | 16 ++++++++++++++++
+ code/qcommon/q_shared.h |  8 ++++++++
+ 4 files changed, 57 insertions(+), 6 deletions(-)
+
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index f19464f6..10bd2f4d 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -1047,6 +1047,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+ 		targCent == &cg.predictedPlayerEntity;
+ 	const int killer = es->eventParm;
+ 
++	vec3_t origin;
++
+ 	int knockbackSpeed = cgs.g_gibsNewEvGibPlayerProtocol & 0x02
+ 		? es->generic1 * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
+ 		// Also check the old Better Gibs mod protocol.
+@@ -1111,6 +1113,28 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+ 		randSeed = Q_rand(&randSeed) + ci->name[0];
+ 	}
+ 
++	// With the new protocol `cent->lerpOrigin` is always equal
++	// to `cent->pos.trBase`, which is the exact place where the player was
++	// when they got gibbed, same as with velocity.
++	// The difference is visible with
++	// `set sv_fps 10; set snaps 10; set cl_timeNudge 30; set g_knockback 3000;`
++	// and a quad shotgun.
++	if ( !targEsValid ) {
++		// Could happen if the gib event is in the PVS (potentially visible set)
++		// but the player is not.
++		// Just fall back to using the position of the gib event,
++		// as if `cg_gibsOriginalOrigin.value == 1.0f`.
++		VectorCopy( cent->lerpOrigin, origin );
++	} else {
++		// `targEs->pos` is better than `targCent->lerpOrigin`
++		// because `targCent->lerpOrigin` seems to be of the old frame,
++		// i.e. this code runs before `CG_CalcEntityLerpPositions()`,
++		// so `targCent->lerpOrigin` could also be invalid (zero vector).
++		// Especially noticeable when telefragging an enemy far away.
++		VectorLerp( targEs->pos.trBase, cg_gibsOriginalOrigin.value,
++			cent->lerpOrigin, origin );
++	}
++
+ 	// Torso animation angles seem to be in better sync
+ 	// between the local state and how others see us,
+ 	// and overall are closer to other player's viewangles
+@@ -1147,11 +1171,13 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+ 		// where the position and velocity are fixed at what they were
+ 		// the moment the player got gibbed on the server,
+ 		// i.e. they are not interpolated.
+-		VectorSubtract( targEs->pos.trBase, es->pos.trBase, diff );
+-		l = VectorLength( diff );
+-		CG_Printf(", pos diff %s%.1f",
+-			l > 750 ? S_COLOR_RED : l > 100 ? S_COLOR_YELLOW : S_COLOR_GREEN,
+-			VectorLength( diff ) );
++		if ( cg_gibsOriginalOrigin.value != 0 ) {
++			VectorSubtract( targEs->pos.trBase, origin, diff );
++			l = VectorLength( diff );
++			CG_Printf(", pos diff %s%.1f",
++				l > 750 ? S_COLOR_RED : l > 100 ? S_COLOR_YELLOW : S_COLOR_GREEN,
++				VectorLength( diff ) );
++		}
+ 		VectorSubtract( targEs->pos.trDelta, *vel, diff );
+ 		l = VectorLength( diff );
+ 		CG_Printf(", vel diff %s%.1f",
+@@ -1163,7 +1189,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+ 			usePredictedPs );
+ 	}
+ 
+-	CG_GibPlayer( cent->lerpOrigin, torsoAngles, *vel, knockbackSpeed,
++	CG_GibPlayer( origin, torsoAngles, *vel, knockbackSpeed,
+ 		&torsoAnimation, randSeed );
+ }
+ 
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index c688daf1..b7a150cb 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -1106,6 +1106,7 @@ extern	vmCvar_t		cg_gibsExtraRandomVelocity;
+ extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
+ extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
+ extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
++extern	vmCvar_t		cg_gibsOriginalOrigin;
+ extern	vmCvar_t		cg_gibsBounceFactor;
+ extern	vmCvar_t		cg_gibsBounceFactorRandomness;
+ extern	vmCvar_t		cg_gibsRotationFactor;
+diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
+index 6066e98f..a347ab74 100644
+--- a/code/cgame/cg_main.c
++++ b/code/cgame/cg_main.c
+@@ -106,6 +106,7 @@ vmCvar_t	cg_gibsExtraRandomVelocity;
+ vmCvar_t	cg_gibsRandomVelocityFromKnockback;
+ vmCvar_t	cg_gibsVerticalVelocityFromKnockback;
+ vmCvar_t	cg_gibsExtraVerticalVelocity;
++vmCvar_t	cg_gibsOriginalOrigin;
+ vmCvar_t	cg_gibsBounceFactor;
+ vmCvar_t	cg_gibsBounceFactorRandomness;
+ vmCvar_t	cg_gibsRotationFactor;
+@@ -251,6 +252,21 @@ static cvarTable_t cvarTable[] = {
+ 	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE  },
+ 	{ &cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE  },
+ 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE  },
++	// Whether to use the exact position where the player got gibbed
++	// as the initial gibs position, instead of the position of the gibbed player
++	// on the screen, i.e. the position of the player on the next server frame
++	// (lerpOrigin).
++	//
++	// Can be a fractional value between 0 and 1,
++	// but you probably want either 0 or 1.
++	// To get vanilla behavior, set to 0.
++	//
++	// Has no effect on vanilla servers (`g_gibsNewEvGibPlayerProtocol 0`).
++	//
++	// Using the original position might make it seem
++	// like the player "telepoted" one snapshot back (50ms at `snaps 20`)
++	// if they're already movnig at high speed.
++	{ &cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0  },
+ 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
+ 	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE  },
+ 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
+diff --git a/code/qcommon/q_shared.h b/code/qcommon/q_shared.h
+index 1877a42c..91dee771 100644
+--- a/code/qcommon/q_shared.h
++++ b/code/qcommon/q_shared.h
+@@ -565,6 +565,14 @@ typedef struct {
+ #define VectorNegate(a,b)		((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
+ #define VectorSet(v, x, y, z)	((v)[0]=(x), (v)[1]=(y), (v)[2]=(z))
+ #define Vector4Copy(a,b)		((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
++// (o)[0]=(v1)[0]*f+(v2)[0]*(1-f),
++// (o)[1]=(v1)[1]*f+(v2)[1]*(1-f),
++// (o)[2]=(v1)[2]*f+(v2)[2]*(1-f)
++#define	VectorLerp(v1, f, v2, o)	(\
++	(o)[0]=(v1)[0]+f*(v2[0]-v1[0]),\
++	(o)[1]=(v1)[1]+f*(v2[1]-v1[1]),\
++	(o)[2]=(v1)[2]+f*(v2[2]-v1[2])\
++)
+ 
+ #define Byte4Copy(a,b)			((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
+ 
+-- 
+2.54.0
+
