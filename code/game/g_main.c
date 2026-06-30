@@ -72,6 +72,7 @@ vmCvar_t	g_blood;
 vmCvar_t	g_oldGibs;
 vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
 vmCvar_t	g_gibsNewEvGibPlayerProtocol;
+vmCvar_t	g_gibsDeadBodyLinearVelocityFromKnockback;
 vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
 vmCvar_t	g_gibsOnCollisionMinSpeed;
 vmCvar_t	g_gibsOnCollisionBaseDamage;
@@ -178,6 +179,7 @@ static cvarTable_t		gameCvarTable[] = {
 	// that the server is running Better Gibs mod. But let's make it flag-like,
 	// for forwards compatibility.
 	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR_SYSTEMINFO, 0, qfalse },
+	{ &g_gibsDeadBodyLinearVelocityFromKnockback, "g_gibsDeadBodyLinearVelocityFromKnockback", "1.0", 0, 0, qfalse },
 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
 	// If a dead player loses this much or more speed
 	// as a result of collision with something (e.g. floor, wall),
