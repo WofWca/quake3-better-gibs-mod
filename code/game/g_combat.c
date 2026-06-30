@@ -1619,9 +1619,24 @@ qboolean G_RadiusDamage ( gentity_t *self, vec3_t origin, gentity_t *attacker, f
 				hitClient = qtrue;
 			}
 			VectorSubtract (ent->r.currentOrigin, origin, dir);
-			// push the center of mass higher than the origin so players
-			// get knocked into the air more
-			dir[2] += 24;
+			if ( ent->health > 0 || g_oldGibs.integer ) {
+				// push the center of mass higher than the origin so players
+				// get knocked into the air more
+				dir[2] += 24;
+
+				// Also results in `+= 24`, for live players
+				// with default `mins` and `maxs`,
+				// but let's keep the old calculation to be 100% sure
+				// that gameplay is the same as in vanilla.
+				//
+				// dir[2] += ent->r.mins[2] +
+				// 	( ent->r.maxs[2] - ent->r.mins[2] ) * 6/7;
+			} else {
+				// For dead bodies prefer "realism":
+				// use the middle of the bounding box as the center of mass.
+				dir[2] += ent->r.mins[2] +
+					( ent->r.maxs[2] - ent->r.mins[2] ) * 1/2;
+			}
 			G_Damage (ent, self, attacker, dir, origin, (int)points, DAMAGE_RADIUS, mod);
 		}
 	}
