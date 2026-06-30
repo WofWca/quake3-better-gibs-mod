@@ -431,7 +431,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
 body_die
 ==================
 */
-void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) {
+void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int meansOfDeath ) {
 	int killer;
 
 	if ( self->health > GIB_HEALTH ) {
@@ -583,7 +583,7 @@ void CheckAlmostScored( gentity_t *self, gentity_t *attacker ) {
 player_die
 ==================
 */
-void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) {
+void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int meansOfDeath ) {
 	gentity_t	*ent;
 	int			anim;
 	int			contents;
@@ -1121,9 +1121,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 			targ->health = targ->health - damage;
 			if ( targ->health <= 0 ) {
+				if ( dir ) {
+					VectorNormalize(dir);
+				}
 				// `body_die` doesn't use any of its arguments (except `targ` and 'attacker'),
 				// so it's fine if they're `NULL`.
-				targ->die( targ, inflictor, attacker, damage, mod );
+				targ->die( targ, inflictor, attacker, dir, damage, mod );
 			}
 		}
 
@@ -1458,7 +1461,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			}
 
 			targ->enemy = attacker;
-			targ->die (targ, inflictor, attacker, take, mod);
+			targ->die (targ, inflictor, attacker, dir, take, mod);
 			return;
 		} else if ( targ->pain ) {
 			targ->pain (targ, attacker, take);
