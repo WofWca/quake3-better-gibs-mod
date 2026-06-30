@@ -82,6 +82,9 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
 // that the server is running Better Gibs mod. But let's make it flag-like,
 // for forwards compatibility.
 G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR_SYSTEMINFO, 0, qfalse, qfalse )
+// Does not affect gameplay. Has no effect
+// when `g_gibsNewEvGibPlayerProtocol 0`.
+G_CVAR( g_gibsDeadBodyLinearVelocityFromKnockback, "g_gibsDeadBodyLinearVelocityFromKnockback", "1.0", 0, 0, qfalse, qfalse )
 // If a dead player loses this much or more speed
 // as a result of collision with something (e.g. floor, wall),
 // deal `g_gibsOnCollisionBaseDamage` or more damage to them
