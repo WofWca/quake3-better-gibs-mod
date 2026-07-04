@@ -1,4 +1,4 @@
-From db3cf722c557b81f0d2ec7769d43f043e6c98cad Mon Sep 17 00:00:00 2001
+From fb0e379f8e2027b3f20125577805b6b689936156 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 27 Jun 2026 17:32:21 +0400
 Subject: [PATCH] fix: gibs: check if killer has quad on vanilla
@@ -10,7 +10,7 @@ this will give more random speed to gibs.
  1 file changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index f340581b..cd45b65e 100644
+index 78e3204a..ae56d59a 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1105,7 +1105,17 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,

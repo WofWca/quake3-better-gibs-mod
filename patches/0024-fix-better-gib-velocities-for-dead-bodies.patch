@@ -1,4 +1,4 @@
-From f4ade60362a95aad7f222df06885bc58a8559200 Mon Sep 17 00:00:00 2001
+From c786fc01da128fede8a034dee401a6a7d0881bb1 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 24 Jan 2026 16:56:17 +0400
 Subject: [PATCH] fix: better gib velocities for dead bodies
@@ -8,7 +8,7 @@ Subject: [PATCH] fix: better gib velocities for dead bodies
  1 file changed, 12 insertions(+), 10 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 127bacc0..3846405b 100644
+index fc526fed..6e53e52b 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -676,9 +676,6 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,

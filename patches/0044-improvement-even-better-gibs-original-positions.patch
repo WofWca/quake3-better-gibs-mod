@@ -1,4 +1,4 @@
-From 36fc3ecc682c766b8d946ed82f33ce79c7b63c19 Mon Sep 17 00:00:00 2001
+From d0a39d6c3864a581a2d4e22d034a63a0f5eadf32 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 7 May 2026 11:27:25 +0400
 Subject: [PATCH] improvement: even better gibs original positions
@@ -13,7 +13,7 @@ compared to 10 in vanilla.
  1 file changed, 120 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 111f399a..c0f5928d 100644
+index d257a435..026d795a 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -654,6 +654,7 @@ in demo playback, so that players see the same gibs

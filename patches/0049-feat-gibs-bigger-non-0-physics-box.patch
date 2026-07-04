@@ -1,4 +1,4 @@
-From 606ba2bff276c69790bea89f9bfa3e09c7e5a64e Mon Sep 17 00:00:00 2001
+From 4d0b99be3f2dbdf81dcd1a9f0e8698c54a55aa2f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 30 May 2026 22:11:27 +0400
 Subject: [PATCH] feat: gibs: bigger (non-0) physics box
@@ -9,7 +9,7 @@ Subject: [PATCH] feat: gibs: bigger (non-0) physics box
  2 files changed, 70 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index cc918e76..3fe09d3a 100644
+index 3e8b6b8f..b9db59ba 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -819,6 +819,13 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,

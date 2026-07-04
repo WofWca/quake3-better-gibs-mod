@@ -1,4 +1,4 @@
-From 33d4d020f7b5879db714f109929f27d559dac962 Mon Sep 17 00:00:00 2001
+From 136f9efd1cd7e17ec1280352037549e790c26cca Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 26 Jun 2026 13:07:28 +0400
 Subject: [PATCH] feat: gibs: fire trails
@@ -11,7 +11,7 @@ Subject: [PATCH] feat: gibs: fire trails
  4 files changed, 127 insertions(+), 28 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 7febe2e8..8f8736c4 100644
+index 306b9bb6..95a39cd0 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -530,6 +530,7 @@ CG_LaunchGib

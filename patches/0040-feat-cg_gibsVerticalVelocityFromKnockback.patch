@@ -1,4 +1,4 @@
-From f54a9674fbce718ca8ea09932bfb1a25f466a6af Mon Sep 17 00:00:00 2001
+From 52fa5a8976471204800e310e2389973c3a439abe Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 9 May 2026 22:53:46 +0400
 Subject: [PATCH] feat: `cg_gibsVerticalVelocityFromKnockback`
@@ -13,7 +13,7 @@ for 200+ damage it becomes 250.
  3 files changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 27567f93..111f399a 100644
+index 4881cf4c..d257a435 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -672,7 +672,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,

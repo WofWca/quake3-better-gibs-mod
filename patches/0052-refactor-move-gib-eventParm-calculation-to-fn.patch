@@ -1,4 +1,4 @@
-From 0426dcaa302fcde8b93d0f64ebf38933edc6e65a Mon Sep 17 00:00:00 2001
+From 0a245d618d074b34d54a5b13fd9e53ed124bee7f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 5 Jun 2026 23:19:55 +0400
 Subject: [PATCH] refactor: move gib `eventParm` calculation to fn
@@ -8,7 +8,7 @@ Subject: [PATCH] refactor: move gib `eventParm` calculation to fn
  1 file changed, 62 insertions(+), 52 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index e8742971..bcfe513d 100644
+index 467560c5..7e5d4f7f 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -240,13 +240,72 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
@@ -22,9 +22,9 @@ index e8742971..bcfe513d 100644
 +*/
 +static int GetGibEntityEventParm( gentity_t *self, const int killer,
 +	const int damageBloodFallback ) {
-+	int damage = damageBloodFallback;
-+	int damageByte;
++	int knockback = damageBloodFallback;
 +	float knockbackSpeed;
++	int knockbackByte;
 +	// In vanilla Quake the meaning of the `EV_GIB_PLAYER` eventParm
 +	// is `killer`.
 +	// But it is unused client-side, so it's safe for us to change its meaning
@@ -59,21 +59,21 @@ index e8742971..bcfe513d 100644
 +		// See `level.intermissionQueued` and `targ->die == body_die` check
 +		// in `G_Damage`.
 +		if ( !level.intermissionQueued || frameDamage != 0 ) {
-+			damage = frameDamage;
++			knockback = frameDamage;
 +		}
 +	}
-+	if ( damage > MAX_KNOCKBACK ) {
-+		damage = MAX_KNOCKBACK;
++	if ( knockback > MAX_KNOCKBACK ) {
++		knockback = MAX_KNOCKBACK;
 +	}
 +
-+	knockbackSpeed = KnockbackToKnockbackSpeed( damage );
++	knockbackSpeed = KnockbackToKnockbackSpeed( knockback );
 +
 +	// Fit it into one byte.
-+	damageByte = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
-+	if (damageByte > 255) {
-+		damageByte = 255;
++	knockbackByte = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
++	if (knockbackByte > 255) {
++		knockbackByte = 255;
 +	}
-+	return damageByte;
++	return knockbackByte;
 +}
  /*
  ==================
@@ -101,7 +101,7 @@ index e8742971..bcfe513d 100644
 -	// we're simply providing the client with the knockback info,
 -	// and whether to use that into is up to `cg_oldGibs`.
 -	if ( g_gibsNewEvGibPlayerParmProtocol.integer == 1 ) {
--		int damage = damageBloodFallback;
+-		int knockback = damageBloodFallback;
 -		float knockbackSpeed;
 -
 -		if ( self->client ) {
@@ -122,14 +122,14 @@ index e8742971..bcfe513d 100644
 -			// See `level.intermissionQueued` and `targ->die == body_die` check
 -			// in `G_Damage`.
 -			if ( !level.intermissionQueued || frameDamage != 0 ) {
--				damage = frameDamage;
+-				knockback = frameDamage;
 -			}
 -		}
--		if ( damage > MAX_KNOCKBACK ) {
--			damage = MAX_KNOCKBACK;
+-		if ( knockback > MAX_KNOCKBACK ) {
+-			knockback = MAX_KNOCKBACK;
 -		}
 -
--		knockbackSpeed = KnockbackToKnockbackSpeed( damage );
+-		knockbackSpeed = KnockbackToKnockbackSpeed( knockback );
 -
 -		// Fit it into one byte.
 -		eventParm = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;

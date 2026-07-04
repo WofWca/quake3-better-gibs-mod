@@ -1,4 +1,4 @@
-From c3a5a16188a16afa927172fa69f128ec26a015ee Mon Sep 17 00:00:00 2001
+From 786cc0de4f9f5d516f879bf4af441d17f092c828 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 17 Feb 2026 19:46:52 +0400
 Subject: [PATCH] fix: shotgun not respecting `MAX_KNOCKBACK`

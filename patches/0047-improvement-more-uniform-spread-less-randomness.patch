@@ -1,4 +1,4 @@
-From c8a243f7420bb0cbc255e9d06638b76a7dccee6d Mon Sep 17 00:00:00 2001
+From 8f14ff024b468c008b0bcd7aa8f6b62c97bf3045 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 16 May 2026 19:12:48 +0400
 Subject: [PATCH] improvement: more uniform spread, less randomness
@@ -8,7 +8,7 @@ Subject: [PATCH] improvement: more uniform spread, less randomness
  1 file changed, 16 insertions(+), 12 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 3842c700..cc918e76 100644
+index a2b0f6e7..3e8b6b8f 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -730,14 +730,18 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,

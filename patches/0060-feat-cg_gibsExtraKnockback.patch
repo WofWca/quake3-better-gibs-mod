@@ -1,4 +1,4 @@
-From 497b498c9df48079e22306402d4a04cd77a2fa52 Mon Sep 17 00:00:00 2001
+From 4a7cb76219f7195f9fe54f6ae3dc945c410956f0 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 21 Jun 2026 14:03:01 +0400
 Subject: [PATCH] feat: `cg_gibsExtraKnockback`
@@ -10,7 +10,7 @@ Subject: [PATCH] feat: `cg_gibsExtraKnockback`
  3 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index e49e525b..687643ae 100644
+index 08b4e4eb..84f3c110 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -672,7 +672,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,

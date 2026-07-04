@@ -1,4 +1,4 @@
-From d73966bdba0a487faebaee6f901908107d1b285d Mon Sep 17 00:00:00 2001
+From 254ec8d66afec2d437248f21d5a12b6f180fca8e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 9 May 2026 13:47:52 +0400
 Subject: [PATCH] fix: gib random speed after match end being lower
@@ -8,15 +8,15 @@ Subject: [PATCH] fix: gib random speed after match end being lower
  1 file changed, 22 insertions(+), 14 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index ae3e7115..d03ebf4a 100644
+index 51035ee6..7852925b 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -278,22 +278,30 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
  	// we're simply providing the client with the knockback info,
  	// and whether to use that into is up to `cg_oldGibs`.
  	if ( g_gibsNewEvGibPlayerParmProtocol.integer == 1 ) {
--		int damage;
-+		int damage = damageBloodFallback;
+-		int knockback;
++		int knockback = damageBloodFallback;
  		float knockbackSpeed;
  
 -		// We prefer actual damage over `client->damage_knockback`
@@ -29,7 +29,7 @@ index ae3e7115..d03ebf4a 100644
 -		// "no knockback" means "the player should not be moved
 -		// in any particular direction",
 -		// and not that "their gibs should stay put".
--		damage = self->client
+-		knockback = self->client
 -			? self->client->damage_blood + self->client->damage_armor
 -			: damageBloodFallback;
 +		if ( self->client ) {
@@ -50,11 +50,11 @@ index ae3e7115..d03ebf4a 100644
 +			// See `level.intermissionQueued` and `targ->die == body_die` check
 +			// in `G_Damage`.
 +			if ( !level.intermissionQueued || frameDamage != 0 ) {
-+				damage = frameDamage;
++				knockback = frameDamage;
 +			}
 +		}
- 		if ( damage > MAX_KNOCKBACK ) {
- 			damage = MAX_KNOCKBACK;
+ 		if ( knockback > MAX_KNOCKBACK ) {
+ 			knockback = MAX_KNOCKBACK;
  		}
 -- 
 2.54.0

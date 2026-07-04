@@ -1,4 +1,4 @@
-From ff0b709b374036886ba519f8766ee95a54e3d197 Mon Sep 17 00:00:00 2001
+From 850f9f40f33eed603d76bb52533e3f0c5b93bd48 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 9 Jun 2026 15:50:47 +0400
 Subject: [PATCH] feat: `cg_gibsBloodTrailPeriod`

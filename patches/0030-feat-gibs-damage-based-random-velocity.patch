@@ -1,4 +1,4 @@
-From 8e91b653a0a14e476e853e9b856a2740e9c5fa7d Mon Sep 17 00:00:00 2001
+From 585d91e72314cfe8c7292816f5a4468f12f9da7f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 2 Feb 2026 14:41:58 +0400
 Subject: [PATCH] feat: gibs: damage-based random velocity
@@ -28,7 +28,7 @@ because `P_DamageFeedback` early-returns when `PM_DEAD`.
  12 files changed, 110 insertions(+), 25 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 3846405b..7207ece9 100644
+index 6e53e52b..116edbfc 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -644,7 +644,7 @@ Generated a bunch of gibs launching out from the bodies location
@@ -251,7 +251,7 @@ index 8c9a7848..ea4133ed 100644
  //	i = trap_AAS_PointReachabilityAreaIndex( ent->client->ps.origin );
  //	ent->client->areabits[i >> 3] |= 1 << (i & 7);
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 549e9453..7c1fae40 100644
+index 549e9453..6ede89ec 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -236,11 +236,7 @@ KnockbackToKnockbackSpeed
@@ -295,7 +295,7 @@ index 549e9453..7c1fae40 100644
 +	// we're simply providing the client with the knockback info,
 +	// and whether to use that into is up to `cg_oldGibs`.
 +	if ( g_gibsNewEvGibPlayerParmProtocol.integer == 1 ) {
-+		int damage;
++		int knockback;
 +		float knockbackSpeed;
 +
 +		// We prefer actual damage over `client->damage_knockback`
@@ -308,14 +308,14 @@ index 549e9453..7c1fae40 100644
 +		// "no knockback" means "the player should not be moved
 +		// in any particular direction",
 +		// and not that "their gibs should stay put".
-+		damage = self->client
++		knockback = self->client
 +			? self->client->damage_blood + self->client->damage_armor
 +			: damageBloodFallback;
-+		if ( damage > MAX_KNOCKBACK ) {
-+			damage = MAX_KNOCKBACK;
++		if ( knockback > MAX_KNOCKBACK ) {
++			knockback = MAX_KNOCKBACK;
 +		}
 +
-+		knockbackSpeed = KnockbackToKnockbackSpeed( damage );
++		knockbackSpeed = KnockbackToKnockbackSpeed( knockback );
 +
 +		// Fit it into one byte.
 +		eventParm = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;

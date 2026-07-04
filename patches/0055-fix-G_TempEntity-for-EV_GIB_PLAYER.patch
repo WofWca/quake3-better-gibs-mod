@@ -1,4 +1,4 @@
-From 9299008200a12f32fe62417f1dcab7565c4d8223 Mon Sep 17 00:00:00 2001
+From e82dcd1893948dc7f349335d3b6a1a3f7950f12f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 7 Jun 2026 15:45:08 +0400
 Subject: [PATCH] fix: `G_TempEntity` for `EV_GIB_PLAYER`
@@ -42,20 +42,20 @@ changes a few other things that are related to that:
   where the player was when they got gibbed,
   which guarantees that they're not sunk into the floor.
 ---
- code/cgame/cg_effects.c    |  82 ++++++++++++++----
+ code/cgame/cg_effects.c    |  82 +++++++++++++++++++++-----
  code/cgame/cg_local.h      |   2 +-
- code/cgame/cg_localents.c  |   7 +-
- code/cgame/cg_servercmds.c |  12 ++-
+ code/cgame/cg_localents.c  |   7 +--
+ code/cgame/cg_servercmds.c |  12 +++-
  code/game/bg_pmove.c       |   5 --
  code/game/g_bot.c          |   5 --
- code/game/g_combat.c       | 169 ++++++++++++++++++++++++-------------
- code/game/g_local.h        |   8 +-
- code/game/g_main.c         |  10 ++-
- code/game/g_weapon.c       |  40 ++++++++-
- 10 files changed, 240 insertions(+), 100 deletions(-)
+ code/game/g_combat.c       | 117 ++++++++++++++++++++++++++-----------
+ code/game/g_local.h        |   8 ++-
+ code/game/g_main.c         |  10 +++-
+ code/game/g_weapon.c       |  40 +++++++++++--
+ 10 files changed, 213 insertions(+), 75 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 8f8736c4..e272ff86 100644
+index 95a39cd0..b73f6c50 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1034,30 +1034,54 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -257,10 +257,10 @@ index 544f96e9..b6b205f1 100644
  	trap_SetUserinfo( clientNum, userinfo );
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index bcfe513d..6f3713dc 100644
+index 7e5d4f7f..613d8a7b 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -242,63 +242,100 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
+@@ -242,29 +242,46 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
  
  /*
  ==================
@@ -275,9 +275,9 @@ index bcfe513d..6f3713dc 100644
 -static int GetGibEntityEventParm( gentity_t *self, const int killer,
 +static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
  	const int damageBloodFallback ) {
--	int damage = damageBloodFallback;
--	int damageByte;
--	float knockbackSpeed;
+ 	int knockback = damageBloodFallback;
+ 	float knockbackSpeed;
+-	int knockbackByte;
 -	// In vanilla Quake the meaning of the `EV_GIB_PLAYER` eventParm
 -	// is `killer`.
 -	// But it is unused client-side, so it's safe for us to change its meaning
@@ -293,26 +293,6 @@ index bcfe513d..6f3713dc 100644
 -	if ( g_gibsNewEvGibPlayerParmProtocol.integer != 1 ) {
 -		return killer;
 -	}
--
--	if ( self->client ) {
--		// We prefer actual damage over `client->damage_knockback`
--		// because `damage_knockback` is sometimes undesirably 0. Namely:
--		// - when the target is a dead body, with `FL_NO_KNOCKBACK`.
--		// - when the knockback `dir` is not provided to `G_Damage`,
--		//   such as with crushers.
--		//
--		// Most of the time (but not always e.g. with lava)
--		// "no knockback" means "the player should not be moved
--		// in any particular direction",
--		// and not that "their gibs should stay put".
--		const int frameDamage =
--			self->client->damage_blood + self->client->damage_armor;
--		// In case when `level.intermissionQueued` we don't use
--		// `damage_blood` and `damage_armor` because they would not be set.
--		// See `level.intermissionQueued` and `targ->die == body_die` check
--		// in `G_Damage`.
--		if ( !level.intermissionQueued || frameDamage != 0 ) {
--			damage = frameDamage;
 +	gentity_t* tent = G_TempEntity(
 +		self->client
 +			? self->client->ps.origin
@@ -342,49 +322,28 @@ index bcfe513d..6f3713dc 100644
 +	// e.g. to get the model of the gibbed player or corpse,
 +	// so let's specify it.
 +	tent->s.clientNum = self->s.clientNum;
-+
+ 
+ 	if ( self->client ) {
+ 		// We prefer actual damage over `client->damage_knockback`
+@@ -290,15 +307,33 @@ static int GetGibEntityEventParm( gentity_t *self, const int killer,
+ 	if ( knockback > MAX_KNOCKBACK ) {
+ 		knockback = MAX_KNOCKBACK;
+ 	}
+-
+ 	knockbackSpeed = KnockbackToKnockbackSpeed( knockback );
+ 
+-	// Fit it into one byte.
+-	knockbackByte = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
+-	if (knockbackByte > 255) {
+-		knockbackByte = 255;
 +	if ( g_gibsNewEvGibPlayerProtocol.integer & 0x2 ) {
-+		int damage = damageBloodFallback;
-+		float knockbackSpeed;
-+
-+		if ( self->client ) {
-+			// We prefer actual damage over `client->damage_knockback`
-+			// because `damage_knockback` is sometimes undesirably 0. Namely:
-+			// - when the target is a dead body, with `FL_NO_KNOCKBACK`.
-+			// - when the knockback `dir` is not provided to `G_Damage`,
-+			//   such as with crushers.
-+			//
-+			// Most of the time (but not always e.g. with lava)
-+			// "no knockback" means "the player should not be moved
-+			// in any particular direction",
-+			// and not that "their gibs should stay put".
-+			const int frameDamage =
-+				self->client->damage_blood + self->client->damage_armor;
-+			// In case when `level.intermissionQueued` we don't use
-+			// `damage_blood` and `damage_armor` because they would not be set.
-+			// See `level.intermissionQueued` and `targ->die == body_die` check
-+			// in `G_Damage`.
-+			if ( !level.intermissionQueued || frameDamage != 0 ) {
-+				damage = frameDamage;
-+			}
-+		}
-+		if ( damage > MAX_KNOCKBACK ) {
-+			damage = MAX_KNOCKBACK;
-+		}
-+
-+		knockbackSpeed = KnockbackToKnockbackSpeed( damage );
-+
 +		// Fit it into one byte.
 +		tent->s.generic1 = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
 +		if (tent->s.generic1 > 255) {
 +			tent->s.generic1 = 255;
- 		}
--	}
--	if ( damage > MAX_KNOCKBACK ) {
--		damage = MAX_KNOCKBACK;
- 	}
- 
--	knockbackSpeed = KnockbackToKnockbackSpeed( damage );
++		}
++	}
++
 +	if ( g_gibsNewEvGibPlayerProtocol.integer & 0x08 ) {
 +		const vec3_t *vel = self->client
 +				? (const vec3_t*)&self->client->ps.velocity
@@ -396,21 +355,17 @@ index bcfe513d..6f3713dc 100644
 +		// or software like WolfcamQL might expect it to be set on the entity.
 +		VectorCopy( *vel, tent->s.pos.trDelta );
 +		trap_SnapVector( tent->s.pos.trDelta );
- 
--	// Fit it into one byte.
--	damageByte = knockbackSpeed / COMBAT_EV_GIB_PLAYER_ARG_DIVISOR;
--	if (damageByte > 255) {
--		damageByte = 255;
++
 +		// `TR_INTERPOLATE` is what player entities have,
 +		// but here it's not actually different from `TR_STATIONARY`
 +		// because we are never going to change `s.pos.trOrigin`.
 +		tent->s.pos.trType = TR_STATIONARY;
  	}
--	return damageByte;
+-	return knockbackByte;
  }
  /*
  ==================
-@@ -325,8 +362,22 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
+@@ -325,8 +360,22 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
  		}
  	}
  
@@ -435,7 +390,7 @@ index bcfe513d..6f3713dc 100644
  
  	self->takedamage = qfalse;
  	self->s.eType = ET_INVISIBLE;
-@@ -741,12 +792,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
+@@ -741,12 +790,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
  			self->health = GIB_HEALTH+1;
  		}
  
@@ -457,7 +412,7 @@ index bcfe513d..6f3713dc 100644
  
  		// the body can still be gibbed
  		self->die = body_die;
-@@ -1302,8 +1357,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -1302,8 +1355,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  				// Set player velocity to what it was before they hit the ground
  				// so that the gibs inherit this velocity
  				// (see `cg_gibsInheritPlayerVelocity`).

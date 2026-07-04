@@ -1,4 +1,4 @@
-From ebe2e7132304b0dabf4760aae6b00709d2134b4d Mon Sep 17 00:00:00 2001
+From 1a2de7d226ccefc01619d2e8377f062b8cd70152 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 5 Feb 2026 12:01:40 +0400
 Subject: [PATCH] feat: try to make all players see the same gibs
@@ -11,7 +11,7 @@ Subject: [PATCH] feat: try to make all players see the same gibs
  4 files changed, 96 insertions(+), 65 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 7207ece9..27567f93 100644
+index 116edbfc..4881cf4c 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -524,10 +524,13 @@ void CG_Bleed( vec3_t origin, int entityNum ) {

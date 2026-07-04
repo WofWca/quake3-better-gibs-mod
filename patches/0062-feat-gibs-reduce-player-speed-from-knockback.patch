@@ -1,4 +1,4 @@
-From e9eea5aebde3e3f5e45bfb4a243ab98d8bd8f324 Mon Sep 17 00:00:00 2001
+From 432c6a8ff02b3e01ce62faf47c34bcd7250178d2 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 21 Jun 2026 18:33:20 +0400
 Subject: [PATCH] feat: gibs: reduce player speed from knockback
@@ -10,7 +10,7 @@ Subject: [PATCH] feat: gibs: reduce player speed from knockback
  3 files changed, 57 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index f371506b..f340581b 100644
+index fd2d2e0b..78e3204a 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -675,12 +675,16 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,

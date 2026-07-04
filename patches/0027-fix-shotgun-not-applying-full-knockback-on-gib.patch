@@ -1,4 +1,4 @@
-From 683761484ab8a9faa364116faf41b348991b8a2d Mon Sep 17 00:00:00 2001
+From fcc88e141095d1d7849af0af161347048ceeb5f1 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 18 Feb 2026 21:29:10 +0400
 Subject: [PATCH] fix: shotgun not applying full knockback on gib

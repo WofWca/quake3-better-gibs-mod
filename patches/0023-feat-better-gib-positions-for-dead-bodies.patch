@@ -1,4 +1,4 @@
-From 3ac3d77d1692cc4656d6e253491ff6bf193b6125 Mon Sep 17 00:00:00 2001
+From d364222fc83f45f3e9496474f902aac52b393117 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 24 Jan 2026 16:48:44 +0400
 Subject: [PATCH] feat: better gib positions for dead bodies
@@ -17,7 +17,7 @@ This commit fixes that.
  4 files changed, 90 insertions(+), 23 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index af522204..127bacc0 100644
+index af522204..fc526fed 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -579,6 +579,60 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
@@ -34,8 +34,8 @@ index af522204..127bacc0 100644
 +	float deathAnimationProgress = 0;
 +	if (
 +		// Is this a death / dead animation?
-+		(anim->animationNumber & ~ANIM_TOGGLEBIT) <= BOTH_DEAD3 &&
 +		(anim->animationNumber & ~ANIM_TOGGLEBIT) >= BOTH_DEATH1 &&
++		(anim->animationNumber & ~ANIM_TOGGLEBIT) <= BOTH_DEAD3 &&
 +		// More sanity checks
 +		anim->animation &&
 +		anim->animation->numFrames > 0

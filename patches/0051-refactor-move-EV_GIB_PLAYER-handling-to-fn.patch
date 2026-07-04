@@ -1,4 +1,4 @@
-From 96927fb0b91e3f43e61e48ce88686124a05db96b Mon Sep 17 00:00:00 2001
+From 2aaaa584e755bf9c17bc92f355b479ff50f922e8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 3 Jun 2026 14:04:52 +0400
 Subject: [PATCH] refactor: move `EV_GIB_PLAYER` handling to fn
@@ -10,7 +10,7 @@ Subject: [PATCH] refactor: move `EV_GIB_PLAYER` handling to fn
  3 files changed, 76 insertions(+), 68 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 3fe09d3a..7febe2e8 100644
+index b9db59ba..306b9bb6 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1025,6 +1025,78 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,

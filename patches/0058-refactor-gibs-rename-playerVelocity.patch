@@ -1,4 +1,4 @@
-From 85c8511ade71cff2557b979bcfdb98f103d38fdf Mon Sep 17 00:00:00 2001
+From c5c6199b417bbf883d8169237ac6933beb4de711 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 21 Jun 2026 15:23:26 +0400
 Subject: [PATCH] refactor: gibs: rename `playerVelocity`
@@ -9,7 +9,7 @@ Subject: [PATCH] refactor: gibs: rename `playerVelocity`
  2 files changed, 22 insertions(+), 22 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 10bd2f4d..18fbdc82 100644
+index 0cf75d76..f7534335 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -656,7 +656,7 @@ in demo playback, so that players see the same gibs

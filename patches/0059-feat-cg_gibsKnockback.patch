@@ -1,4 +1,4 @@
-From ef4394327e431ded8b19e268ba6a379a560826af Mon Sep 17 00:00:00 2001
+From c67c5b3989ea59a192a768cfcbe3fa04b9b135e4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 19 Jun 2026 23:38:21 +0400
 Subject: [PATCH] feat: `cg_gibsKnockback`
@@ -13,7 +13,7 @@ Subject: [PATCH] feat: `cg_gibsKnockback`
  6 files changed, 60 insertions(+), 7 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 18fbdc82..e49e525b 100644
+index f7534335..08b4e4eb 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -656,7 +656,8 @@ in demo playback, so that players see the same gibs
@@ -160,10 +160,10 @@ index a347ab74..185c1bcd 100644
  	// add this many pieces of gibs, times the value of `cg_gibs`.
  	//
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 6f3713dc..185e435b 100644
+index 613d8a7b..57e0193b 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -336,6 +336,22 @@ static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
+@@ -334,6 +334,22 @@ static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
  		// because we are never going to change `s.pos.trOrigin`.
  		tent->s.pos.trType = TR_STATIONARY;
  	}

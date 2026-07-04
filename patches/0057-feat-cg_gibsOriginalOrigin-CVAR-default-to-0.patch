@@ -1,4 +1,4 @@
-From 13c2ebc3f6d5deffe12420d42c8a18d1db91d314 Mon Sep 17 00:00:00 2001
+From 000b21d59d59be23b0e0f42253fa88a8dd9527e9 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 14 Jun 2026 23:37:56 +0400
 Subject: [PATCH] feat: `cg_gibsOriginalOrigin` CVAR (default to 0)
@@ -11,7 +11,7 @@ Subject: [PATCH] feat: `cg_gibsOriginalOrigin` CVAR (default to 0)
  4 files changed, 57 insertions(+), 6 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index f19464f6..10bd2f4d 100644
+index 6686d0c8..0cf75d76 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1047,6 +1047,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,

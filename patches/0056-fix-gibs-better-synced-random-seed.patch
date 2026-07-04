@@ -1,4 +1,4 @@
-From 386477395a4fd1b3e4526bd6b6ba148bfbe590e8 Mon Sep 17 00:00:00 2001
+From 6b01f2836b27ac0322fd650d4c32d61b6fa1397c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 8 Jun 2026 18:07:26 +0400
 Subject: [PATCH] fix: gibs: better synced random seed
@@ -8,7 +8,7 @@ Subject: [PATCH] fix: gibs: better synced random seed
  1 file changed, 16 insertions(+), 3 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index e272ff86..f19464f6 100644
+index b73f6c50..6686d0c8 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1090,10 +1090,23 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
