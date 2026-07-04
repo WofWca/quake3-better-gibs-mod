@@ -1,0 +1,29 @@
+From 7423195fa4960a223185b86147473ac335705e70 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sat, 27 Jun 2026 23:40:24 +0400
+Subject: [PATCH] fix: dead body health resetting to 0 on respawn
+
+If one tries to gib a dead body with the machine gun,
+they might unexpectedly need to fire more rounds to gib the body.
+---
+ code/game/g_client.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/code/game/g_client.c b/code/game/g_client.c
+index 5b4b2717..e8931b5b 100644
+--- a/code/game/g_client.c
++++ b/code/game/g_client.c
+@@ -487,6 +487,10 @@ void CopyToBodyQue( gentity_t *ent ) {
+ 
+ 	body->die = body_die;
+ 
++	if ( !g_oldGibs.integer ) {
++		// Not present in vanilla (probably just a bug).
++		body->health = ent->health;
++	}
+ 	// don't take more damage if already gibbed
+ 	if ( ent->health <= GIB_HEALTH ) {
+ 		body->takedamage = qfalse;
+-- 
+2.54.0
+

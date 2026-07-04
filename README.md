@@ -133,6 +133,7 @@ so you can enjoy it on basically any server
   This is compatible with vanilla clients.
   However, if some other mod does rely on vanilla server behavior,
   you can set this CVAR to 0 to revert this change.
+- `g_gibsDeadBodyLinearVelocityFromKnockback`
 - `g_gibsOnCollisionMinSpeed`
 - `g_gibsOnCollisionBaseDamage`
 - `g_gibsOnCollisionAffectLivePlayers`

@@ -1,0 +1,39 @@
+From 3844f17c69e3e1da271be1a73f54a035e38f6593 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 30 Jun 2026 13:50:42 +0400
+Subject: [PATCH] refactor: mark `DirToByte` arg as `const`
+
+---
+ code/qcommon/q_math.c   | 2 +-
+ code/qcommon/q_shared.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/code/qcommon/q_math.c b/code/qcommon/q_math.c
+index 13158661..8c3cca6e 100644
+--- a/code/qcommon/q_math.c
++++ b/code/qcommon/q_math.c
+@@ -189,7 +189,7 @@ signed short ClampShort( int i ) {
+ 
+ 
+ // this isn't a real cheap function to call!
+-int DirToByte( vec3_t dir ) {
++int DirToByte( const vec3_t dir ) {
+ 	int		i, best;
+ 	float	d, bestd;
+ 
+diff --git a/code/qcommon/q_shared.h b/code/qcommon/q_shared.h
+index 91dee771..b5627710 100644
+--- a/code/qcommon/q_shared.h
++++ b/code/qcommon/q_shared.h
+@@ -527,7 +527,7 @@ signed char ClampChar( int i );
+ signed short ClampShort( int i );
+ 
+ // this isn't a real cheap function to call!
+-int DirToByte( vec3_t dir );
++int DirToByte( const vec3_t dir );
+ void ByteToDir( int b, vec3_t dir );
+ 
+ #if	1
+-- 
+2.54.0
+
