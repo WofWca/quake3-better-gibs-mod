@@ -1600,13 +1600,15 @@ static void CheckExitRules( void ) {
 #endif
 
 #ifdef MISSIONPACK
-		int time = (g_singlePlayer.integer) ? SP_INTERMISSION_DELAY_TIME : INTERMISSION_DELAY_TIME;
+		int time = (g_singlePlayer.integer)
+			? g_intermissionDelaySinglePlayer.integer
+			: g_intermissionDelay.integer;
 		if ( level.time - level.intermissionQueued >= time ) {
 			level.intermissionQueued = 0;
 			BeginIntermission();
 		}
 #else
-		if ( level.time - level.intermissionQueued >= INTERMISSION_DELAY_TIME ) {
+		if ( level.time - level.intermissionQueued >= g_intermissionDelay.integer ) {
 			level.intermissionQueued = 0;
 			BeginIntermission();
 		}
