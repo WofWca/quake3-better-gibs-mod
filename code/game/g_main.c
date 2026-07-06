@@ -77,6 +77,10 @@ vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
 vmCvar_t	g_gibsOnCollisionMinSpeed;
 vmCvar_t	g_gibsOnCollisionBaseDamage;
 vmCvar_t	g_gibsOnCollisionAffectLivePlayers;
+vmCvar_t	g_intermissionDelay;
+#ifdef MISSIONPACK
+vmCvar_t	g_intermissionDelaySinglePlayer;
+#endif
 vmCvar_t	g_podiumDist;
 vmCvar_t	g_podiumDrop;
 vmCvar_t	g_allowVote;
@@ -189,6 +193,11 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_ARCHIVE, 0, qfalse },
 	// This one affects gameplay significantly, and is basically just for fun.
 	{ &g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, qtrue },
+
+	{ &g_intermissionDelay, "g_intermissionDelay", "1000", 0, 0, qtrue },
+#ifdef MISSIONPACK
+	{ &g_intermissionDelaySinglePlayer, "g_intermissionDelaySinglePlayer", "5000", 0, 0, qtrue },
+#endif
 
 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
 	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
@@ -1384,13 +1393,15 @@ void CheckExitRules( void ) {
 
 	if ( level.intermissionQueued ) {
 #ifdef MISSIONPACK
-		int time = (g_singlePlayer.integer) ? SP_INTERMISSION_DELAY_TIME : INTERMISSION_DELAY_TIME;
+		int time = (g_singlePlayer.integer)
+			? g_intermissionDelaySinglePlayer.integer
+			: g_intermissionDelay.integer;
 		if ( level.time - level.intermissionQueued >= time ) {
 			level.intermissionQueued = 0;
 			BeginIntermission();
 		}
 #else
-		if ( level.time - level.intermissionQueued >= INTERMISSION_DELAY_TIME ) {
+		if ( level.time - level.intermissionQueued >= g_intermissionDelay.integer ) {
 			level.intermissionQueued = 0;
 			BeginIntermission();
 		}
