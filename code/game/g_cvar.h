@@ -95,7 +95,9 @@ G_CVAR( g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_
 G_CVAR( g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, qtrue, qfalse )
 G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse, qfalse )
 
-G_CVAR( g_intermissionDelay, "g_intermissionDelay", "1000", 0, 0, qtrue, qfalse )
+// In vanilla this is 1000, but we increase it by 100 (two server frames)
+// so that the winner can shoot a second shotgun shot, to gib the dead body.
+G_CVAR( g_intermissionDelay, "g_intermissionDelay", "1100", 0, 0, qtrue, qfalse )
 #ifdef MISSIONPACK
 G_CVAR( g_intermissionDelaySinglePlayer, "g_intermissionDelaySinglePlayer", "5000", 0, 0, qtrue, qfalse )
 #endif
