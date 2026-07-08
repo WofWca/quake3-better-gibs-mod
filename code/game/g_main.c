@@ -194,7 +194,9 @@ static cvarTable_t		gameCvarTable[] = {
 	// This one affects gameplay significantly, and is basically just for fun.
 	{ &g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, qtrue },
 
-	{ &g_intermissionDelay, "g_intermissionDelay", "1000", 0, 0, qtrue },
+	// In vanilla this is 1000, but we increase it by 100 (two server frames)
+	// so that the winner can shoot a second shotgun shot, to gib the dead body.
+	{ &g_intermissionDelay, "g_intermissionDelay", "1100", 0, 0, qtrue },
 #ifdef MISSIONPACK
 	{ &g_intermissionDelaySinglePlayer, "g_intermissionDelaySinglePlayer", "5000", 0, 0, qtrue },
 #endif
