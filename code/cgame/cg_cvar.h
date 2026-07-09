@@ -59,6 +59,7 @@ CG_CVAR( cg_gibsPlayerSpeedFromKnockback, "cg_gibsPlayerSpeedFromKnockback", "-0
 // For example, if this is -0.75, we'll always keep at least 25%
 // of original player velocity.
 CG_CVAR( cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnockbackMaxFraction", "-0.5", 0 )
+CG_CVAR( cg_gibsDuration, "cg_gibsDuration", "5000", 0 )
 // Whether to use the exact position where the player got gibbed
 // as the initial gibs position, instead of the position of the gibbed player
 // on the screen, i.e. the position of the player on the next server frame
