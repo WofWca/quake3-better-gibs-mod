@@ -111,6 +111,7 @@ vmCvar_t	cg_gibsVerticalVelocityFromKnockback;
 vmCvar_t	cg_gibsExtraVerticalVelocity;
 vmCvar_t	cg_gibsPlayerSpeedFromKnockback;
 vmCvar_t	cg_gibsPlayerSpeedFromKnockbackMaxFraction;
+vmCvar_t	cg_gibsDuration;
 vmCvar_t	cg_gibsOriginalOrigin;
 vmCvar_t	cg_gibsNoLerpDelay;
 vmCvar_t	cg_gibsBounceFactor;
@@ -282,6 +283,7 @@ static cvarTable_t cvarTable[] = {
 	// For example, if this is -0.75, we'll always keep at least 25%
 	// of original player velocity.
 	{ &cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnockbackMaxFraction", "-0.5", 0  },
+	{ &cg_gibsDuration, "cg_gibsDuration", "5000", 0  },
 	// Whether to use the exact position where the player got gibbed
 	// as the initial gibs position, instead of the position of the gibbed player
 	// on the screen, i.e. the position of the player on the next server frame

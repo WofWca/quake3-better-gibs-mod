@@ -1111,6 +1111,7 @@ extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
 extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
 extern	vmCvar_t		cg_gibsPlayerSpeedFromKnockback;
 extern	vmCvar_t		cg_gibsPlayerSpeedFromKnockbackMaxFraction;
+extern	vmCvar_t		cg_gibsDuration;
 extern	vmCvar_t		cg_gibsOriginalOrigin;
 extern	vmCvar_t		cg_gibsNoLerpDelay;
 extern	vmCvar_t		cg_gibsBounceFactor;
