@@ -134,5 +134,5 @@ index f210e93e..75cc7405 100644
  	// as the initial gibs position, instead of the position of the gibbed player
  	// on the screen, i.e. the position of the player on the next server frame
 -- 
-2.54.0
+2.55.0
 

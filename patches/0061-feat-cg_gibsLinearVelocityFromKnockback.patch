@@ -55,5 +55,5 @@ index a11af3ec..f210e93e 100644
  	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE  },
  	{ &cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE  },
 -- 
-2.54.0
+2.55.0
 

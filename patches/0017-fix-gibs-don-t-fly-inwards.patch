@@ -125,5 +125,5 @@ index 800f089a..82efe802 100644
  	VectorAdd( velocity, playerVelocityScaled, velocity );
  	VectorCopy( bodyAngles, angles );
 -- 
-2.54.0
+2.55.0
 

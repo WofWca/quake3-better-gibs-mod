@@ -70,5 +70,5 @@ index ccf2f250..b05176eb 100644
  	for (i = 0; i < level.num_entities; i++, ent2++) {
  		if ( !ent2->inuse ) {
 -- 
-2.54.0
+2.55.0
 

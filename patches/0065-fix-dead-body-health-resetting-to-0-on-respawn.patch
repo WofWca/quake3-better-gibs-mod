@@ -25,5 +25,5 @@ index 5b4b2717..e8931b5b 100644
  	if ( ent->health <= GIB_HEALTH ) {
  		body->takedamage = qfalse;
 -- 
-2.54.0
+2.55.0
 

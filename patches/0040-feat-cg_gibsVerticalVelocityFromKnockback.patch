@@ -62,5 +62,5 @@ index 8276b2f5..c3a9ccf1 100644
  	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE  },
  	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
 -- 
-2.54.0
+2.55.0
 

@@ -58,5 +58,5 @@ index 10944e80..6b7ad8d4 100644
  	for ( ; t <= t2; t += step ) {
  		BG_EvaluateTrajectory( &le->pos, t, newOrigin );
 -- 
-2.54.0
+2.55.0
 

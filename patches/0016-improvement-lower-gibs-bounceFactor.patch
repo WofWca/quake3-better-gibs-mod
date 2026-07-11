@@ -22,5 +22,5 @@ index cdf014a2..e658828e 100644
  	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
  	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 -- 
-2.54.0
+2.55.0
 

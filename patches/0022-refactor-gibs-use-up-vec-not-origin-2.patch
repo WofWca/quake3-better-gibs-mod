@@ -111,5 +111,5 @@ index 38323ab3..af522204 100644
  		VectorMA( origin, -0.2 * playerRadius, forward, origin );
  		VectorClear( velocity );
 -- 
-2.54.0
+2.55.0
 

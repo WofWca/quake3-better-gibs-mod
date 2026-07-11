@@ -98,5 +98,5 @@ index 5d644276..9f58c523 100644
  	{ &cg_nopredict, "cg_nopredict", "0", 0 },
  	{ &cg_noPlayerAnims, "cg_noplayeranims", "0", CVAR_CHEAT },
 -- 
-2.54.0
+2.55.0
 

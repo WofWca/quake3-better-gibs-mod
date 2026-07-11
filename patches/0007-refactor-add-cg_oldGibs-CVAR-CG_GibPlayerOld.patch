@@ -174,5 +174,5 @@ index 1269e1b6..f8fe4644 100644
  	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
  	{ &cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE  },
 -- 
-2.54.0
+2.55.0
 

@@ -65,5 +65,5 @@ index edd3cac0..549e9453 100644
  			targ->enemy = attacker;
  			targ->die (targ, inflictor, attacker, take, mod);
 -- 
-2.54.0
+2.55.0
 

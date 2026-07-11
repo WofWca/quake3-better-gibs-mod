@@ -107,5 +107,5 @@ index a2b0f6e7..3e8b6b8f 100644
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
 -- 
-2.54.0
+2.55.0
 

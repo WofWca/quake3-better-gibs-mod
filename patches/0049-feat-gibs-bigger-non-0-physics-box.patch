@@ -124,5 +124,5 @@ index ac5eefaa..10944e80 100644
  		// still in free fall
  		VectorCopy( newOrigin, le->refEntity.origin );
 -- 
-2.54.0
+2.55.0
 

@@ -61,5 +61,5 @@ index 7801a108..ac5eefaa 100644
  
  	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceSoundMinImpactSpeed.value ) ) {
 -- 
-2.54.0
+2.55.0
 

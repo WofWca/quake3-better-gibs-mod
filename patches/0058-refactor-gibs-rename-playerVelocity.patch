@@ -208,5 +208,5 @@ index b7a150cb..43298b2f 100644
  // Same as `CG_GibPlayer`, but takes different params.
  void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 -- 
-2.54.0
+2.55.0
 

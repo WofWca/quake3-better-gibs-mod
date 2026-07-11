@@ -37,5 +37,5 @@ index 44233727..8d33f553 100644
  				: cent->pe.torso;
  			vec3_t torsoAngles;
 -- 
-2.54.0
+2.55.0
 
