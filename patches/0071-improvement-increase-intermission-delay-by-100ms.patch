@@ -1,0 +1,27 @@
+From 62ac9056a50c55e5649dd8dc100498c456a31aa4 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Wed, 8 Jul 2026 23:12:50 +0400
+Subject: [PATCH] improvement: increase intermission delay by 100ms
+
+---
+ code/game/g_main.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/code/game/g_main.c b/code/game/g_main.c
+index 5271e37b..cb131ba0 100644
+--- a/code/game/g_main.c
++++ b/code/game/g_main.c
+@@ -194,7 +194,9 @@ static cvarTable_t		gameCvarTable[] = {
+ 	// This one affects gameplay significantly, and is basically just for fun.
+ 	{ &g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, qtrue },
+ 
+-	{ &g_intermissionDelay, "g_intermissionDelay", "1000", 0, 0, qtrue },
++	// In vanilla this is 1000, but we increase it by 100 (two server frames)
++	// so that the winner can shoot a second shotgun shot, to gib the dead body.
++	{ &g_intermissionDelay, "g_intermissionDelay", "1100", 0, 0, qtrue },
+ #ifdef MISSIONPACK
+ 	{ &g_intermissionDelaySinglePlayer, "g_intermissionDelaySinglePlayer", "5000", 0, 0, qtrue },
+ #endif
+-- 
+2.55.0
+

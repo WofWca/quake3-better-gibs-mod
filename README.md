@@ -110,6 +110,7 @@ so you can enjoy it on basically any server
 - `cg_gibsExtraVerticalVelocity`
 - `cg_gibsPlayerSpeedFromKnockback`
 - `cg_gibsPlayerSpeedFromKnockbackMaxFraction`
+- `cg_gibsDuration`
 - `cg_gibsOriginalOrigin`
 - `cg_gibsNoLerpDelay`
 - `cg_gibsBounceFactor`
@@ -120,6 +121,9 @@ so you can enjoy it on basically any server
 - `cg_gibsFireTrailDuration`
 - `cg_gibsFireTrailMinKnockback`
 - `cg_gibsBetterCameraOnGib`
+- `cg_marks`
+  Old CVAR, but it now controls the duration of blood and other marks,
+  in milliseconds.
 - `cg_bounceMarksMinImpactSpeed`
 - `cg_bounceSoundMinImpactSpeed`
 - `g_gibsMissileDirectionKnockbackWeight`
@@ -139,6 +143,9 @@ so you can enjoy it on basically any server
 - `g_gibsOnCollisionAffectLivePlayers`
   For fooling around (off by default).
 - `g_gibsOnCollisionInheritPlayerVelocity`
+- `g_intermissionDelay`
+- `g_intermissionDelaySinglePlayer`
+  Only in Team Arena.
 - (maybe I've missed some: search the code for `+vmCvar_t`)
 
 Another way to (almost) restore the old behavior:
