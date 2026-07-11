@@ -1,4 +1,4 @@
-From 358e658b2ed0d5d7843f74cca4d4ddce57ed66ca Mon Sep 17 00:00:00 2001
+From d70c78f586b27a1c336dd5dae0456fe4ce5337cc Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 31 May 2026 23:04:43 +0400
 Subject: [PATCH] improvement: dampen gibs' tumble speed

@@ -1,4 +1,4 @@
-From da8b51fbd9cee1456514e1fe21e79105722d392a Mon Sep 17 00:00:00 2001
+From ec30c5f4aaa119ba581742bb51c68c4419edb5aa Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 24 Jan 2026 12:59:46 +0400
 Subject: [PATCH] refactor: gibs: use `up` vec, not `origin[2]`
@@ -9,10 +9,10 @@ This will let us handle non-0 pitch values.
  1 file changed, 10 insertions(+), 11 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 38323ab3..af522204 100644
+index 3579d48c..c30ad412 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -602,7 +602,6 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -603,7 +603,6 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	// (do we have them available on the client though?),
  	// to account for crounching or for the "lying on the ground dead" state.
  	float playerHeight = 32 - MINS_Z;
@@ -20,7 +20,7 @@ index 38323ab3..af522204 100644
  	float playerRadius = 15;
  	float baseRandomVelocity = cg_gibsExtraRandomVelocity.value;
  	vec3_t playerVelocityScaled;
-@@ -626,7 +625,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -627,7 +626,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		// This is in line with the original behavior of `CG_GibPlayer`.
  
  		VectorCopy( playerOrigin, origin );
@@ -29,7 +29,7 @@ index 38323ab3..af522204 100644
  		VectorClear( velocity );
  		velocity[0] = crandom()*baseRandomVelocity;
  		velocity[1] = crandom()*baseRandomVelocity;
-@@ -648,7 +647,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -649,7 +648,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );
@@ -38,7 +38,7 @@ index 38323ab3..af522204 100644
  		VectorClear( velocity );
  		velocity[0] = crandom()*baseRandomVelocity;
  		velocity[1] = crandom()*baseRandomVelocity;
-@@ -660,7 +659,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -661,7 +660,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );
@@ -47,7 +47,7 @@ index 38323ab3..af522204 100644
  		VectorMA( origin, 0.8 * playerRadius, right, origin );
  		VectorMA( origin, -0.3 * playerRadius, forward, origin );
  		VectorClear( velocity );
-@@ -677,7 +676,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -678,7 +677,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );
@@ -56,7 +56,7 @@ index 38323ab3..af522204 100644
  		VectorClear( velocity );
  		// Chest is a more "central" and "heavier" piece,
  		// so it gets less random velocity.
-@@ -691,7 +690,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -692,7 +691,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );
@@ -65,7 +65,7 @@ index 38323ab3..af522204 100644
  		VectorMA( origin, 0.8 * playerRadius, right, origin );
  		VectorMA( origin, 0.2 * playerRadius, forward, origin );
  		VectorClear( velocity );
-@@ -708,7 +707,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -709,7 +708,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );
@@ -74,7 +74,7 @@ index 38323ab3..af522204 100644
  		VectorMA( origin, -0.5 * playerRadius, right, origin );
  		VectorMA( origin, -0.5 * playerRadius, forward, origin );
  		VectorClear( velocity );
-@@ -722,7 +721,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -723,7 +722,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );
@@ -83,7 +83,7 @@ index 38323ab3..af522204 100644
  		VectorMA( origin, -0.6 * playerRadius, right, origin );
  		VectorMA( origin, +0.2 * playerRadius, forward, origin );
  		VectorClear( velocity );
-@@ -739,7 +738,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -740,7 +739,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );
@@ -92,7 +92,7 @@ index 38323ab3..af522204 100644
  		VectorClear( velocity );
  		velocity[0] = crandom()*baseRandomVelocity;
  		velocity[1] = crandom()*baseRandomVelocity;
-@@ -751,7 +750,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -752,7 +751,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );
@@ -101,7 +101,7 @@ index 38323ab3..af522204 100644
  		VectorMA( origin, 0.5 * playerRadius, right, origin );
  		VectorMA( origin, 0.1 * playerRadius, forward, origin );
  		VectorClear( velocity );
-@@ -768,7 +767,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -769,7 +768,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  
  		VectorCopy( playerOrigin, origin );

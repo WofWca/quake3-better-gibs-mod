@@ -1,4 +1,4 @@
-From bb30173c62685d79b76a849e9b2772d84b8a8ae1 Mon Sep 17 00:00:00 2001
+From 2165a2d73092807a9cdd2acf2cbfe65b1aff60db Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 6 May 2026 23:29:47 +0400
 Subject: [PATCH] feat: add `cg_debugGibs`
@@ -11,10 +11,10 @@ Subject: [PATCH] feat: add `cg_debugGibs`
  4 files changed, 36 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 963bd4bf..a2b0f6e7 100644
+index 613246e9..83701a02 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -701,6 +701,28 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -702,6 +702,28 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  
  	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocityScaled );
  

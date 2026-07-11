@@ -1,4 +1,4 @@
-From c67c5b3989ea59a192a768cfcbe3fa04b9b135e4 Mon Sep 17 00:00:00 2001
+From 85dd197e8241abad203763e9122339a8696f50ef Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 19 Jun 2026 23:38:21 +0400
 Subject: [PATCH] feat: `cg_gibsKnockback`
@@ -13,10 +13,10 @@ Subject: [PATCH] feat: `cg_gibsKnockback`
  6 files changed, 60 insertions(+), 7 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index f7534335..08b4e4eb 100644
+index a172ca89..37ef5df0 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -656,7 +656,8 @@ in demo playback, so that players see the same gibs
+@@ -657,7 +657,8 @@ in demo playback, so that players see the same gibs
  #define	GIB_VELOCITY		250
  #define	GIB_JUMP			250
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -26,7 +26,7 @@ index f7534335..08b4e4eb 100644
  					const lerpFrame_t *bodyAnimation, const int randSeed ) {
  	int i;
  	vec3_t	baseOrigin, origin, velocity;
-@@ -671,6 +672,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -672,6 +673,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	// to account for crounching.
  	float playerHeight = 32 - MINS_Z;
  	float playerRadius = PLAYER_WIDTH;
@@ -34,7 +34,7 @@ index f7534335..08b4e4eb 100644
  	float baseRandomVelocity =
  		cg_gibsExtraRandomVelocity.value +
  		cg_gibsRandomVelocityFromKnockback.value * knockbackSpeed;
-@@ -706,13 +708,33 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -707,13 +709,33 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	}
  	AngleVectors( bodyAngles, forward, right, up );
  
@@ -70,7 +70,7 @@ index f7534335..08b4e4eb 100644
  			VectorLength( playerVelocity ) );
  		CG_Printf( " (vertical "S_COLOR_YELLOW"%.1f"S_COLOR_WHITE")",
  			playerVelocity[2] );
-@@ -1059,6 +1081,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1060,6 +1082,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		? es->eventParm * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
  		// Just use the default knockback speed for 100 damage.
  		: 100 * 1000 / COMBAT_PLAYER_MASS;
@@ -78,7 +78,7 @@ index f7534335..08b4e4eb 100644
  
  	// Apparently at this point `targEs->pos.trDelta` doesn't yet have
  	// the knockback from the damage that gibbed us,
-@@ -1135,6 +1158,12 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1136,6 +1159,12 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  			cent->lerpOrigin, origin );
  	}
  
@@ -91,7 +91,7 @@ index f7534335..08b4e4eb 100644
  	// Torso animation angles seem to be in better sync
  	// between the local state and how others see us,
  	// and overall are closer to other player's viewangles
-@@ -1189,7 +1218,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1190,7 +1219,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  			usePredictedPs );
  	}
  
@@ -160,10 +160,10 @@ index a347ab74..185c1bcd 100644
  	// add this many pieces of gibs, times the value of `cg_gibs`.
  	//
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 613d8a7b..57e0193b 100644
+index 17eb2be2..32ceea13 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -334,6 +334,22 @@ static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
+@@ -342,6 +342,22 @@ static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
  		// because we are never going to change `s.pos.trOrigin`.
  		tent->s.pos.trType = TR_STATIONARY;
  	}

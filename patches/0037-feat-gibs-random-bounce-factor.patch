@@ -1,4 +1,4 @@
-From 484f31e84e2aaac5a0d2ea58077d6c9e992a41ca Mon Sep 17 00:00:00 2001
+From 9275b86d8eba6ca9ceff26a6997436f63146e346 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 27 Mar 2026 11:50:37 +0400
 Subject: [PATCH] feat: gibs: random bounce factor

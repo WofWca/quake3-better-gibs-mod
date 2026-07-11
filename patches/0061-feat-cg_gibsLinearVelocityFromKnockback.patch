@@ -1,4 +1,4 @@
-From d696be1b14621d76c649dda244e74936f664234a Mon Sep 17 00:00:00 2001
+From 6c57510bbd74c288ac6a4d69d653daae8b23e30d Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 24 Jun 2026 19:08:01 +0400
 Subject: [PATCH] feat: `cg_gibsLinearVelocityFromKnockback`
@@ -10,10 +10,10 @@ Subject: [PATCH] feat: `cg_gibsLinearVelocityFromKnockback`
  3 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 84f3c110..fd2d2e0b 100644
+index 378a002b..97469126 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -717,7 +717,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -718,7 +718,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		//
  		// This also handles `knockbackDir` being a zero-vector.
  		VectorMA( playerVelocity,

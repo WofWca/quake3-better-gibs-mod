@@ -1,4 +1,4 @@
-From 7423195fa4960a223185b86147473ac335705e70 Mon Sep 17 00:00:00 2001
+From dde7e4692cdc32250754b8dc7ea3d233c74f6ae0 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 27 Jun 2026 23:40:24 +0400
 Subject: [PATCH] fix: dead body health resetting to 0 on respawn

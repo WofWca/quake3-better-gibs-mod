@@ -1,4 +1,4 @@
-From 3844f17c69e3e1da271be1a73f54a035e38f6593 Mon Sep 17 00:00:00 2001
+From 5b13bb7b3f7f09294208d640bf27581978e84ac2 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 13:50:42 +0400
 Subject: [PATCH] refactor: mark `DirToByte` arg as `const`

@@ -1,4 +1,4 @@
-From 000b21d59d59be23b0e0f42253fa88a8dd9527e9 Mon Sep 17 00:00:00 2001
+From f91a85f919c6cebbe313b1d77dd2eb58f512a95b Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 14 Jun 2026 23:37:56 +0400
 Subject: [PATCH] feat: `cg_gibsOriginalOrigin` CVAR (default to 0)
@@ -11,10 +11,10 @@ Subject: [PATCH] feat: `cg_gibsOriginalOrigin` CVAR (default to 0)
  4 files changed, 57 insertions(+), 6 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 6686d0c8..0cf75d76 100644
+index b8bd0a57..6cc45b39 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -1047,6 +1047,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1048,6 +1048,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		targCent == &cg.predictedPlayerEntity;
  	const int killer = es->eventParm;
  
@@ -23,7 +23,7 @@ index 6686d0c8..0cf75d76 100644
  	int knockbackSpeed = cgs.g_gibsNewEvGibPlayerProtocol & 0x02
  		? es->generic1 * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
  		// Also check the old Better Gibs mod protocol.
-@@ -1111,6 +1113,28 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1112,6 +1114,28 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		randSeed = Q_rand(&randSeed) + ci->name[0];
  	}
  
@@ -52,7 +52,7 @@ index 6686d0c8..0cf75d76 100644
  	// Torso animation angles seem to be in better sync
  	// between the local state and how others see us,
  	// and overall are closer to other player's viewangles
-@@ -1147,11 +1171,13 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1148,11 +1172,13 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		// where the position and velocity are fixed at what they were
  		// the moment the player got gibbed on the server,
  		// i.e. they are not interpolated.
@@ -71,7 +71,7 @@ index 6686d0c8..0cf75d76 100644
  		VectorSubtract( targEs->pos.trDelta, *vel, diff );
  		l = VectorLength( diff );
  		CG_Printf(", vel diff %s%.1f",
-@@ -1163,7 +1189,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1164,7 +1190,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  			usePredictedPs );
  	}
  

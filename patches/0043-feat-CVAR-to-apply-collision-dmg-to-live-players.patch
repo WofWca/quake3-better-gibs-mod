@@ -1,4 +1,4 @@
-From bfecde3c59f463541327042f9c2671f816060ab7 Mon Sep 17 00:00:00 2001
+From c09283f2b7103a13a45d0de850d1bf0faf6bab7f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 5 May 2026 22:12:12 +0400
 Subject: [PATCH] feat: CVAR to apply collision dmg to live players

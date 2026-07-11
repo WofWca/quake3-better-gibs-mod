@@ -1,4 +1,4 @@
-From e82dcd1893948dc7f349335d3b6a1a3f7950f12f Mon Sep 17 00:00:00 2001
+From 8f9f7cc40adcf6365143b3c173c779d431c448e7 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 7 Jun 2026 15:45:08 +0400
 Subject: [PATCH] fix: `G_TempEntity` for `EV_GIB_PLAYER`
@@ -42,23 +42,23 @@ changes a few other things that are related to that:
   where the player was when they got gibbed,
   which guarantees that they're not sunk into the floor.
 ---
- code/cgame/cg_effects.c    |  82 +++++++++++++++++++++-----
+ code/cgame/cg_effects.c    |  82 +++++++++++++++++++-----
  code/cgame/cg_local.h      |   2 +-
  code/cgame/cg_localents.c  |   7 +--
  code/cgame/cg_servercmds.c |  12 +++-
  code/game/bg_pmove.c       |   5 --
  code/game/g_bot.c          |   5 --
- code/game/g_combat.c       | 117 ++++++++++++++++++++++++++-----------
+ code/game/g_combat.c       | 125 +++++++++++++++++++++++++++----------
  code/game/g_local.h        |   8 ++-
- code/game/g_main.c         |  10 +++-
- code/game/g_weapon.c       |  40 +++++++++++--
- 10 files changed, 213 insertions(+), 75 deletions(-)
+ code/game/g_main.c         |  10 ++-
+ code/game/g_weapon.c       |  40 ++++++++++--
+ 10 files changed, 221 insertions(+), 75 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 95a39cd0..b73f6c50 100644
+index a67ecd39..6499f727 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -1034,30 +1034,54 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -1035,30 +1035,54 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  }
  void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  					const clientInfo_t *ci ) {
@@ -127,7 +127,7 @@ index 95a39cd0..b73f6c50 100644
  	vec3_t torsoAngles;
  
  	// TODO fix: things like `origin` and `angles`
-@@ -1090,11 +1114,37 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1091,11 +1115,37 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  	torsoAngles[ROLL] = 0;
  
  	if ( cg_debugGibs.integer & 0x04 ) {
@@ -257,10 +257,10 @@ index 544f96e9..b6b205f1 100644
  	trap_SetUserinfo( clientNum, userinfo );
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 7e5d4f7f..613d8a7b 100644
+index 7e5d4f7f..17eb2be2 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -242,29 +242,46 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
+@@ -242,29 +242,54 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
  
  /*
  ==================
@@ -300,6 +300,14 @@ index 7e5d4f7f..613d8a7b 100644
 +		EV_GIB_PLAYER
 +	);
 +
++	// Match the player box. This affects PVS checks,
++	// i.e. if the box is not potentially visible
++	// then the event won't be sent to clients.
++	trap_UnlinkEntity(tent);
++	VectorCopy( self->r.mins, tent->r.mins );
++	VectorCopy( self->r.maxs, tent->r.maxs );
++	trap_LinkEntity(tent);
++
 +	// For super-duper compatibility with possible mods
 +	// we could have also utilized `BG_PlayerStateToEntityState`
 +	// (and copying the whole `self->s` to the temp entity),
@@ -325,7 +333,7 @@ index 7e5d4f7f..613d8a7b 100644
  
  	if ( self->client ) {
  		// We prefer actual damage over `client->damage_knockback`
-@@ -290,15 +307,33 @@ static int GetGibEntityEventParm( gentity_t *self, const int killer,
+@@ -290,15 +315,33 @@ static int GetGibEntityEventParm( gentity_t *self, const int killer,
  	if ( knockback > MAX_KNOCKBACK ) {
  		knockback = MAX_KNOCKBACK;
  	}
@@ -365,7 +373,7 @@ index 7e5d4f7f..613d8a7b 100644
  }
  /*
  ==================
-@@ -325,8 +360,22 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
+@@ -325,8 +368,22 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
  		}
  	}
  
@@ -390,7 +398,7 @@ index 7e5d4f7f..613d8a7b 100644
  
  	self->takedamage = qfalse;
  	self->s.eType = ET_INVISIBLE;
-@@ -741,12 +790,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
+@@ -741,12 +798,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
  			self->health = GIB_HEALTH+1;
  		}
  
@@ -412,7 +420,7 @@ index 7e5d4f7f..613d8a7b 100644
  
  		// the body can still be gibbed
  		self->die = body_die;
-@@ -1302,8 +1355,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -1302,8 +1363,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  				// Set player velocity to what it was before they hit the ground
  				// so that the gibs inherit this velocity
  				// (see `cg_gibsInheritPlayerVelocity`).

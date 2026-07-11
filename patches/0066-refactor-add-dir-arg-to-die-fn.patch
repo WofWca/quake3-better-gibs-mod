@@ -1,4 +1,4 @@
-From 4e1c96cf71b80d8d00ea0918cfd4a4d21c6988fc Mon Sep 17 00:00:00 2001
+From 3244d81ce8d3bb9419731ee31db8a802691bd2d9 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 13:48:03 +0400
 Subject: [PATCH] refactor: add `dir` arg to `die()` fn
@@ -35,10 +35,10 @@ index f349a1bc..998d4b40 100644
  	}
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 57e0193b..146a6e4f 100644
+index 32ceea13..cfb9c10c 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -415,7 +415,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
+@@ -423,7 +423,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
  body_die
  ==================
  */
@@ -47,7 +47,7 @@ index 57e0193b..146a6e4f 100644
  	if ( self->health > GIB_HEALTH ) {
  		return;
  	}
-@@ -586,7 +586,7 @@ void CheckAlmostScored( gentity_t *self, gentity_t *attacker ) {
+@@ -594,7 +594,7 @@ void CheckAlmostScored( gentity_t *self, gentity_t *attacker ) {
  player_die
  ==================
  */
@@ -56,7 +56,7 @@ index 57e0193b..146a6e4f 100644
  	gentity_t	*ent;
  	int			anim;
  	int			contents;
-@@ -1082,9 +1082,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -1090,9 +1090,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  
  			targ->health = targ->health - damage;
  			if ( targ->health <= 0 ) {
@@ -70,7 +70,7 @@ index 57e0193b..146a6e4f 100644
  			}
  		}
  
-@@ -1407,7 +1410,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -1415,7 +1418,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  			}
  
  			targ->enemy = attacker;

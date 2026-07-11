@@ -1,4 +1,4 @@
-From fb0e379f8e2027b3f20125577805b6b689936156 Mon Sep 17 00:00:00 2001
+From 0a315b4ee17e4ce44a65c8bbbfe5026aa67d7b60 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 27 Jun 2026 17:32:21 +0400
 Subject: [PATCH] fix: gibs: check if killer has quad on vanilla
@@ -10,10 +10,10 @@ this will give more random speed to gibs.
  1 file changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 78e3204a..ae56d59a 100644
+index eda4d618..eff93f46 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -1105,7 +1105,17 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1106,7 +1106,17 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  	const entityState_t *targEs = &targCent->currentState;
  	const qboolean targEsValid = targCent->currentValid ||
  		targCent == &cg.predictedPlayerEntity;
@@ -32,7 +32,7 @@ index 78e3204a..ae56d59a 100644
  
  	vec3_t origin;
  
-@@ -1117,6 +1127,11 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1118,6 +1128,11 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		// Not super necessary but why not.
  		: cgs.g_gibsNewEvGibPlayerProtocol & 0x01
  		? es->eventParm * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
@@ -44,7 +44,7 @@ index 78e3204a..ae56d59a 100644
  		// Just use the default knockback speed for 100 damage.
  		: 100 * 1000 / COMBAT_PLAYER_MASS;
  	vec3_t knockbackDir;
-@@ -1232,6 +1247,9 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1233,6 +1248,9 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		CG_Printf(", targ %s%i",
  			targEsValid ? S_COLOR_GREEN : S_COLOR_RED,
  			targNum );

@@ -1,4 +1,4 @@
-From c986961fd9fa863e4727342b61fcafa96da100e1 Mon Sep 17 00:00:00 2001
+From dd860067050d2ce3790b11009c99e03e159f951d Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 17:04:33 +0400
 Subject: [PATCH] fix: better dead bodies' explosion knockback dir
@@ -8,10 +8,10 @@ Subject: [PATCH] fix: better dead bodies' explosion knockback dir
  1 file changed, 18 insertions(+), 3 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 99fd0514..80ded494 100644
+index 0c2f3784..7f9d0710 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -1602,9 +1602,24 @@ qboolean G_RadiusDamage ( vec3_t origin, gentity_t *attacker, float damage, floa
+@@ -1610,9 +1610,24 @@ qboolean G_RadiusDamage ( vec3_t origin, gentity_t *attacker, float damage, floa
  				hitClient = qtrue;
  			}
  			VectorSubtract (ent->r.currentOrigin, origin, dir);

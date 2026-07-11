@@ -1,19 +1,19 @@
-From 8c093d58f241f345d71a6f22edf811dc61b61e49 Mon Sep 17 00:00:00 2001
+From befdd5b497c1f056d69d1ef0ccae1264732c2f75 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 19 Jan 2026 21:36:34 +0400
 Subject: [PATCH] feat: make gibs tumble (rotate)
 
 ---
- code/cgame/cg_effects.c | 26 ++++++++++++++++++++++++++
+ code/cgame/cg_effects.c | 27 +++++++++++++++++++++++++++
  code/cgame/cg_local.h   |  1 +
  code/cgame/cg_main.c    |  2 ++
- 3 files changed, 29 insertions(+)
+ 3 files changed, 30 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 5a3a1dd7..38323ab3 100644
+index 5a3a1dd7..3579d48c 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -549,6 +549,32 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
+@@ -549,6 +549,33 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
  
  	le->bounceFactor = cg_oldGibs.integer ? 0.6f : cg_gibsBounceFactor.value;
  
@@ -36,7 +36,8 @@ index 5a3a1dd7..38323ab3 100644
 +		// or at least on random velocity.
 +		for ( i = 0; i < 3; i++ ) {
 +			// The numbers are not based on science, but it looks like
-+			// having one axis be bigger than others makes rotation look natural.
++			// having one axis be bigger than others makes rotation
++			// look natural (better preserve angular momentum).
 +			float axisMul = mainRotationAxis == i ? 1 : 0.375;
 +			le->angles.trDelta[i] = speedIsh * axisMul *
 +				cg_gibsRotationFactor.value * crandom();

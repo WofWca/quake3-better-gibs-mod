@@ -1,4 +1,4 @@
-From 432c6a8ff02b3e01ce62faf47c34bcd7250178d2 Mon Sep 17 00:00:00 2001
+From a697eb38b861cdde6f2a6590162bc7718f9561fc Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 21 Jun 2026 18:33:20 +0400
 Subject: [PATCH] feat: gibs: reduce player speed from knockback
@@ -10,10 +10,10 @@ Subject: [PATCH] feat: gibs: reduce player speed from knockback
  3 files changed, 57 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index fd2d2e0b..78e3204a 100644
+index 97469126..eda4d618 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -675,12 +675,16 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -676,12 +676,16 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	const int knockbackSpeed =
  		cg_gibsExtraKnockback.integer +
  		cg_gibsKnockback.value * knockbackSpeedOriginal;
@@ -30,7 +30,7 @@ index fd2d2e0b..78e3204a 100644
  	float jump =
  		cg_gibsExtraVerticalVelocity.value +
  		cg_gibsVerticalVelocityFromKnockback.value * knockbackSpeed;
-@@ -710,6 +714,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -711,6 +715,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	}
  	AngleVectors( bodyAngles, forward, right, up );
  
@@ -43,7 +43,7 @@ index fd2d2e0b..78e3204a 100644
  	VectorCopy( playerVelocityOriginal, playerVelocity );
  
  	if ( knockbackDir ) {
-@@ -725,6 +735,27 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -726,6 +736,27 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  			playerVelocity );
  	}
  
@@ -71,7 +71,7 @@ index fd2d2e0b..78e3204a 100644
  	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocity );
  
  	if ( cg_debugGibs.integer & 0x01 ) {
-@@ -750,6 +781,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -751,6 +782,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		CG_Printf( " yaw "S_COLOR_YELLOW"%.1f",
  			AngleNormalize360( bodyAngles[YAW] ) );
  		CG_Printf( ", knockback speed "S_COLOR_YELLOW"%i", knockbackSpeed );

@@ -1,4 +1,4 @@
-From 3c4d3bde5ebd115aa346dc07e6f07a63acad318e Mon Sep 17 00:00:00 2001
+From 321dc77d4f21bd77b835bfa08919e1a0e2d6dda4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 4 May 2026 00:21:38 +0400
 Subject: [PATCH] improvement: adjust random speed CVARs' defaults

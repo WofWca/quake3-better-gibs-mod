@@ -1,4 +1,4 @@
-From 73c9198f208462bae8abc8671c3b943cfdab86be Mon Sep 17 00:00:00 2001
+From 70ced5ac6e693c7c81873b8efe34ba384471d6a5 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 6 May 2026 22:18:20 +0400
 Subject: [PATCH] feat: more gib pieces from damage
@@ -10,10 +10,10 @@ Subject: [PATCH] feat: more gib pieces from damage
  3 files changed, 20 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 026d795a..963bd4bf 100644
+index 2be5b373..613246e9 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -676,7 +676,13 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -677,7 +677,13 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	float jump =
  		cg_gibsExtraVerticalVelocity.value +
  		cg_gibsVerticalVelocityFromKnockback.value * knockbackSpeed;

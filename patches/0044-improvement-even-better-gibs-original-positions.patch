@@ -1,4 +1,4 @@
-From d0a39d6c3864a581a2d4e22d034a63a0f5eadf32 Mon Sep 17 00:00:00 2001
+From 3b51a0abf1b5a6bf653769b7dcafda4a958f1a2c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 7 May 2026 11:27:25 +0400
 Subject: [PATCH] improvement: even better gibs original positions
@@ -13,10 +13,10 @@ compared to 10 in vanilla.
  1 file changed, 120 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index d257a435..026d795a 100644
+index f9fa8c20..2be5b373 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -654,6 +654,7 @@ in demo playback, so that players see the same gibs
+@@ -655,6 +655,7 @@ in demo playback, so that players see the same gibs
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  					const vec3_t playerVelocity, const int knockbackSpeed,
  					const lerpFrame_t *bodyAnimation, const int randSeed ) {
@@ -24,7 +24,7 @@ index d257a435..026d795a 100644
  	vec3_t	baseOrigin, origin, velocity;
  	// Generally only the head should have pitch,
  	// the rest of the body is upright.
-@@ -860,6 +861,125 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -861,6 +862,125 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		if (--numGibs <= 0) {
  			return;
  		}

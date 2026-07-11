@@ -1,4 +1,4 @@
-From 254ec8d66afec2d437248f21d5a12b6f180fca8e Mon Sep 17 00:00:00 2001
+From 8104300ebf32e800fb84d67a6a90261cb4815a8c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 9 May 2026 13:47:52 +0400
 Subject: [PATCH] fix: gib random speed after match end being lower

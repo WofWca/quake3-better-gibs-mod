@@ -1,4 +1,4 @@
-From 7bb424b63a895f4e29c6788de0cfe06eb0ec2505 Mon Sep 17 00:00:00 2001
+From bad1b0c83d05cf6520ba60ec0f6fac54db33c703 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 22 Feb 2026 13:37:04 +0400
 Subject: [PATCH] fix: gibs velocity when spectating a player
