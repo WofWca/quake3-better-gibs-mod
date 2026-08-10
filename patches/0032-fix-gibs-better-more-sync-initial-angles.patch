@@ -1,4 +1,4 @@
-From 684f88aefc3bb439124a3c72b969e5d76daa988f Mon Sep 17 00:00:00 2001
+From c97ee9324287e4b3314de26314b94d335ccf3986 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 5 Feb 2026 19:39:18 +0400
 Subject: [PATCH] fix: gibs: better, more sync, initial angles
@@ -8,7 +8,7 @@ Subject: [PATCH] fix: gibs: better, more sync, initial angles
  1 file changed, 25 insertions(+), 5 deletions(-)
 
 diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
-index a27a5b16..635a0993 100644
+index a27a5b164..635a09934 100644
 --- a/code/cgame/cg_event.c
 +++ b/code/cgame/cg_event.c
 @@ -1227,6 +1227,12 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {

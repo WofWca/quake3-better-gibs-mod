@@ -1,4 +1,4 @@
-From 3244d81ce8d3bb9419731ee31db8a802691bd2d9 Mon Sep 17 00:00:00 2001
+From 7d84881b0b84c087e10d6b8d5e3e64059f370914 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 13:48:03 +0400
 Subject: [PATCH] refactor: add `dir` arg to `die()` fn
@@ -13,7 +13,7 @@ Subject: [PATCH] refactor: add `dir` arg to `die()` fn
  6 files changed, 15 insertions(+), 12 deletions(-)
 
 diff --git a/code/game/g_cmds.c b/code/game/g_cmds.c
-index f349a1bc..998d4b40 100644
+index f349a1bc4..998d4b405 100644
 --- a/code/game/g_cmds.c
 +++ b/code/game/g_cmds.c
 @@ -480,7 +480,7 @@ void Cmd_Kill_f( gentity_t *ent ) {
@@ -35,7 +35,7 @@ index f349a1bc..998d4b40 100644
  	}
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 32ceea13..cfb9c10c 100644
+index 32ceea137..cfb9c10cb 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -423,7 +423,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
@@ -80,7 +80,7 @@ index 32ceea13..cfb9c10c 100644
  		} else if ( targ->pain ) {
  			targ->pain (targ, attacker, take);
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 1d2eb0b2..2020dc78 100644
+index dd521f5b3..0afb34c7c 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -135,7 +135,7 @@ struct gentity_s {
@@ -111,7 +111,7 @@ index 1d2eb0b2..2020dc78 100644
  void CalculateRanks( void );
  qboolean SpotWouldTelefrag( gentity_t *spot );
 diff --git a/code/game/g_misc.c b/code/game/g_misc.c
-index 4a16d33f..ae7fbc42 100644
+index 4a16d33f3..ae7fbc420 100644
 --- a/code/game/g_misc.c
 +++ b/code/game/g_misc.c
 @@ -338,7 +338,7 @@ void SP_shooter_grenade( gentity_t *ent ) {
@@ -124,7 +124,7 @@ index 4a16d33f..ae7fbc42 100644
  	//FIXME do something more interesting
  }
 diff --git a/code/game/g_missile.c b/code/game/g_missile.c
-index 821e554b..faeee7c8 100644
+index 821e554ba..faeee7c8c 100644
 --- a/code/game/g_missile.c
 +++ b/code/game/g_missile.c
 @@ -113,7 +113,7 @@ static void ProximityMine_Explode( gentity_t *mine ) {
@@ -137,7 +137,7 @@ index 821e554b..faeee7c8 100644
  	ent->nextthink = level.time + 1;
  }
 diff --git a/code/game/g_team.c b/code/game/g_team.c
-index ada16f11..d7dde585 100644
+index ada16f113..d7dde5855 100644
 --- a/code/game/g_team.c
 +++ b/code/game/g_team.c
 @@ -1223,7 +1223,7 @@ static void ObeliskRespawn( gentity_t *self ) {

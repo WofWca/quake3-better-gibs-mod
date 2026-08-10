@@ -1,4 +1,4 @@
-From 599fc43f621542c6f629168a020f41b9cc98c727 Mon Sep 17 00:00:00 2001
+From 317287a06de7ba6757a114ee5d5aab6fd1fccc3c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 2 Feb 2026 17:58:55 +0400
 Subject: [PATCH] improvement: better gib angles: arm, forearm, legs
@@ -8,7 +8,7 @@ Subject: [PATCH] improvement: better gib angles: arm, forearm, legs
  1 file changed, 22 insertions(+), 7 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 09986505..7ae0eb37 100644
+index 099865052..7ae0eb373 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -567,6 +567,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles ) {

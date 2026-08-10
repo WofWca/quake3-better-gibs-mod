@@ -1,4 +1,4 @@
-From 5b13bb7b3f7f09294208d640bf27581978e84ac2 Mon Sep 17 00:00:00 2001
+From db920e8d45857c51161266835e2060b8c4c02d20 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 13:50:42 +0400
 Subject: [PATCH] refactor: mark `DirToByte` arg as `const`
@@ -9,7 +9,7 @@ Subject: [PATCH] refactor: mark `DirToByte` arg as `const`
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/code/qcommon/q_math.c b/code/qcommon/q_math.c
-index 13158661..8c3cca6e 100644
+index 13158661b..8c3cca6e5 100644
 --- a/code/qcommon/q_math.c
 +++ b/code/qcommon/q_math.c
 @@ -189,7 +189,7 @@ signed short ClampShort( int i ) {
@@ -22,7 +22,7 @@ index 13158661..8c3cca6e 100644
  	float	d, bestd;
  
 diff --git a/code/qcommon/q_shared.h b/code/qcommon/q_shared.h
-index 91dee771..b5627710 100644
+index 91dee771e..b56277100 100644
 --- a/code/qcommon/q_shared.h
 +++ b/code/qcommon/q_shared.h
 @@ -527,7 +527,7 @@ signed char ClampChar( int i );

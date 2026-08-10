@@ -1,16 +1,27 @@
-From 66d2b359e88acc93329250d2abcd0ada15bc0d7b Mon Sep 17 00:00:00 2001
+From 032cc24c68f3035884a0aa2afb1bf5d805a3ae19 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 9 Jul 2026 15:23:54 +0400
 Subject: [PATCH] feat: `cg_gibsDuration`
 
 ---
+ code/cgame/cg_cvar.h    | 1 +
  code/cgame/cg_effects.c | 2 +-
- code/cgame/cg_local.h   | 1 +
- code/cgame/cg_main.c    | 2 ++
- 3 files changed, 4 insertions(+), 1 deletion(-)
+ 2 files changed, 2 insertions(+), 1 deletion(-)
 
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index b22e51224..0a94b8c7d 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -86,6 +86,7 @@ CG_CVAR( cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnoc
+ 	"If knockback is big, this helps keep at least some fraction of player speed.\n"
+ 	"For example, if this is -0.75, we'll always keep at least 25%\n"
+ 	"of original player velocity." )
++CG_CVAR( cg_gibsDuration, "cg_gibsDuration", "5000", 0, NULL )
+ CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
+ 	"Whether to use the exact position where the player got gibbed\n"
+ 	"as the initial gibs position, instead of the position of the gibbed player\n"
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index eff93f46..f1bc6608 100644
+index eff93f46f..f1bc6608a 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -540,7 +540,7 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
@@ -22,38 +33,6 @@ index eff93f46..f1bc6608 100644
  
  	VectorCopy( origin, re->origin );
  	AnglesToAxis( angles, re->axis );
-diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index e034318e..d9f635db 100644
---- a/code/cgame/cg_local.h
-+++ b/code/cgame/cg_local.h
-@@ -1111,6 +1111,7 @@ extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
- extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
- extern	vmCvar_t		cg_gibsPlayerSpeedFromKnockback;
- extern	vmCvar_t		cg_gibsPlayerSpeedFromKnockbackMaxFraction;
-+extern	vmCvar_t		cg_gibsDuration;
- extern	vmCvar_t		cg_gibsOriginalOrigin;
- extern	vmCvar_t		cg_gibsNoLerpDelay;
- extern	vmCvar_t		cg_gibsBounceFactor;
-diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 0af86524..181540d7 100644
---- a/code/cgame/cg_main.c
-+++ b/code/cgame/cg_main.c
-@@ -111,6 +111,7 @@ vmCvar_t	cg_gibsVerticalVelocityFromKnockback;
- vmCvar_t	cg_gibsExtraVerticalVelocity;
- vmCvar_t	cg_gibsPlayerSpeedFromKnockback;
- vmCvar_t	cg_gibsPlayerSpeedFromKnockbackMaxFraction;
-+vmCvar_t	cg_gibsDuration;
- vmCvar_t	cg_gibsOriginalOrigin;
- vmCvar_t	cg_gibsNoLerpDelay;
- vmCvar_t	cg_gibsBounceFactor;
-@@ -282,6 +283,7 @@ static cvarTable_t cvarTable[] = {
- 	// For example, if this is -0.75, we'll always keep at least 25%
- 	// of original player velocity.
- 	{ &cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnockbackMaxFraction", "-0.5", 0  },
-+	{ &cg_gibsDuration, "cg_gibsDuration", "5000", 0  },
- 	// Whether to use the exact position where the player got gibbed
- 	// as the initial gibs position, instead of the position of the gibbed player
- 	// on the screen, i.e. the position of the player on the next server frame
 -- 
 2.55.0
 

@@ -1,19 +1,35 @@
-From 85dd197e8241abad203763e9122339a8696f50ef Mon Sep 17 00:00:00 2001
+From 9333f0eb75fbf3d85c11b039bc32a49073fb56d1 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 19 Jun 2026 23:38:21 +0400
 Subject: [PATCH] feat: `cg_gibsKnockback`
 
 ---
+ code/cgame/cg_cvar.h      |  5 +++++
  code/cgame/cg_effects.c   | 37 +++++++++++++++++++++++++++++++++----
- code/cgame/cg_local.h     |  4 +++-
+ code/cgame/cg_local.h     |  3 ++-
  code/cgame/cg_localents.c |  2 +-
- code/cgame/cg_main.c      |  6 ++++++
  code/game/g_combat.c      | 16 ++++++++++++++++
- code/game/g_main.c        |  2 +-
- 6 files changed, 60 insertions(+), 7 deletions(-)
+ code/game/g_cvar.h        |  2 +-
+ 6 files changed, 58 insertions(+), 7 deletions(-)
 
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 2b84ba542..f2aca1449 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -47,6 +47,11 @@ CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0,
++	"On vanilla servers this only has effect on random and vertical velocity\n"
++	"but not on directional velocity.\n"
++	"Remember that this also affects own gibs, so having a value too high\n"
++	"will make gibs fly faster than the camera." )
+ CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_ARCHIVE,
+ 	"For every 100 of knockback speed above 500 (100 damage),\n"
+ 	"add this many pieces of gibs, times the value of `cg_gibs`.\n"
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index a172ca89..37ef5df0 100644
+index a172ca894..37ef5df0f 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -657,7 +657,8 @@ in demo playback, so that players see the same gibs
@@ -101,18 +117,10 @@ index a172ca89..37ef5df0 100644
  }
  
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 43298b2f..aea4828a 100644
+index 417911af3..45b2905c1 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
-@@ -1101,6 +1101,7 @@ extern	vmCvar_t		cg_shadows;
- extern	vmCvar_t		cg_gibs;
- extern	vmCvar_t		cg_oldGibs;
- extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
-+extern	vmCvar_t		cg_gibsKnockback;
- extern	vmCvar_t		cg_gibsPiecesFromKnockback;
- extern	vmCvar_t		cg_gibsExtraRandomVelocity;
- extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
-@@ -1443,7 +1444,8 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
+@@ -1321,7 +1321,8 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
  void CG_ScorePlum( int client, vec3_t org, int score );
  
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -123,7 +131,7 @@ index 43298b2f..aea4828a 100644
  // Same as `CG_GibPlayer`, but takes different params.
  void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index e631d1c1..53e61d9d 100644
+index e631d1c18..53e61d9d8 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -937,7 +937,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
@@ -135,32 +143,8 @@ index e631d1c1..53e61d9d 100644
  		}
  	}
  	else {
-diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index a347ab74..185c1bcd 100644
---- a/code/cgame/cg_main.c
-+++ b/code/cgame/cg_main.c
-@@ -101,6 +101,7 @@ vmCvar_t	cg_shadows;
- vmCvar_t	cg_gibs;
- vmCvar_t	cg_oldGibs;
- vmCvar_t	cg_gibsInheritPlayerVelocity;
-+vmCvar_t	cg_gibsKnockback;
- vmCvar_t	cg_gibsPiecesFromKnockback;
- vmCvar_t	cg_gibsExtraRandomVelocity;
- vmCvar_t	cg_gibsRandomVelocityFromKnockback;
-@@ -237,6 +238,11 @@ static cvarTable_t cvarTable[] = {
- 	{ &cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE  },
- 	{ &cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE  },
- 	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE  },
-+	// On vanilla servers this only has effect on random and vertical velocity
-+	// but not on directional velocity.
-+	// Remember that this also affects own gibs, so having a value too high
-+	// will make gibs fly faster than the camera.
-+	{ &cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0  },
- 	// For every 100 of knockback speed above 500 (100 damage),
- 	// add this many pieces of gibs, times the value of `cg_gibs`.
- 	//
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 17eb2be2..32ceea13 100644
+index 17eb2be2d..32ceea137 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -342,6 +342,22 @@ static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
@@ -186,19 +170,19 @@ index 17eb2be2..32ceea13 100644
  }
  /*
  ==================
-diff --git a/code/game/g_main.c b/code/game/g_main.c
-index 4465eef1..92c74f14 100644
---- a/code/game/g_main.c
-+++ b/code/game/g_main.c
-@@ -177,7 +177,7 @@ static cvarTable_t		gameCvarTable[] = {
- 	// We could have simply made this a binary value to tell clients
- 	// that the server is running Better Gibs mod. But let's make it flag-like,
- 	// for forwards compatibility.
--	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, 0, qfalse },
-+	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR_SYSTEMINFO, 0, qfalse },
- 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
- 	// If a dead player loses this much or more speed
- 	// as a result of collision with something (e.g. floor, wall),
+diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
+index 11f9b7323..941813e89 100644
+--- a/code/game/g_cvar.h
++++ b/code/game/g_cvar.h
+@@ -115,7 +115,7 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
+ 	"\n"
+ 	"Note that this affects not just the gibs\n"
+ 	"but also the camera velocity of the gibbed player." )
+-G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, NO_TRACK,
++G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR_SYSTEMINFO, NO_TRACK,
+ 	"This is not really intended to be changed by users to a value different from\n"
+ 	"the default or 0, unless they're having mod compatibility issues\n"
+ 	"and really know what they're doing.\n"
 -- 
 2.55.0
 

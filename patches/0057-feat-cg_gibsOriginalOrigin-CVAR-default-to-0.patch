@@ -1,17 +1,42 @@
-From f91a85f919c6cebbe313b1d77dd2eb58f512a95b Mon Sep 17 00:00:00 2001
+From a75ba7319e753355a5f450cec64fc2ea11669fbf Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 14 Jun 2026 23:37:56 +0400
 Subject: [PATCH] feat: `cg_gibsOriginalOrigin` CVAR (default to 0)
 
 ---
+ code/cgame/cg_cvar.h    | 15 +++++++++++++++
  code/cgame/cg_effects.c | 38 ++++++++++++++++++++++++++++++++------
- code/cgame/cg_local.h   |  1 +
- code/cgame/cg_main.c    | 16 ++++++++++++++++
  code/qcommon/q_shared.h |  8 ++++++++
- 4 files changed, 57 insertions(+), 6 deletions(-)
+ 3 files changed, 55 insertions(+), 6 deletions(-)
 
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index f647559ac..2b84ba542 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -62,6 +62,21 @@ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback
+ CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
++	"Whether to use the exact position where the player got gibbed\n"
++	"as the initial gibs position, instead of the position of the gibbed player\n"
++	"on the screen, i.e. the position of the player on the next server frame\n"
++	"(lerpOrigin).\n"
++	"\n"
++	"Can be a fractional value between 0 and 1,\n"
++	"but you probably want either 0 or 1.\n"
++	"To get vanilla behavior, set to 0.\n"
++	"\n"
++	"Has no effect on vanilla servers (`g_gibsNewEvGibPlayerProtocol 0`).\n"
++	"\n"
++	"Using the original position might make it seem\n"
++	"like the player \"telepoted\" one snapshot back (50ms at `snaps 20`)\n"
++	"if they're already movnig at high speed." )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index b8bd0a57..6cc45b39 100644
+index b8bd0a577..6cc45b394 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1048,6 +1048,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
@@ -80,54 +105,8 @@ index b8bd0a57..6cc45b39 100644
  		&torsoAnimation, randSeed );
  }
  
-diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index c688daf1..b7a150cb 100644
---- a/code/cgame/cg_local.h
-+++ b/code/cgame/cg_local.h
-@@ -1106,6 +1106,7 @@ extern	vmCvar_t		cg_gibsExtraRandomVelocity;
- extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
- extern	vmCvar_t		cg_gibsVerticalVelocityFromKnockback;
- extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
-+extern	vmCvar_t		cg_gibsOriginalOrigin;
- extern	vmCvar_t		cg_gibsBounceFactor;
- extern	vmCvar_t		cg_gibsBounceFactorRandomness;
- extern	vmCvar_t		cg_gibsRotationFactor;
-diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 6066e98f..a347ab74 100644
---- a/code/cgame/cg_main.c
-+++ b/code/cgame/cg_main.c
-@@ -106,6 +106,7 @@ vmCvar_t	cg_gibsExtraRandomVelocity;
- vmCvar_t	cg_gibsRandomVelocityFromKnockback;
- vmCvar_t	cg_gibsVerticalVelocityFromKnockback;
- vmCvar_t	cg_gibsExtraVerticalVelocity;
-+vmCvar_t	cg_gibsOriginalOrigin;
- vmCvar_t	cg_gibsBounceFactor;
- vmCvar_t	cg_gibsBounceFactorRandomness;
- vmCvar_t	cg_gibsRotationFactor;
-@@ -251,6 +252,21 @@ static cvarTable_t cvarTable[] = {
- 	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE  },
- 	{ &cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE  },
- 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE  },
-+	// Whether to use the exact position where the player got gibbed
-+	// as the initial gibs position, instead of the position of the gibbed player
-+	// on the screen, i.e. the position of the player on the next server frame
-+	// (lerpOrigin).
-+	//
-+	// Can be a fractional value between 0 and 1,
-+	// but you probably want either 0 or 1.
-+	// To get vanilla behavior, set to 0.
-+	//
-+	// Has no effect on vanilla servers (`g_gibsNewEvGibPlayerProtocol 0`).
-+	//
-+	// Using the original position might make it seem
-+	// like the player "telepoted" one snapshot back (50ms at `snaps 20`)
-+	// if they're already movnig at high speed.
-+	{ &cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0  },
- 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
- 	{ &cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE  },
- 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
 diff --git a/code/qcommon/q_shared.h b/code/qcommon/q_shared.h
-index 1877a42c..91dee771 100644
+index 1877a42cb..91dee771e 100644
 --- a/code/qcommon/q_shared.h
 +++ b/code/qcommon/q_shared.h
 @@ -565,6 +565,14 @@ typedef struct {

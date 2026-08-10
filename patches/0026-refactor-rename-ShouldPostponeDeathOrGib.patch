@@ -1,4 +1,4 @@
-From 9bc45089d173551d3286085bb1f0e8b67b3bba5f Mon Sep 17 00:00:00 2001
+From 3a7cd0e8e11101e8233d26984ea805aeec04fe31 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 18 Feb 2026 21:06:24 +0400
 Subject: [PATCH] refactor: rename `ShouldPostponeDeathOrGib`
@@ -10,7 +10,7 @@ Subject: [PATCH] refactor: rename `ShouldPostponeDeathOrGib`
  3 files changed, 7 insertions(+), 6 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 9e9d89a9..e5f4becc 100644
+index 9e9d89a95..e5f4becc2 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -620,7 +620,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
@@ -41,7 +41,7 @@ index 9e9d89a9..e5f4becc 100644
  			}
  
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index f7d87fff..6ff91ed0 100644
+index 82f798510..7c2291b53 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -501,7 +501,7 @@ void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
@@ -54,7 +54,7 @@ index f7d87fff..6ff91ed0 100644
  #define SetFlNoKnockback( ent ) {ent->flags |= FL_NO_KNOCKBACK;}
  qboolean G_RadiusDamage (vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod);
 diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
-index ccf2f250..b05176eb 100644
+index ccf2f250a..b05176eb1 100644
 --- a/code/game/g_weapon.c
 +++ b/code/game/g_weapon.c
 @@ -366,8 +366,9 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {

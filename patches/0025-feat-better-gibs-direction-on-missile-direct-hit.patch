@@ -1,4 +1,4 @@
-From fb1a084b3d94fad7d4ac38f0f78cd369a9285083 Mon Sep 17 00:00:00 2001
+From 1b6c3f5d77299e4ebc6ab7df8317872f5ec1c31f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 22 Jan 2026 13:55:28 +0400
 Subject: [PATCH] feat: better gibs direction on missile direct hit
@@ -7,13 +7,12 @@ Related:
 - https://github.com/WofWca/quake3-better-gibs-mod/issues/2.
 ---
  code/game/g_combat.c  | 114 +++++++++++++++++++++++++++++++++++++++---
- code/game/g_local.h   |   2 +
- code/game/g_main.c    |  15 ++++++
+ code/game/g_cvar.h    |  13 +++++
  code/game/g_missile.c |   5 +-
- 4 files changed, 129 insertions(+), 7 deletions(-)
+ 3 files changed, 125 insertions(+), 7 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 9ed883d0..9e9d89a9 100644
+index 9ed883d0c..9e9d89a95 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -229,6 +229,20 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker )
@@ -170,54 +169,32 @@ index 9ed883d0..9e9d89a9 100644
  			targ->enemy = attacker;
  			targ->die (targ, inflictor, attacker, take, mod);
  			return;
-diff --git a/code/game/g_local.h b/code/game/g_local.h
-index c83d0cd2..f7d87fff 100644
---- a/code/game/g_local.h
-+++ b/code/game/g_local.h
-@@ -738,6 +738,8 @@ extern	vmCvar_t	g_motd;
- extern	vmCvar_t	g_warmup;
- extern	vmCvar_t	g_doWarmup;
- extern	vmCvar_t	g_blood;
-+extern	vmCvar_t	g_oldGibs;
-+extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
- extern	vmCvar_t	g_allowVote;
- extern	vmCvar_t	g_teamAutoJoin;
- extern	vmCvar_t	g_teamForceBalance;
-diff --git a/code/game/g_main.c b/code/game/g_main.c
-index ed5d4ead..ca1e8fe7 100644
---- a/code/game/g_main.c
-+++ b/code/game/g_main.c
-@@ -69,6 +69,8 @@ vmCvar_t	g_restarted;
- vmCvar_t	g_logfile;
- vmCvar_t	g_logfileSync;
- vmCvar_t	g_blood;
-+vmCvar_t	g_oldGibs;
-+vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
- vmCvar_t	g_podiumDist;
- vmCvar_t	g_podiumDrop;
- vmCvar_t	g_allowVote;
-@@ -151,6 +153,19 @@ static cvarTable_t		gameCvarTable[] = {
- 	{ &g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse },
- 	{ &g_motd, "g_motd", "", 0, 0, qfalse },
- 	{ &g_blood, "com_blood", "1", 0, 0, qfalse },
-+	{ &g_oldGibs, "g_oldGibs", "0", CVAR_ARCHIVE, 0, qfalse },
-+	// How much the movement direction of a missile affects the knockback direction
-+	// when gibbing, as opposed to the direction from the center of the explosion.
-+	// This makes sure that if the missile hits the player's feet,
-+	// the gibs will fly up, so that there is not a big difference
-+	// between hitting the player's feet and the ground not far
-+	// from the player's feet.
-+	//
-+	// Setting to 1 restores the old behavior.
-+	//
-+	// Note that this affects not just the gibs
-+	// but also the camera velocity of the gibbed player.
-+	{ &g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse },
+diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
+index a2e642782..6a399f342 100644
+--- a/code/game/g_cvar.h
++++ b/code/game/g_cvar.h
+@@ -102,6 +102,19 @@ G_CVAR( g_debugDamage, "g_debugDamage", "0", NO_FLAGS, NO_TRACK, NULL )
+ G_CVAR( g_debugAlloc, "g_debugAlloc", "0", NO_FLAGS, NO_TRACK, NULL )
+ G_CVAR( g_motd, "g_motd", "", NO_FLAGS, NO_TRACK, NULL )
+ G_CVAR( g_blood, "com_blood", "1", NO_FLAGS, NO_TRACK, NULL )
++G_CVAR( g_oldGibs, "g_oldGibs", "0", CVAR_ARCHIVE, NO_TRACK, NULL )
++G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, NO_TRACK,
++	"How much the movement direction of a missile affects the knockback direction\n"
++	"when gibbing, as opposed to the direction from the center of the explosion.\n"
++	"This makes sure that if the missile hits the player's feet,\n"
++	"the gibs will fly up, so that there is not a big difference\n"
++	"between hitting the player's feet and the ground not far\n"
++	"from the player's feet.\n"
++	"\n"
++	"Setting to 1 restores the old behavior.\n"
++	"\n"
++	"Note that this affects not just the gibs\n"
++	"but also the camera velocity of the gibbed player." )
  
- 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
- 	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
+ G_CVAR( g_podiumDist, "g_podiumDist", "80", NO_FLAGS, NO_TRACK, NULL )
+ G_CVAR( g_podiumDrop, "g_podiumDrop", "70", NO_FLAGS, NO_TRACK, NULL )
 diff --git a/code/game/g_missile.c b/code/game/g_missile.c
-index 3a138b95..821e554b 100644
+index 3a138b959..821e554ba 100644
 --- a/code/game/g_missile.c
 +++ b/code/game/g_missile.c
 @@ -318,8 +318,11 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {

@@ -1,4 +1,4 @@
-From 3be635e1991b70ca22b321d7b84c723b6a1d732b Mon Sep 17 00:00:00 2001
+From 4ce123b872ed744b37765849b1f46b3945b8cef4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 3 Jun 2026 14:04:52 +0400
 Subject: [PATCH] refactor: move `EV_GIB_PLAYER` handling to fn
@@ -10,7 +10,7 @@ Subject: [PATCH] refactor: move `EV_GIB_PLAYER` handling to fn
  3 files changed, 76 insertions(+), 68 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 28477dec..dafa2c6e 100644
+index 28477dec7..dafa2c6ef 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1026,6 +1026,78 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -93,7 +93,7 @@ index 28477dec..dafa2c6e 100644
  	vec3_t	origin, angles, velocity;
  
 diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
-index 562963f0..a8c3f7fa 100644
+index 562963f06..a8c3f7fa0 100644
 --- a/code/cgame/cg_event.c
 +++ b/code/cgame/cg_event.c
 @@ -1222,74 +1222,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
@@ -173,10 +173,10 @@ index 562963f0..a8c3f7fa 100644
  		break;
  
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index a5ae714d..727cbc94 100644
+index 0c27bdaa6..2c118c6dd 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
-@@ -1437,6 +1437,9 @@ void CG_ScorePlum( int client, vec3_t org, int score );
+@@ -1320,6 +1320,9 @@ void CG_ScorePlum( int client, vec3_t org, int score );
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  				const vec3_t playerVelocity, const int knockbackSpeed,
  				const lerpFrame_t *bodyAnimation, const int randSeed );

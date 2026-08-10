@@ -1,4 +1,4 @@
-From 0fa6d70541080a79abe8edca611947cafc7dab47 Mon Sep 17 00:00:00 2001
+From 1aaba0ff6201cfb2566c61333438e994b531213f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 30 May 2026 22:11:27 +0400
 Subject: [PATCH] feat: gibs: bigger (non-0) physics box
@@ -9,7 +9,7 @@ Subject: [PATCH] feat: gibs: bigger (non-0) physics box
  2 files changed, 70 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index f25d674e..28477dec 100644
+index f25d674e4..28477dec7 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -820,6 +820,13 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -38,7 +38,7 @@ index f25d674e..28477dec 100644
  		VectorMA( velocity, -(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index ac5eefaa..10944e80 100644
+index ac5eefaad..10944e802 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -278,6 +278,58 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDiffe

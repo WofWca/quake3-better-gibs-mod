@@ -1,17 +1,31 @@
-From cf34e39fc4657f50dd68ac8290e9df9afdb0ee14 Mon Sep 17 00:00:00 2001
+From c6a743673e3fc19697f8ad71112e3589fe68f275 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 26 Jun 2026 13:07:28 +0400
 Subject: [PATCH] feat: gibs: fire trails
 
 ---
+ code/cgame/cg_cvar.h      |  3 ++
  code/cgame/cg_effects.c   | 63 ++++++++++++++++--------------
- code/cgame/cg_local.h     |  6 +++
+ code/cgame/cg_local.h     |  3 ++
  code/cgame/cg_localents.c | 80 +++++++++++++++++++++++++++++++++++++++
- code/cgame/cg_main.c      |  6 +++
- 4 files changed, 127 insertions(+), 28 deletions(-)
+ 4 files changed, 121 insertions(+), 28 deletions(-)
 
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 87d2c5ee2..f647559ac 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -67,6 +67,9 @@ CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5",
+ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
+ // Not archived because experimental
+ CG_CVAR( cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0, NULL )
++CG_CVAR( cg_gibsFireTrailPeriod, "cg_gibsFireTrailPeriod", "30", 0, NULL )
++CG_CVAR( cg_gibsFireTrailDuration, "cg_gibsFireTrailDuration", "1024", 0, NULL )
++CG_CVAR( cg_gibsFireTrailMinKnockback, "cg_gibsFireTrailMinKnockback", "-1", 0, NULL )
+ CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE, NULL )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index dafa2c6e..a67ecd39 100644
+index dafa2c6ef..a67ecd397 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -530,6 +530,7 @@ CG_LaunchGib
@@ -268,7 +282,7 @@ index dafa2c6e..a67ecd39 100644
  
  /*
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index b2c08cd8..9a49ff72 100644
+index 2c118c6dd..58c0f17cc 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -92,6 +92,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -281,18 +295,8 @@ index b2c08cd8..9a49ff72 100644
  typedef enum {
  	FOOTSTEP_NORMAL,
  	FOOTSTEP_BOOT,
-@@ -1107,6 +1110,9 @@ extern	vmCvar_t		cg_gibsBounceFactor;
- extern	vmCvar_t		cg_gibsBounceFactorRandomness;
- extern	vmCvar_t		cg_gibsRotationFactor;
- extern	vmCvar_t		cg_gibsBloodTrailPeriod;
-+extern	vmCvar_t		cg_gibsFireTrailPeriod;
-+extern	vmCvar_t		cg_gibsFireTrailDuration;
-+extern	vmCvar_t		cg_gibsFireTrailMinKnockback;
- extern	vmCvar_t		cg_gibsBetterCameraOnGib;
- extern	vmCvar_t		cg_drawTimer;
- extern	vmCvar_t		cg_drawFPS;
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index d608a0a5..8510b5ab 100644
+index d608a0a56..8510b5ab4 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -181,6 +181,82 @@ void CG_BloodTrail( localEntity_t *le ) {
@@ -389,30 +393,6 @@ index d608a0a5..8510b5ab 100644
  		}
  
  		return;
-diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index b412a50c..6066e98f 100644
---- a/code/cgame/cg_main.c
-+++ b/code/cgame/cg_main.c
-@@ -110,6 +110,9 @@ vmCvar_t	cg_gibsBounceFactor;
- vmCvar_t	cg_gibsBounceFactorRandomness;
- vmCvar_t	cg_gibsRotationFactor;
- vmCvar_t	cg_gibsBloodTrailPeriod;
-+vmCvar_t	cg_gibsFireTrailPeriod;
-+vmCvar_t	cg_gibsFireTrailDuration;
-+vmCvar_t	cg_gibsFireTrailMinKnockback;
- vmCvar_t	cg_gibsBetterCameraOnGib;
- vmCvar_t	cg_drawTimer;
- vmCvar_t	cg_drawFPS;
-@@ -253,6 +256,9 @@ static cvarTable_t cvarTable[] = {
- 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
- 	// Not archived because experimental
- 	{ &cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0  },
-+	{ &cg_gibsFireTrailPeriod, "cg_gibsFireTrailPeriod", "30", 0  },
-+	{ &cg_gibsFireTrailDuration, "cg_gibsFireTrailDuration", "1024", 0  },
-+	{ &cg_gibsFireTrailMinKnockback, "cg_gibsFireTrailMinKnockback", "-1", 0  },
- 	{ &cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE  },
- 	{ &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
- 	{ &cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE  },
 -- 
 2.55.0
 

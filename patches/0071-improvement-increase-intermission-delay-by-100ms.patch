@@ -1,26 +1,26 @@
-From 62ac9056a50c55e5649dd8dc100498c456a31aa4 Mon Sep 17 00:00:00 2001
+From 4501aa9a21875c4089eae1ab85f347243ac81c67 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 8 Jul 2026 23:12:50 +0400
 Subject: [PATCH] improvement: increase intermission delay by 100ms
 
 ---
- code/game/g_main.c | 4 +++-
+ code/game/g_cvar.h | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/code/game/g_main.c b/code/game/g_main.c
-index 5271e37b..cb131ba0 100644
---- a/code/game/g_main.c
-+++ b/code/game/g_main.c
-@@ -194,7 +194,9 @@ static cvarTable_t		gameCvarTable[] = {
- 	// This one affects gameplay significantly, and is basically just for fun.
- 	{ &g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, qtrue },
+diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
+index aabdbbe5c..70a4a72d6 100644
+--- a/code/game/g_cvar.h
++++ b/code/game/g_cvar.h
+@@ -135,7 +135,9 @@ G_CVAR( g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers"
+ 	"This one affects gameplay significantly, and is basically just for fun." )
+ G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NO_TRACK, NULL )
  
--	{ &g_intermissionDelay, "g_intermissionDelay", "1000", 0, 0, qtrue },
-+	// In vanilla this is 1000, but we increase it by 100 (two server frames)
-+	// so that the winner can shoot a second shotgun shot, to gib the dead body.
-+	{ &g_intermissionDelay, "g_intermissionDelay", "1100", 0, 0, qtrue },
+-G_CVAR( g_intermissionDelay, "g_intermissionDelay", "1000", NO_FLAGS, TRACK, NULL )
++G_CVAR( g_intermissionDelay, "g_intermissionDelay", "1100", NO_FLAGS, TRACK,
++	"In vanilla this is 1000, but we increase it by 100 (two server frames)\n"
++	"so that the winner can shoot a second shotgun shot, to gib the dead body." )
  #ifdef MISSIONPACK
- 	{ &g_intermissionDelaySinglePlayer, "g_intermissionDelaySinglePlayer", "5000", 0, 0, qtrue },
+ G_CVAR( g_intermissionDelaySinglePlayer, "g_intermissionDelaySinglePlayer", "5000", NO_FLAGS, TRACK, NULL )
  #endif
 -- 
 2.55.0

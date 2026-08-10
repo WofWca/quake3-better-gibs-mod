@@ -1,4 +1,4 @@
-From 2d4c02b3491f5faf18de2455fca628feb8737cea Mon Sep 17 00:00:00 2001
+From ead40c78a1914f69883073fe65380da7c41518fb Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 31 May 2026 17:36:50 +0400
 Subject: [PATCH] fix: better blood trail puffs position offsets
@@ -10,7 +10,7 @@ where the gib occurred.
  1 file changed, 31 insertions(+), 3 deletions(-)
 
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 10944e80..6b7ad8d4 100644
+index 10944e802..6b7ad8d43 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -122,12 +122,40 @@ void CG_BloodTrail( localEntity_t *le ) {

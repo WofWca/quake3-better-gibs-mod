@@ -1,4 +1,4 @@
-From 9e3fae0dea22f5dc8f921ba63214d96039efd993 Mon Sep 17 00:00:00 2001
+From 2c5e9d7b9f7ee74d2fb44631c513a7bd54446209 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 5 Jun 2026 23:19:55 +0400
 Subject: [PATCH] refactor: move gib `eventParm` calculation to fn
@@ -8,7 +8,7 @@ Subject: [PATCH] refactor: move gib `eventParm` calculation to fn
  1 file changed, 62 insertions(+), 52 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 467560c5..7e5d4f7f 100644
+index 467560c5d..7e5d4f7f3 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -240,13 +240,72 @@ static float KnockbackToKnockbackSpeed( int knockback ) {

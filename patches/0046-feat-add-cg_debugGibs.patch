@@ -1,17 +1,28 @@
-From 2165a2d73092807a9cdd2acf2cbfe65b1aff60db Mon Sep 17 00:00:00 2001
+From 002ba267a7119d25b4530b5e0c1d6966b94777cc Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 6 May 2026 23:29:47 +0400
 Subject: [PATCH] feat: add `cg_debugGibs`
 
 ---
+ code/cgame/cg_cvar.h    |  1 +
  code/cgame/cg_effects.c | 22 ++++++++++++++++++++++
  code/cgame/cg_event.c   | 11 +++++++++++
- code/cgame/cg_local.h   |  1 +
- code/cgame/cg_main.c    |  2 ++
- 4 files changed, 36 insertions(+)
+ 3 files changed, 34 insertions(+)
 
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 6ab977a1f..293f6d31d 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -105,6 +105,7 @@ CG_CVAR( cg_animSpeed, "cg_animspeed", "1", CVAR_CHEAT, NULL )
+ CG_CVAR( cg_debugAnim, "cg_debuganim", "0", CVAR_CHEAT, NULL )
+ CG_CVAR( cg_debugPosition, "cg_debugposition", "0", CVAR_CHEAT, NULL )
+ CG_CVAR( cg_debugEvents, "cg_debugevents", "0", CVAR_CHEAT, NULL )
++CG_CVAR( cg_debugGibs, "cg_debugGibs", "0", CVAR_CHEAT, NULL )
+ CG_CVAR( cg_errorDecay, "cg_errordecay", "100", 0, NULL )
+ CG_CVAR( cg_nopredict, "cg_nopredict", "0", 0, NULL )
+ CG_CVAR( cg_noPlayerAnims, "cg_noplayeranims", "0", CVAR_CHEAT, NULL )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 613246e9..83701a02 100644
+index 613246e9c..83701a023 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -702,6 +702,28 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -44,7 +55,7 @@ index 613246e9..83701a02 100644
  		// Note that one gib will get launched even if `numGibs == 0`.
  		// This is in line with the original behavior of `CG_GibPlayer`.
 diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
-index 8d33f553..562963f0 100644
+index 8d33f5538..562963f06 100644
 --- a/code/cgame/cg_event.c
 +++ b/code/cgame/cg_event.c
 @@ -1277,6 +1277,17 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
@@ -65,38 +76,6 @@ index 8d33f553..562963f0 100644
  			CG_GibPlayer( cent->lerpOrigin, torsoAngles, *vel, knockbackSpeed,
  				&torsoAnimation, randSeed );
  		}
-diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 4ffdfd47..a5ae714d 100644
---- a/code/cgame/cg_local.h
-+++ b/code/cgame/cg_local.h
-@@ -1128,6 +1128,7 @@ extern	vmCvar_t		cg_animSpeed;
- extern	vmCvar_t		cg_debugAnim;
- extern	vmCvar_t		cg_debugPosition;
- extern	vmCvar_t		cg_debugEvents;
-+extern	vmCvar_t		cg_debugGibs;
- extern	vmCvar_t		cg_railTrailTime;
- extern	vmCvar_t		cg_errorDecay;
- extern	vmCvar_t		cg_nopredict;
-diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 5d644276..9f58c523 100644
---- a/code/cgame/cg_main.c
-+++ b/code/cgame/cg_main.c
-@@ -129,6 +129,7 @@ vmCvar_t	cg_animSpeed;
- vmCvar_t	cg_debugAnim;
- vmCvar_t	cg_debugPosition;
- vmCvar_t	cg_debugEvents;
-+vmCvar_t	cg_debugGibs;
- vmCvar_t	cg_errorDecay;
- vmCvar_t	cg_nopredict;
- vmCvar_t	cg_noPlayerAnims;
-@@ -288,6 +289,7 @@ static cvarTable_t cvarTable[] = {
- 	{ &cg_debugAnim, "cg_debuganim", "0", CVAR_CHEAT },
- 	{ &cg_debugPosition, "cg_debugposition", "0", CVAR_CHEAT },
- 	{ &cg_debugEvents, "cg_debugevents", "0", CVAR_CHEAT },
-+	{ &cg_debugGibs, "cg_debugGibs", "0", CVAR_CHEAT },
- 	{ &cg_errorDecay, "cg_errordecay", "100", 0 },
- 	{ &cg_nopredict, "cg_nopredict", "0", 0 },
- 	{ &cg_noPlayerAnims, "cg_noplayeranims", "0", CVAR_CHEAT },
 -- 
 2.55.0
 

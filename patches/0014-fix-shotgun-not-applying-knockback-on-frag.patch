@@ -1,4 +1,4 @@
-From 3b800a1b3452f5fc1ca4ef2ad64f9f554f217aad Mon Sep 17 00:00:00 2001
+From 50ad850604b778273431111e5854d1e062ee1071 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 14 Nov 2025 17:55:52 +0400
 Subject: [PATCH] fix: shotgun not applying knockback on frag
@@ -10,7 +10,7 @@ Subject: [PATCH] fix: shotgun not applying knockback on frag
  3 files changed, 21 insertions(+), 2 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 1e824432..9ed883d0 100644
+index 1e824432b..9ed883d0c 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -1060,8 +1060,25 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
@@ -42,7 +42,7 @@ index 1e824432..9ed883d0 100644
  			if (targ->health < -999)
  				targ->health = -999;
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 6814d193..c83d0cd2 100644
+index baf03a24c..82f798510 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -503,6 +503,7 @@ void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
@@ -54,7 +54,7 @@ index 6814d193..c83d0cd2 100644
  int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t impactpoint, vec3_t bouncedir );
  void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
-index 664888c4..ccf2f250 100644
+index 664888c41..ccf2f250a 100644
 --- a/code/game/g_weapon.c
 +++ b/code/game/g_weapon.c
 @@ -376,6 +376,7 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {

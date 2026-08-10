@@ -1,15 +1,28 @@
-From 47560f16c6e9abf0a3f35f35d75c9335e35b8840 Mon Sep 17 00:00:00 2001
+From 7beee4daabdb28c0ba72f3fb46fa2debe373210a Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 12 Jan 2026 22:49:16 +0400
 Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
 
 ---
+ code/cgame/cg_cvar.h    |   2 +-
  code/cgame/cg_effects.c | 282 ++++++++++++++++++++++------------------
- code/cgame/cg_main.c    |   2 +-
  2 files changed, 159 insertions(+), 125 deletions(-)
 
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 8553225de..31a10d03b 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -44,7 +44,7 @@ CG_CVAR( cg_zoomFov, "cg_zoomfov", "22.5", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_fov, "cg_fov", "90", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
+-CG_CVAR( cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE, NULL )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 82efe802..5a3a1dd7 100644
+index 82efe8026..5a3a1dd7f 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -560,8 +560,9 @@ CG_GibPlayer
@@ -324,19 +337,6 @@ index 82efe802..5a3a1dd7 100644
  }
  void CG_GibPlayerOld( vec3_t playerOrigin ) {
  	vec3_t	origin, angles, velocity;
-diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index e658828e..5be1e212 100644
---- a/code/cgame/cg_main.c
-+++ b/code/cgame/cg_main.c
-@@ -222,7 +222,7 @@ static cvarTable_t cvarTable[] = {
- 	{ &cg_fov, "cg_fov", "90", CVAR_ARCHIVE },
- 	{ &cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE },
- 	{ &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE  },
--	{ &cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE  },
-+	{ &cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE  },
- 	{ &cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE  },
- 	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE  },
- 	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE  },
 -- 
 2.55.0
 

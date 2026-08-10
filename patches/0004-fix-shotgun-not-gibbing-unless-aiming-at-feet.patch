@@ -1,4 +1,4 @@
-From 0f887866ae906debf220f25dfffe0fd1e96655df Mon Sep 17 00:00:00 2001
+From a93c3033c4d24ba2357867d3b4b4177c11891f92 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 13 Sep 2025 18:56:45 +0400
 Subject: [PATCH] fix: shotgun not gibbing unless aiming at feet
@@ -10,7 +10,7 @@ Original (rejected) MR: https://github.com/ioquake/ioq3/pull/795.
  1 file changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 8f8e6311..e29853ec 100644
+index 8f8e63117..e29853ec7 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -601,7 +601,25 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int

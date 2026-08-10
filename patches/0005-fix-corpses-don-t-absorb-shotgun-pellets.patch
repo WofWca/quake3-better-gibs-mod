@@ -1,4 +1,4 @@
-From b11aab13430b62775090ceb0cfccbc6da402c076 Mon Sep 17 00:00:00 2001
+From f0b0bc2e0ad17179b2a0b0c945ad1be192acb041 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 18 Nov 2025 12:34:11 +0400
 Subject: [PATCH] fix: corpses don't absorb shotgun pellets
@@ -16,7 +16,7 @@ https://github.com/OpenArena/gamecode/pull/349.
  2 files changed, 25 insertions(+), 5 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index e29853ec..1e18a41f 100644
+index e29853ec7..1e18a41f7 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -607,11 +607,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
@@ -36,7 +36,7 @@ index e29853ec..1e18a41f 100644
  	// The purpose and the effect of this line is not entirely clear.
  	// Maybe it's to transition the player hitbox
 diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
-index d78afb0f..ea052cf0 100644
+index d78afb0f7..ea052cf04 100644
 --- a/code/game/g_weapon.c
 +++ b/code/game/g_weapon.c
 @@ -306,6 +306,27 @@ qboolean ShotgunPellet( vec3_t start, vec3_t end, gentity_t *ent ) {

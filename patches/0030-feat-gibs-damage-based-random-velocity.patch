@@ -1,4 +1,4 @@
-From a882f5c5337db036c8b7ffae784f441126b88a31 Mon Sep 17 00:00:00 2001
+From 4c3374356a1dfee0d1821f23cbed997220f81996 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 2 Feb 2026 14:41:58 +0400
 Subject: [PATCH] feat: gibs: damage-based random velocity
@@ -13,22 +13,37 @@ because otherwise they would stop getting reset
 when the player dies,
 because `P_DamageFeedback` early-returns when `PM_DEAD`.
 ---
+ code/cgame/cg_cvar.h       |  3 +-
  code/cgame/cg_effects.c    |  7 +++--
  code/cgame/cg_event.c      |  9 ++++--
- code/cgame/cg_local.h      |  7 ++++-
+ code/cgame/cg_local.h      |  6 +++-
  code/cgame/cg_localents.c  |  5 +++-
- code/cgame/cg_main.c       |  5 +++-
+ code/cgame/cg_main.c       |  1 +
  code/cgame/cg_servercmds.c | 12 ++++++++
  code/game/bg_public.h      |  7 +++++
  code/game/g_active.c       | 14 ++++-----
  code/game/g_combat.c       | 59 ++++++++++++++++++++++++++++++++------
- code/game/g_local.h        |  3 +-
- code/game/g_main.c         |  2 ++
+ code/game/g_cvar.h         |  1 +
+ code/game/g_local.h        |  2 +-
  code/game/g_weapon.c       |  5 +++-
- 12 files changed, 110 insertions(+), 25 deletions(-)
+ 13 files changed, 106 insertions(+), 25 deletions(-)
 
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 68e34b5f9..28f316c37 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -47,7 +47,8 @@ CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
+-CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.15", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 3197a816..6bcccc8c 100644
+index 3197a8163..6bcccc8c8 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -645,7 +645,7 @@ Generated a bunch of gibs launching out from the bodies location
@@ -53,7 +68,7 @@ index 3197a816..6bcccc8c 100644
  	float jump = cg_gibsExtraVerticalVelocity.value;
  	int numGibs = cg_gibs.value * DEFAULT_NUM_GIBS;
 diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
-index 065175f7..d2986002 100644
+index 065175f75..d29860026 100644
 --- a/code/cgame/cg_event.c
 +++ b/code/cgame/cg_event.c
 @@ -1222,6 +1222,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
@@ -83,7 +98,7 @@ index 065175f7..d2986002 100644
  			}
  		}
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index f1bae3d0..0e07221f 100644
+index a288bc0a1..1f2886bfd 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1014,6 +1014,9 @@ typedef struct {
@@ -96,15 +111,7 @@ index f1bae3d0..0e07221f 100644
  	int				voteTime;
  	int				voteYes;
  	int				voteNo;
-@@ -1096,6 +1099,7 @@ extern	vmCvar_t		cg_gibs;
- extern	vmCvar_t		cg_oldGibs;
- extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
- extern	vmCvar_t		cg_gibsExtraRandomVelocity;
-+extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
- extern	vmCvar_t		cg_gibsExtraVerticalVelocity;
- extern	vmCvar_t		cg_gibsBounceFactor;
- extern	vmCvar_t		cg_gibsRotationFactor;
-@@ -1426,7 +1430,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
+@@ -1315,7 +1318,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
  void CG_ScorePlum( int client, vec3_t org, int score );
  
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -113,7 +120,7 @@ index f1bae3d0..0e07221f 100644
  				const lerpFrame_t *bodyAnimation );
  void CG_GibPlayerOld( vec3_t playerOrigin );
  void CG_BigExplode( vec3_t playerOrigin );
-@@ -1467,6 +1471,7 @@ void CG_InitConsoleCommands( void );
+@@ -1356,6 +1359,7 @@ void CG_InitConsoleCommands( void );
  //
  void CG_ExecuteNewServerCommands( int latestSequence );
  void CG_ParseServerinfo( void );
@@ -122,7 +129,7 @@ index f1bae3d0..0e07221f 100644
  void CG_ShaderStateChanged(void);
  #ifdef MISSIONPACK
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index d11e2d21..4a49d6f2 100644
+index d11e2d21e..4a49d6f23 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -724,10 +724,13 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
@@ -141,28 +148,10 @@ index d11e2d21..4a49d6f2 100644
  	}
  	else {
 diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 38d7b079..e8816489 100644
+index 426ea57be..4a34596b7 100644
 --- a/code/cgame/cg_main.c
 +++ b/code/cgame/cg_main.c
-@@ -102,6 +102,7 @@ vmCvar_t	cg_gibs;
- vmCvar_t	cg_oldGibs;
- vmCvar_t	cg_gibsInheritPlayerVelocity;
- vmCvar_t	cg_gibsExtraRandomVelocity;
-+vmCvar_t	cg_gibsRandomVelocityFromKnockback;
- vmCvar_t	cg_gibsExtraVerticalVelocity;
- vmCvar_t	cg_gibsBounceFactor;
- vmCvar_t	cg_gibsRotationFactor;
-@@ -226,7 +227,8 @@ static cvarTable_t cvarTable[] = {
- 	{ &cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE  },
- 	{ &cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE  },
- 	{ &cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE  },
--	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE  },
-+	{ &cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_ARCHIVE  },
-+	{ &cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.15", CVAR_ARCHIVE  },
- 	{ &cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE  },
- 	{ &cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE  },
- 	{ &cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE  },
-@@ -1910,6 +1912,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
+@@ -1675,6 +1675,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
  	cgs.levelStartTime = atoi( s );
  
  	CG_ParseServerinfo();
@@ -171,7 +160,7 @@ index 38d7b079..e8816489 100644
  	// load the new map
  	CG_LoadingString( "collision map" );
 diff --git a/code/cgame/cg_servercmds.c b/code/cgame/cg_servercmds.c
-index 5829e8f3..fe13adec 100644
+index 5829e8f39..fe13adecf 100644
 --- a/code/cgame/cg_servercmds.c
 +++ b/code/cgame/cg_servercmds.c
 @@ -173,6 +173,16 @@ void CG_ParseServerinfo( void ) {
@@ -201,7 +190,7 @@ index 5829e8f3..fe13adec 100644
  		CG_ParseServerinfo();
  	} else if ( num == CS_WARMUP ) {
 diff --git a/code/game/bg_public.h b/code/game/bg_public.h
-index 19a71ed8..ef8b5a1b 100644
+index 19a71ed80..ef8b5a1b6 100644
 --- a/code/game/bg_public.h
 +++ b/code/game/bg_public.h
 @@ -202,6 +202,13 @@ void Pmove (pmove_t *pmove);
@@ -219,7 +208,7 @@ index 19a71ed8..ef8b5a1b 100644
  // player_state->stats[] indexes
  // NOTE: may not have more than 16
 diff --git a/code/game/g_active.c b/code/game/g_active.c
-index 8c9a7848..ea4133ed 100644
+index 8c9a78486..ea4133ed3 100644
 --- a/code/game/g_active.c
 +++ b/code/game/g_active.c
 @@ -78,13 +78,6 @@ void P_DamageFeedback( gentity_t *player ) {
@@ -251,7 +240,7 @@ index 8c9a7848..ea4133ed 100644
  //	i = trap_AAS_PointReachabilityAreaIndex( ent->client->ps.origin );
  //	ent->client->areabits[i >> 3] |= 1 << (i & 7);
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 549e9453..6ede89ec 100644
+index 549e94533..6ede89ec8 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -236,11 +236,7 @@ KnockbackToKnockbackSpeed
@@ -348,8 +337,20 @@ index 549e9453..6ede89ec 100644
  		}
  	} else {
  		// normal death
+diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
+index 6a399f342..f94102862 100644
+--- a/code/game/g_cvar.h
++++ b/code/game/g_cvar.h
+@@ -115,6 +115,7 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
+ 	"\n"
+ 	"Note that this affects not just the gibs\n"
+ 	"but also the camera velocity of the gibbed player." )
++G_CVAR( g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, NO_TRACK, NULL )
+ 
+ G_CVAR( g_podiumDist, "g_podiumDist", "80", NO_FLAGS, NO_TRACK, NULL )
+ G_CVAR( g_podiumDrop, "g_podiumDrop", "70", NO_FLAGS, NO_TRACK, NULL )
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 05e8c2fc..a09333a0 100644
+index aa63b9b5b..4af3f87e4 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -492,7 +492,7 @@ const char *BuildShaderStateConfig( void );
@@ -361,36 +362,8 @@ index 05e8c2fc..a09333a0 100644
  // The shotgun does `G_Damage` multiple times, per each pellet.
  // Normally that would mean that if the target is at 1 HP,
  // only one pellet would hit them.
-@@ -743,6 +743,7 @@ extern	vmCvar_t	g_doWarmup;
- extern	vmCvar_t	g_blood;
- extern	vmCvar_t	g_oldGibs;
- extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
-+extern	vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
- extern	vmCvar_t	g_allowVote;
- extern	vmCvar_t	g_teamAutoJoin;
- extern	vmCvar_t	g_teamForceBalance;
-diff --git a/code/game/g_main.c b/code/game/g_main.c
-index ca1e8fe7..05470792 100644
---- a/code/game/g_main.c
-+++ b/code/game/g_main.c
-@@ -71,6 +71,7 @@ vmCvar_t	g_logfileSync;
- vmCvar_t	g_blood;
- vmCvar_t	g_oldGibs;
- vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
-+vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
- vmCvar_t	g_podiumDist;
- vmCvar_t	g_podiumDrop;
- vmCvar_t	g_allowVote;
-@@ -166,6 +167,7 @@ static cvarTable_t		gameCvarTable[] = {
- 	// Note that this affects not just the gibs
- 	// but also the camera velocity of the gibbed player.
- 	{ &g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse },
-+	{ &g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse },
- 
- 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
- 	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
 diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
-index bca3af51..cbb54c1a 100644
+index bca3af51c..cbb54c1a6 100644
 --- a/code/game/g_weapon.c
 +++ b/code/game/g_weapon.c
 @@ -385,7 +385,10 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {

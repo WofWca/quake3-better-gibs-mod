@@ -1,4 +1,4 @@
-From fb3ce56dc1ac0521af1fddd8de6b0c048384fd1f Mon Sep 17 00:00:00 2001
+From 2badfe3b1b07812655eea3a3b4abcf53ef73712e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 10 Jul 2026 15:34:28 +0400
 Subject: [PATCH] feat: launch an extra brain when gibbing Klesk
@@ -10,7 +10,7 @@ Subject: [PATCH] feat: launch an extra brain when gibbing Klesk
  3 files changed, 23 insertions(+), 4 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index f1bc6608..aeec338f 100644
+index f1bc6608a..aeec338f3 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -659,7 +659,8 @@ in demo playback, so that players see the same gibs
@@ -57,10 +57,10 @@ index f1bc6608..aeec338f 100644
  
  void CG_GibPlayerOld( vec3_t playerOrigin ) {
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index d9f635db..547d8e1c 100644
+index 45b2905c1..580b70ff3 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
-@@ -1452,7 +1452,8 @@ void CG_ScorePlum( int client, vec3_t org, int score );
+@@ -1323,7 +1323,8 @@ void CG_ScorePlum( int client, vec3_t org, int score );
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  				const vec3_t playerVelocityOriginal,
  				const vec3_t knockbackDir, const int knockbackSpeedOriginal,
@@ -71,7 +71,7 @@ index d9f635db..547d8e1c 100644
  void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  					const clientInfo_t *ci );
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 53e61d9d..bd8a7e95 100644
+index 53e61d9d8..bd8a7e955 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -937,7 +937,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {

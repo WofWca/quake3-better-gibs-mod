@@ -1,4 +1,4 @@
-From 3f8b16b958789f50c19aac0cd2b7268ef67337c1 Mon Sep 17 00:00:00 2001
+From b69e71949417c1e63ca5f47a6fbce17c3dc58aef Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 14:35:21 +0400
 Subject: [PATCH] improvement: better gib starting positions
@@ -12,7 +12,7 @@ anatomically. That is, legs go lower, head goes higher.
  1 file changed, 29 insertions(+)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index ba60f99e..ab6bb416 100644
+index ba60f99ec..ab6bb416b 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -563,12 +563,20 @@ Generated a bunch of gibs launching out from the bodies location

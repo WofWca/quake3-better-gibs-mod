@@ -1,4 +1,4 @@
-From 9f5754c142003d69fa6caebae6a0bcb85b2e2e2e Mon Sep 17 00:00:00 2001
+From aa98ac55a7358a93e55439388e83b5a7d2f97b2f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 24 May 2026 20:36:06 +0400
 Subject: [PATCH] improvement: lower blood bounce mark min speed
@@ -7,22 +7,22 @@ We have increaset `MAX_MARK_POLYS` and basically lowered
 the bounce factor so now it is safe and is better-looking
 to require less speed to leave a blood mark.
 ---
- code/cgame/cg_main.c | 2 +-
+ code/cgame/cg_cvar.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index ef40256c..28ed3cfb 100644
---- a/code/cgame/cg_main.c
-+++ b/code/cgame/cg_main.c
-@@ -256,7 +256,7 @@ static cvarTable_t cvarTable[] = {
- 	{ &cg_simpleItems, "cg_simpleItems", "0", CVAR_ARCHIVE },
- 	{ &cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE },
- 	// Note that ~290 corresponds to a free fall with no bounce from player height.
--	{ &cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "350", CVAR_ARCHIVE },
-+	{ &cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "200", CVAR_ARCHIVE },
- 	{ &cg_bounceSoundMinImpactSpeed, "cg_bounceSoundMinImpactSpeed", "450", CVAR_ARCHIVE },
- 	{ &cg_lagometer, "cg_lagometer", "1", CVAR_ARCHIVE },
- 	{ &cg_railTrailTime, "cg_railTrailTime", "400", CVAR_ARCHIVE  },
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 3caa48965..198a1ef39 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -73,7 +73,7 @@ CG_CVAR( cg_crosshairY, "cg_crosshairY", "0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_brassTime, "cg_brassTime", "2500", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_simpleItems, "cg_simpleItems", "0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE, NULL )
+-CG_CVAR( cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "350", CVAR_ARCHIVE,
++CG_CVAR( cg_bounceMarksMinImpactSpeed, "cg_bounceMarksMinImpactSpeed", "200", CVAR_ARCHIVE,
+ 	"Note that ~290 corresponds to a free fall with no bounce from player height." )
+ CG_CVAR( cg_bounceSoundMinImpactSpeed, "cg_bounceSoundMinImpactSpeed", "450", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_lagometer, "cg_lagometer", "1", CVAR_ARCHIVE, NULL )
 -- 
 2.55.0
 

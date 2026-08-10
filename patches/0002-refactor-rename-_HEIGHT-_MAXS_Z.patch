@@ -1,4 +1,4 @@
-From 2cb8a774f37699e025b269b31c09cb603a633045 Mon Sep 17 00:00:00 2001
+From 5d9179c6c265fde14b391f59786e8837f1796a68 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 27 Jan 2026 18:49:38 +0400
 Subject: [PATCH] refactor: rename `*_HEIGHT` -> `*_MAXS_Z`
@@ -17,7 +17,7 @@ named `MINS_Z`.
  3 files changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/code/game/bg_pmove.c b/code/game/bg_pmove.c
-index 5d9bbee8..754343b5 100644
+index 5d9bbee8c..754343b5d 100644
 --- a/code/game/bg_pmove.c
 +++ b/code/game/bg_pmove.c
 @@ -1282,7 +1282,7 @@ static void PM_CheckDuck (void)
@@ -54,7 +54,7 @@ index 5d9bbee8..754343b5 100644
  	}
  }
 diff --git a/code/game/bg_public.h b/code/game/bg_public.h
-index 7d203fb0..19a71ed8 100644
+index 7d203fb08..19a71ed80 100644
 --- a/code/game/bg_public.h
 +++ b/code/game/bg_public.h
 @@ -48,11 +48,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -73,7 +73,7 @@ index 7d203fb0..19a71ed8 100644
  #define INVUL_RADIUS		42
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index b8f7448a..eaeb582d 100644
+index b8f7448a7..eaeb582db 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -601,7 +601,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int

@@ -1,17 +1,17 @@
-From f21f3023aefe0ae52ea2db93494cac22749d44a7 Mon Sep 17 00:00:00 2001
+From c8af5478e9b4a09243be77511b9d066540c6759e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 16:58:03 +0400
 Subject: [PATCH] fix: gibs: apply knockback to dead bodies
 
 ---
  code/game/g_combat.c | 81 +++++++++++++++++++++++++++-----------------
- code/game/g_local.h  |  3 +-
- code/game/g_main.c   |  2 ++
+ code/game/g_cvar.h   |  3 ++
+ code/game/g_local.h  |  2 +-
  code/game/g_weapon.c | 15 ++++----
  4 files changed, 63 insertions(+), 38 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index cfb9c10c..0c2f3784 100644
+index cfb9c10cb..0c2f3784e 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -250,7 +250,7 @@ with more info about the gib event.
@@ -167,8 +167,22 @@ index cfb9c10c..0c2f3784 100644
  			return;
  		} else if ( targ->pain ) {
  			targ->pain (targ, attacker, take);
+diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
+index 941813e89..d4d963a62 100644
+--- a/code/game/g_cvar.h
++++ b/code/game/g_cvar.h
+@@ -122,6 +122,9 @@ G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR
+ 	"We could have simply made this a binary value to tell clients\n"
+ 	"that the server is running Better Gibs mod. But let's make it flag-like,\n"
+ 	"for forwards compatibility." )
++G_CVAR( g_gibsDeadBodyLinearVelocityFromKnockback, "g_gibsDeadBodyLinearVelocityFromKnockback", "1.0", NO_FLAGS, NO_TRACK,
++	"Does not affect gameplay. Has no effect\n"
++	"when `g_gibsNewEvGibPlayerProtocol 0`." )
+ G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, NO_TRACK,
+ 	"If a dead player loses this much or more speed\n"
+ 	"as a result of collision with something (e.g. floor, wall),\n"
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 2020dc78..582562e9 100644
+index 0afb34c7c..1092726a5 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -503,7 +503,7 @@ const char *BuildShaderStateConfig( void );
@@ -180,36 +194,8 @@ index 2020dc78..582562e9 100644
  // The shotgun does `G_Damage` multiple times, per each pellet.
  // Normally that would mean that if the target is at 1 HP,
  // only one pellet would hit them.
-@@ -755,6 +755,7 @@ extern	vmCvar_t	g_blood;
- extern	vmCvar_t	g_oldGibs;
- extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
- extern	vmCvar_t	g_gibsNewEvGibPlayerProtocol;
-+extern	vmCvar_t	g_gibsDeadBodyLinearVelocityFromKnockback;
- extern	vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
- extern	vmCvar_t	g_gibsOnCollisionMinSpeed;
- extern	vmCvar_t	g_gibsOnCollisionBaseDamage;
-diff --git a/code/game/g_main.c b/code/game/g_main.c
-index 92c74f14..c93c25a5 100644
---- a/code/game/g_main.c
-+++ b/code/game/g_main.c
-@@ -72,6 +72,7 @@ vmCvar_t	g_blood;
- vmCvar_t	g_oldGibs;
- vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
- vmCvar_t	g_gibsNewEvGibPlayerProtocol;
-+vmCvar_t	g_gibsDeadBodyLinearVelocityFromKnockback;
- vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
- vmCvar_t	g_gibsOnCollisionMinSpeed;
- vmCvar_t	g_gibsOnCollisionBaseDamage;
-@@ -178,6 +179,7 @@ static cvarTable_t		gameCvarTable[] = {
- 	// that the server is running Better Gibs mod. But let's make it flag-like,
- 	// for forwards compatibility.
- 	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR_SYSTEMINFO, 0, qfalse },
-+	{ &g_gibsDeadBodyLinearVelocityFromKnockback, "g_gibsDeadBodyLinearVelocityFromKnockback", "1.0", 0, 0, qfalse },
- 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
- 	// If a dead player loses this much or more speed
- 	// as a result of collision with something (e.g. floor, wall),
 diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
-index 9dbb13dc..6fe017f8 100644
+index 9dbb13dcf..6fe017f8e 100644
 --- a/code/game/g_weapon.c
 +++ b/code/game/g_weapon.c
 @@ -377,11 +377,6 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {

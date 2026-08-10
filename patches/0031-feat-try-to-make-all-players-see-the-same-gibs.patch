@@ -1,4 +1,4 @@
-From 2f4969a66c144ba1f18d9bc0f9b7451c19c68cd3 Mon Sep 17 00:00:00 2001
+From 8ce83bcecec1f146ad1fa5b7cb5d4a9e6d763d8c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 5 Feb 2026 12:01:40 +0400
 Subject: [PATCH] feat: try to make all players see the same gibs
@@ -11,7 +11,7 @@ Subject: [PATCH] feat: try to make all players see the same gibs
  4 files changed, 96 insertions(+), 65 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 6bcccc8c..eb9f7d8b 100644
+index 6bcccc8c8..eb9f7d8bc 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -524,10 +524,13 @@ void CG_Bleed( vec3_t origin, int entityNum ) {
@@ -357,7 +357,7 @@ index 6bcccc8c..eb9f7d8b 100644
  
  /*
 diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
-index d2986002..a27a5b16 100644
+index d29860026..a27a5b164 100644
 --- a/code/cgame/cg_event.c
 +++ b/code/cgame/cg_event.c
 @@ -1227,6 +1227,20 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
@@ -396,10 +396,10 @@ index d2986002..a27a5b16 100644
  		}
  		break;
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 0e07221f..b2f03803 100644
+index 1f2886bfd..0c27bdaa6 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
-@@ -1431,7 +1431,7 @@ void CG_ScorePlum( int client, vec3_t org, int score );
+@@ -1319,7 +1319,7 @@ void CG_ScorePlum( int client, vec3_t org, int score );
  
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  				const vec3_t playerVelocity, const int knockbackSpeed,
@@ -409,7 +409,7 @@ index 0e07221f..b2f03803 100644
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 4a49d6f2..3a5d407b 100644
+index 4a49d6f23..3a5d407b1 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -726,11 +726,19 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {

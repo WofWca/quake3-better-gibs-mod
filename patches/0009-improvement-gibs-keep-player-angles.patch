@@ -1,4 +1,4 @@
-From 89407f28782a16232a8b5c878f72b06c3708dff5 Mon Sep 17 00:00:00 2001
+From 6de1f7fcb1210de84bad90860cf07880c9cd4e66 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 21:00:17 +0400
 Subject: [PATCH] improvement: gibs: keep player angles
@@ -15,7 +15,7 @@ that they're facing the right direction.
  4 files changed, 57 insertions(+), 41 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index ab6bb416..09986505 100644
+index ab6bb416b..099865052 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -526,7 +526,8 @@ void CG_Bleed( vec3_t origin, int entityNum ) {
@@ -258,7 +258,7 @@ index ab6bb416..09986505 100644
  
  /*
 diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
-index 4191888d..83a9cb58 100644
+index 4191888da..83a9cb588 100644
 --- a/code/cgame/cg_event.c
 +++ b/code/cgame/cg_event.c
 @@ -1222,7 +1222,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
@@ -271,10 +271,10 @@ index 4191888d..83a9cb58 100644
  		break;
  
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 4a4da431..e87bb14f 100644
+index 9a4f2f5f7..87041b55e 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
-@@ -1418,7 +1418,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
+@@ -1314,7 +1314,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
  #endif
  void CG_ScorePlum( int client, vec3_t org, int score );
  
@@ -284,7 +284,7 @@ index 4a4da431..e87bb14f 100644
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index d0ddef2c..c1683908 100644
+index d0ddef2c8..c16839086 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -690,7 +690,11 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {

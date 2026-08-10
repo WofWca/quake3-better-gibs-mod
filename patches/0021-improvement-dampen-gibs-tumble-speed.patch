@@ -1,4 +1,4 @@
-From d70c78f586b27a1c336dd5dae0456fe4ce5337cc Mon Sep 17 00:00:00 2001
+From 695f37ac158af7876b7615256ddab92a8c4c2a40 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 31 May 2026 23:04:43 +0400
 Subject: [PATCH] improvement: dampen gibs' tumble speed
@@ -11,7 +11,7 @@ But if it did, this would probably be good.
  1 file changed, 19 insertions(+)
 
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index a99fcaea..6417ca1e 100644
+index a99fcaea6..6417ca1e5 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -316,6 +316,25 @@ void CG_AddFragment( localEntity_t *le ) {

@@ -1,4 +1,4 @@
-From dafafe0649da682658723a79b2d08ee8272f2ead Mon Sep 17 00:00:00 2001
+From 9d5e53e9034031798bc06fd040bcc8feb55be895 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 24 May 2026 22:49:33 +0400
 Subject: [PATCH] feat: speed-dependent blood impact mark size
@@ -8,7 +8,7 @@ Subject: [PATCH] feat: speed-dependent blood impact mark size
  1 file changed, 28 insertions(+), 3 deletions(-)
 
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 7801a108..ac5eefaa 100644
+index 7801a1081..ac5eefaad 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -153,12 +153,37 @@ void CG_BloodTrail( localEntity_t *le ) {

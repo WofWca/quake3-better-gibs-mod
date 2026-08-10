@@ -1,4 +1,4 @@
-From b88946a471b658a110e396fd0e5a45f427384521 Mon Sep 17 00:00:00 2001
+From 18d6fcf4999a9fe7656c0af3e8fcdaff7fedfe23 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 28 Oct 2025 21:36:43 +0400
 Subject: [PATCH] fix: allow gibbing after `intermissionQueued`
@@ -13,7 +13,7 @@ The round could end with a bang, but it ends with a whimper.
  1 file changed, 23 insertions(+)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index eaeb582d..8f8e6311 100644
+index eaeb582db..8f8e63117 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -817,6 +817,29 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,

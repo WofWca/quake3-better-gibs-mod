@@ -1,4 +1,4 @@
-From 4f342210fb0e0d013eb87584c7bf01585604d4d9 Mon Sep 17 00:00:00 2001
+From 7930ce3376772cf347e1ef447445b3675d12bd62 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 29 Jan 2026 22:17:24 +0400
 Subject: [PATCH] improvement: increase `MAX_MARK_POLYS` 256 -> 1024
@@ -10,7 +10,7 @@ but makes blood marks not forcefully disappear as new ones are made.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 5db7b94b..f1bae3d0 100644
+index 2db17e2ea..a288bc0a1 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -58,7 +58,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA

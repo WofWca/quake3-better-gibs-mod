@@ -1,4 +1,4 @@
-From 110789f06fa9ade7800c6062f80110118e245a12 Mon Sep 17 00:00:00 2001
+From 5afe36f7f34f9deffd130b7b3c55b6db8a4ff6d6 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 11 Jul 2026 17:15:54 +0400
 Subject: [PATCH] fix: gibs: poor RNG (skull either always or never)
@@ -11,7 +11,7 @@ Yes, this increases rotation a little.
  1 file changed, 26 insertions(+), 12 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index aeec338f..72c620a9 100644
+index aeec338f3..72c620a95 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1185,28 +1185,42 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,

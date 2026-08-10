@@ -1,16 +1,27 @@
-From dede0ea86cdc72fc467ec02d9373e05628e44996 Mon Sep 17 00:00:00 2001
+From 1e98b5e85df45059cd87b61b656cc5223f9122f4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 21 Jun 2026 14:03:01 +0400
 Subject: [PATCH] feat: `cg_gibsExtraKnockback`
 
 ---
+ code/cgame/cg_cvar.h    | 1 +
  code/cgame/cg_effects.c | 4 +++-
- code/cgame/cg_local.h   | 1 +
- code/cgame/cg_main.c    | 2 ++
- 3 files changed, 6 insertions(+), 1 deletion(-)
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index f2aca1449..c6e745b48 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -52,6 +52,7 @@ CG_CVAR( cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0,
+ 	"but not on directional velocity.\n"
+ 	"Remember that this also affects own gibs, so having a value too high\n"
+ 	"will make gibs fly faster than the camera." )
++CG_CVAR( cg_gibsExtraKnockback, "cg_gibsExtraKnockback", "0", 0, NULL )
+ CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_ARCHIVE,
+ 	"For every 100 of knockback speed above 500 (100 damage),\n"
+ 	"add this many pieces of gibs, times the value of `cg_gibs`.\n"
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 37ef5df0..378a002b 100644
+index 37ef5df0f..378a002bd 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -673,7 +673,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -24,38 +35,6 @@ index 37ef5df0..378a002b 100644
  	float baseRandomVelocity =
  		cg_gibsExtraRandomVelocity.value +
  		cg_gibsRandomVelocityFromKnockback.value * knockbackSpeed;
-diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index aea4828a..1f502791 100644
---- a/code/cgame/cg_local.h
-+++ b/code/cgame/cg_local.h
-@@ -1102,6 +1102,7 @@ extern	vmCvar_t		cg_gibs;
- extern	vmCvar_t		cg_oldGibs;
- extern	vmCvar_t		cg_gibsInheritPlayerVelocity;
- extern	vmCvar_t		cg_gibsKnockback;
-+extern	vmCvar_t		cg_gibsExtraKnockback;
- extern	vmCvar_t		cg_gibsPiecesFromKnockback;
- extern	vmCvar_t		cg_gibsExtraRandomVelocity;
- extern	vmCvar_t		cg_gibsRandomVelocityFromKnockback;
-diff --git a/code/cgame/cg_main.c b/code/cgame/cg_main.c
-index 185c1bcd..a11af3ec 100644
---- a/code/cgame/cg_main.c
-+++ b/code/cgame/cg_main.c
-@@ -102,6 +102,7 @@ vmCvar_t	cg_gibs;
- vmCvar_t	cg_oldGibs;
- vmCvar_t	cg_gibsInheritPlayerVelocity;
- vmCvar_t	cg_gibsKnockback;
-+vmCvar_t	cg_gibsExtraKnockback;
- vmCvar_t	cg_gibsPiecesFromKnockback;
- vmCvar_t	cg_gibsExtraRandomVelocity;
- vmCvar_t	cg_gibsRandomVelocityFromKnockback;
-@@ -243,6 +244,7 @@ static cvarTable_t cvarTable[] = {
- 	// Remember that this also affects own gibs, so having a value too high
- 	// will make gibs fly faster than the camera.
- 	{ &cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0  },
-+	{ &cg_gibsExtraKnockback, "cg_gibsExtraKnockback", "0", 0  },
- 	// For every 100 of knockback speed above 500 (100 damage),
- 	// add this many pieces of gibs, times the value of `cg_gibs`.
- 	//
 -- 
 2.55.0
 

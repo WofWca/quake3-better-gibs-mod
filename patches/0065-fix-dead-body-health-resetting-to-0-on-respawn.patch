@@ -1,4 +1,4 @@
-From dde7e4692cdc32250754b8dc7ea3d233c74f6ae0 Mon Sep 17 00:00:00 2001
+From 49241ba7f0c757f65214dc60854a83daeefe508b Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 27 Jun 2026 23:40:24 +0400
 Subject: [PATCH] fix: dead body health resetting to 0 on respawn
@@ -10,7 +10,7 @@ they might unexpectedly need to fire more rounds to gib the body.
  1 file changed, 4 insertions(+)
 
 diff --git a/code/game/g_client.c b/code/game/g_client.c
-index 5b4b2717..e8931b5b 100644
+index 5b4b27179..e8931b5b3 100644
 --- a/code/game/g_client.c
 +++ b/code/game/g_client.c
 @@ -487,6 +487,10 @@ void CopyToBodyQue( gentity_t *ent ) {

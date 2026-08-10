@@ -1,4 +1,4 @@
-From 4bed98c7f726773aa6a01ca714b38d2a8b4c484a Mon Sep 17 00:00:00 2001
+From 290745bb2cf62fec1f8a81547cfc5342058564d8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 26 Jun 2026 15:16:16 +0400
 Subject: [PATCH] fix: don't make a landing sound when gibbed
@@ -8,7 +8,7 @@ Subject: [PATCH] fix: don't make a landing sound when gibbed
  1 file changed, 7 insertions(+)
 
 diff --git a/code/game/bg_pmove.c b/code/game/bg_pmove.c
-index c7541743..5d9bbee8 100644
+index c75417433..5d9bbee8c 100644
 --- a/code/game/bg_pmove.c
 +++ b/code/game/bg_pmove.c
 @@ -927,6 +927,13 @@ static void PM_CrashLand( void ) {

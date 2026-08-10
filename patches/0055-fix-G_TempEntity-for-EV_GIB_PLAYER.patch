@@ -1,4 +1,4 @@
-From 8f9f7cc40adcf6365143b3c173c779d431c448e7 Mon Sep 17 00:00:00 2001
+From 5962102e508be58842ff35fff2384c0acdd101fd Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 7 Jun 2026 15:45:08 +0400
 Subject: [PATCH] fix: `G_TempEntity` for `EV_GIB_PLAYER`
@@ -49,13 +49,13 @@ changes a few other things that are related to that:
  code/game/bg_pmove.c       |   5 --
  code/game/g_bot.c          |   5 --
  code/game/g_combat.c       | 125 +++++++++++++++++++++++++++----------
- code/game/g_local.h        |   8 ++-
- code/game/g_main.c         |  10 ++-
+ code/game/g_cvar.h         |   8 ++-
+ code/game/g_local.h        |   6 ++
  code/game/g_weapon.c       |  40 ++++++++++--
- 10 files changed, 221 insertions(+), 75 deletions(-)
+ 10 files changed, 219 insertions(+), 73 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index a67ecd39..6499f727 100644
+index a67ecd397..6499f7279 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -1035,30 +1035,54 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -168,7 +168,7 @@ index a67ecd39..6499f727 100644
  			usePredictedPs ? S_COLOR_GREEN : S_COLOR_CYAN,
  			usePredictedPs );
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 9a49ff72..c688daf1 100644
+index 58c0f17cc..da51ef33e 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
 @@ -1018,7 +1018,7 @@ typedef struct {
@@ -181,7 +181,7 @@ index 9a49ff72..c688daf1 100644
  	int				voteTime;
  	int				voteYes;
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 8510b5ab..e631d1c1 100644
+index 8510b5ab4..e631d1c18 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -428,12 +428,7 @@ static void GetFragmentMinsMaxs( const localEntity_t *le, vec3_t mins, vec3_t ma
@@ -199,7 +199,7 @@ index 8510b5ab..e631d1c1 100644
  
  		VectorScale( mins, sizeFactor, mins );
 diff --git a/code/cgame/cg_servercmds.c b/code/cgame/cg_servercmds.c
-index fe13adec..1a347396 100644
+index fe13adecf..1a3473964 100644
 --- a/code/cgame/cg_servercmds.c
 +++ b/code/cgame/cg_servercmds.c
 @@ -176,11 +176,19 @@ void CG_ParseServerinfo( void ) {
@@ -225,7 +225,7 @@ index fe13adec..1a347396 100644
  
  /*
 diff --git a/code/game/bg_pmove.c b/code/game/bg_pmove.c
-index d5c14ec6..d8b07eab 100644
+index d5c14ec68..d8b07eab2 100644
 --- a/code/game/bg_pmove.c
 +++ b/code/game/bg_pmove.c
 @@ -1294,11 +1294,6 @@ static void PM_CheckDuck (void)
@@ -241,7 +241,7 @@ index d5c14ec6..d8b07eab 100644
  			// because there is `PM_GroundTraceMissed()`
  			// right after `PM_CheckDuck()`.
 diff --git a/code/game/g_bot.c b/code/game/g_bot.c
-index 544f96e9..b6b205f1 100644
+index 544f96e9f..b6b205f11 100644
 --- a/code/game/g_bot.c
 +++ b/code/game/g_bot.c
 @@ -727,11 +727,6 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
@@ -257,7 +257,7 @@ index 544f96e9..b6b205f1 100644
  	trap_SetUserinfo( clientNum, userinfo );
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 7e5d4f7f..17eb2be2 100644
+index 7e5d4f7f3..17eb2be2d 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -242,29 +242,54 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
@@ -429,8 +429,27 @@ index 7e5d4f7f..17eb2be2 100644
  				//
  				// Note that there is a more accurate crash landing
  				// velocity calculation in `PM_CrashLand`,
+diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
+index 0f6a93be9..11f9b7323 100644
+--- a/code/game/g_cvar.h
++++ b/code/game/g_cvar.h
+@@ -115,7 +115,13 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
+ 	"\n"
+ 	"Note that this affects not just the gibs\n"
+ 	"but also the camera velocity of the gibbed player." )
+-G_CVAR( g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, NO_TRACK, NULL )
++G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, NO_TRACK,
++	"This is not really intended to be changed by users to a value different from\n"
++	"the default or 0, unless they're having mod compatibility issues\n"
++	"and really know what they're doing.\n"
++	"We could have simply made this a binary value to tell clients\n"
++	"that the server is running Better Gibs mod. But let's make it flag-like,\n"
++	"for forwards compatibility." )
+ G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, NO_TRACK,
+ 	"If a dead player loses this much or more speed\n"
+ 	"as a result of collision with something (e.g. floor, wall),\n"
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index eb54ef3b..1d2eb0b2 100644
+index c477414b3..dd521f5b3 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -144,6 +144,12 @@ struct gentity_s {
@@ -446,45 +465,8 @@ index eb54ef3b..1d2eb0b2 100644
  	// Whether to `GibEntity` after applying all the pellets of a shotgun shot.
  	qboolean	gibScheduled;
  
-@@ -748,7 +754,7 @@ extern	vmCvar_t	g_doWarmup;
- extern	vmCvar_t	g_blood;
- extern	vmCvar_t	g_oldGibs;
- extern	vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
--extern	vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
-+extern	vmCvar_t	g_gibsNewEvGibPlayerProtocol;
- extern	vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
- extern	vmCvar_t	g_gibsOnCollisionMinSpeed;
- extern	vmCvar_t	g_gibsOnCollisionBaseDamage;
-diff --git a/code/game/g_main.c b/code/game/g_main.c
-index e6542196..4465eef1 100644
---- a/code/game/g_main.c
-+++ b/code/game/g_main.c
-@@ -71,7 +71,7 @@ vmCvar_t	g_logfileSync;
- vmCvar_t	g_blood;
- vmCvar_t	g_oldGibs;
- vmCvar_t	g_gibsMissileDirectionKnockbackWeight;
--vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
-+vmCvar_t	g_gibsNewEvGibPlayerProtocol;
- vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
- vmCvar_t	g_gibsOnCollisionMinSpeed;
- vmCvar_t	g_gibsOnCollisionBaseDamage;
-@@ -171,7 +171,13 @@ static cvarTable_t		gameCvarTable[] = {
- 	// Note that this affects not just the gibs
- 	// but also the camera velocity of the gibbed player.
- 	{ &g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, 0, qfalse },
--	{ &g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qfalse },
-+	// This is not really intended to be changed by users to a value different from
-+	// the default or 0, unless they're having mod compatibility issues
-+	// and really know what they're doing.
-+	// We could have simply made this a binary value to tell clients
-+	// that the server is running Better Gibs mod. But let's make it flag-like,
-+	// for forwards compatibility.
-+	{ &g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, 0, qfalse },
- 	{ &g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, 0, qfalse },
- 	// If a dead player loses this much or more speed
- 	// as a result of collision with something (e.g. floor, wall),
 diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
-index cbb54c1a..9dbb13dc 100644
+index cbb54c1a6..9dbb13dcf 100644
 --- a/code/game/g_weapon.c
 +++ b/code/game/g_weapon.c
 @@ -371,6 +371,8 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {

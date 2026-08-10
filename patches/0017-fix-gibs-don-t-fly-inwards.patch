@@ -1,4 +1,4 @@
-From 4b1a586cfa652083e7605825b5fcad84b9429b25 Mon Sep 17 00:00:00 2001
+From 96e9c5d7f3f21015b4605b2d88d7b426fa98540b Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 7 Jan 2026 13:01:30 +0400
 Subject: [PATCH] fix: gibs don't fly inwards
@@ -8,7 +8,7 @@ Subject: [PATCH] fix: gibs don't fly inwards
  1 file changed, 29 insertions(+), 12 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 800f089a..82efe802 100644
+index 800f089a6..82efe8026 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -594,9 +594,15 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,

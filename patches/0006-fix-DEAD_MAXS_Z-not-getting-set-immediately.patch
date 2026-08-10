@@ -1,4 +1,4 @@
-From f819bab7bfead0cea9032a9f62edcdf2e8d75b0a Mon Sep 17 00:00:00 2001
+From 60d2410b5f6c094471904ed027d409d98c992d46 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 18 Feb 2026 17:24:14 +0400
 Subject: [PATCH] fix: `DEAD_MAXS_Z` not getting set immediately
@@ -28,7 +28,7 @@ The bug has been introduced recently, in
  3 files changed, 36 insertions(+), 19 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 1e18a41f..1e824432 100644
+index 1e18a41f7..1e824432b 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -601,24 +601,14 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
@@ -65,7 +65,7 @@ index 1e18a41f..1e824432 100644
  	// don't allow respawn until the death anim is done
  	// g_forcerespawn may force spawning at some later time
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 10ec8dbf..6814d193 100644
+index 02ad55ba0..baf03a24c 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -490,6 +490,19 @@ const char *BuildShaderStateConfig( void );
@@ -89,7 +89,7 @@ index 10ec8dbf..6814d193 100644
  int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t impactpoint, vec3_t bouncedir );
  void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
-index ea052cf0..664888c4 100644
+index ea052cf04..664888c41 100644
 --- a/code/game/g_weapon.c
 +++ b/code/game/g_weapon.c
 @@ -314,7 +314,7 @@ qboolean ShotgunPellet( vec3_t start, vec3_t end, gentity_t *ent ) {

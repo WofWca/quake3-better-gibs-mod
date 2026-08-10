@@ -1,4 +1,4 @@
-From 0828fb3c588f2fccb046efa8c509651d1800cbc4 Mon Sep 17 00:00:00 2001
+From 023783b3a89858e7f0fe946c98536460c3038691 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 17 Feb 2026 19:46:52 +0400
 Subject: [PATCH] fix: shotgun not respecting `MAX_KNOCKBACK`
@@ -8,7 +8,7 @@ Subject: [PATCH] fix: shotgun not respecting `MAX_KNOCKBACK`
  1 file changed, 30 insertions(+), 2 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index edd3cac0..549e9453 100644
+index edd3cac0c..549e94533 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -229,6 +229,7 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker )

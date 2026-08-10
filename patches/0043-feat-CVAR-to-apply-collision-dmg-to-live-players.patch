@@ -1,4 +1,4 @@
-From c09283f2b7103a13a45d0de850d1bf0faf6bab7f Mon Sep 17 00:00:00 2001
+From 46057272658a21dc1470df82b45d139a11423f40 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 5 May 2026 22:12:12 +0400
 Subject: [PATCH] feat: CVAR to apply collision dmg to live players
@@ -7,12 +7,11 @@ This affects gameplay significantly,
 and is basically just for fooling around.
 ---
  code/game/g_active.c | 10 +++++++---
- code/game/g_local.h  |  1 +
- code/game/g_main.c   |  3 +++
- 3 files changed, 11 insertions(+), 3 deletions(-)
+ code/game/g_cvar.h   |  2 ++
+ 2 files changed, 9 insertions(+), 3 deletions(-)
 
 diff --git a/code/game/g_active.c b/code/game/g_active.c
-index 457fbb51..e45392a7 100644
+index 457fbb51b..e45392a78 100644
 --- a/code/game/g_active.c
 +++ b/code/game/g_active.c
 @@ -307,8 +307,12 @@ static void CheckCollisionDamage( gentity_t *ent, const vec3_t oldVelocity ) {
@@ -44,39 +43,19 @@ index 457fbb51..e45392a7 100644
  		return;
  	}
  
-diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 569b5d42..eb54ef3b 100644
---- a/code/game/g_local.h
-+++ b/code/game/g_local.h
-@@ -752,6 +752,7 @@ extern	vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
- extern	vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
- extern	vmCvar_t	g_gibsOnCollisionMinSpeed;
- extern	vmCvar_t	g_gibsOnCollisionBaseDamage;
-+extern	vmCvar_t	g_gibsOnCollisionAffectLivePlayers;
- extern	vmCvar_t	g_allowVote;
- extern	vmCvar_t	g_teamAutoJoin;
- extern	vmCvar_t	g_teamForceBalance;
-diff --git a/code/game/g_main.c b/code/game/g_main.c
-index 05a59bbe..e6542196 100644
---- a/code/game/g_main.c
-+++ b/code/game/g_main.c
-@@ -75,6 +75,7 @@ vmCvar_t	g_gibsNewEvGibPlayerParmProtocol;
- vmCvar_t	g_gibsOnCollisionInheritPlayerVelocity;
- vmCvar_t	g_gibsOnCollisionMinSpeed;
- vmCvar_t	g_gibsOnCollisionBaseDamage;
-+vmCvar_t	g_gibsOnCollisionAffectLivePlayers;
- vmCvar_t	g_podiumDist;
- vmCvar_t	g_podiumDrop;
- vmCvar_t	g_allowVote;
-@@ -178,6 +179,8 @@ static cvarTable_t		gameCvarTable[] = {
- 	// (damage increases with the square of the speed).
- 	{ &g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, 0, qfalse },
- 	{ &g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_ARCHIVE, 0, qfalse },
-+	// This one affects gameplay significantly, and is basically just for fun.
-+	{ &g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", 0, 0, qtrue },
+diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
+index a6e843d16..0f6a93be9 100644
+--- a/code/game/g_cvar.h
++++ b/code/game/g_cvar.h
+@@ -122,6 +122,8 @@ G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARC
+ 	"deal `g_gibsOnCollisionBaseDamage` or more damage to them\n"
+ 	"(damage increases with the square of the speed)." )
+ G_CVAR( g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_ARCHIVE, NO_TRACK, NULL )
++G_CVAR( g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", NO_FLAGS, TRACK,
++	"This one affects gameplay significantly, and is basically just for fun." )
+ G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NO_TRACK, NULL )
  
- 	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
- 	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
+ G_CVAR( g_podiumDist, "g_podiumDist", "80", NO_FLAGS, NO_TRACK, NULL )
 -- 
 2.55.0
 

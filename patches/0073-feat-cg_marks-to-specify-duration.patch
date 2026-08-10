@@ -1,4 +1,4 @@
-From 005a5c5b5ed3a3acda282881000f32d66a5ddb57 Mon Sep 17 00:00:00 2001
+From 63ab8878f931ec12db7da7412169bc206a5084a4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 9 Jul 2026 15:25:20 +0400
 Subject: [PATCH] feat: `cg_marks` to specify duration
@@ -8,7 +8,7 @@ Subject: [PATCH] feat: `cg_marks` to specify duration
  1 file changed, 12 insertions(+), 7 deletions(-)
 
 diff --git a/code/cgame/cg_marks.c b/code/cgame/cg_marks.c
-index f219a983..8355c92a 100644
+index f219a983f..8355c92ad 100644
 --- a/code/cgame/cg_marks.c
 +++ b/code/cgame/cg_marks.c
 @@ -227,14 +227,19 @@ void CG_ImpactMark( qhandle_t markShader, const vec3_t origin, const vec3_t dir,

@@ -1,4 +1,4 @@
-From b12ce9c67d149b8688499a912c813dd1e162f27d Mon Sep 17 00:00:00 2001
+From 6341e6bd67712ca8e0d40af2ed125d7a7597090e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 24 Jan 2026 16:48:44 +0400
 Subject: [PATCH] feat: better gib positions for dead bodies
@@ -17,7 +17,7 @@ This commit fixes that.
  4 files changed, 90 insertions(+), 23 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index c30ad412..58c6843a 100644
+index c30ad4122..58c6843a5 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -580,6 +580,60 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
@@ -229,7 +229,7 @@ index c30ad412..58c6843a 100644
  		VectorMA( origin, -0.5 * playerRadius, right, origin );
  		VectorMA( origin, -0.2 * playerRadius, forward, origin );
 diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
-index 03a10dc4..065175f7 100644
+index 03a10dc4f..065175f75 100644
 --- a/code/cgame/cg_event.c
 +++ b/code/cgame/cg_event.c
 @@ -1228,11 +1228,14 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
@@ -250,10 +250,10 @@ index 03a10dc4..065175f7 100644
  		}
  		break;
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index 9ba1b4c5..5db7b94b 100644
+index cccb99333..2db17e2ea 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
-@@ -1426,7 +1426,8 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
+@@ -1315,7 +1315,8 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
  void CG_ScorePlum( int client, vec3_t org, int score );
  
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
@@ -264,7 +264,7 @@ index 9ba1b4c5..5db7b94b 100644
  void CG_BigExplode( vec3_t playerOrigin );
  
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 6417ca1e..d11e2d21 100644
+index 6417ca1e5..d11e2d21e 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -727,7 +727,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {

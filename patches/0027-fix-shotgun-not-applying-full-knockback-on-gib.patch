@@ -1,4 +1,4 @@
-From 77ff9dd795917bfbf24a64f8c4f4aef54111c374 Mon Sep 17 00:00:00 2001
+From ed94f962829c98cbc6c2b5b43320d9b11ed935f6 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 18 Feb 2026 21:29:10 +0400
 Subject: [PATCH] fix: shotgun not applying full knockback on gib
@@ -13,7 +13,7 @@ Related:
  3 files changed, 22 insertions(+), 2 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index e5f4becc..edd3cac0 100644
+index e5f4becc2..edd3cac0c 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -287,7 +287,11 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d
@@ -43,7 +43,7 @@ index e5f4becc..edd3cac0 100644
  		// normal death
  		static int lastDeath;
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 6ff91ed0..05e8c2fc 100644
+index 7c2291b53..aa63b9b5b 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -144,6 +144,8 @@ struct gentity_s {
@@ -64,7 +64,7 @@ index 6ff91ed0..05e8c2fc 100644
  // Normally that would mean that if the target is at 1 HP,
  // only one pellet would hit them.
 diff --git a/code/game/g_weapon.c b/code/game/g_weapon.c
-index b05176eb..bca3af51 100644
+index b05176eb1..bca3af51c 100644
 --- a/code/game/g_weapon.c
 +++ b/code/game/g_weapon.c
 @@ -379,6 +379,15 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent ) {

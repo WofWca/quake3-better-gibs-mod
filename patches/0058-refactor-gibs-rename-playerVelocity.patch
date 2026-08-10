@@ -1,4 +1,4 @@
-From 3fe4191375b628f3c4c2dac82160d7a4c735decd Mon Sep 17 00:00:00 2001
+From 5cbd96f3d8fbd795ee8952b11ee913d6a60f2ad0 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 21 Jun 2026 15:23:26 +0400
 Subject: [PATCH] refactor: gibs: rename `playerVelocity`
@@ -9,7 +9,7 @@ Subject: [PATCH] refactor: gibs: rename `playerVelocity`
  2 files changed, 22 insertions(+), 22 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 6cc45b39..a172ca89 100644
+index 6cc45b394..a172ca894 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
 @@ -657,7 +657,7 @@ in demo playback, so that players see the same gibs
@@ -195,10 +195,10 @@ index 6cc45b39..a172ca89 100644
  			angles[0] += Q_random(&seed) * 360;
  			angles[1] += Q_random(&seed) * 360;
 diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
-index b7a150cb..43298b2f 100644
+index da51ef33e..417911af3 100644
 --- a/code/cgame/cg_local.h
 +++ b/code/cgame/cg_local.h
-@@ -1443,7 +1443,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
+@@ -1321,7 +1321,7 @@ void CG_LightningBoltBeam( vec3_t start, vec3_t end );
  void CG_ScorePlum( int client, vec3_t org, int score );
  
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
