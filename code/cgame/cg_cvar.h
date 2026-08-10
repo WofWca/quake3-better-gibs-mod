@@ -131,6 +131,9 @@ CG_CVAR( cg_gibsNoLerpDelay, "cg_gibsNoLerpDelay", "0", 0,
 	"\n"
 	"Set this to 3 (2nd bit) to also do this on vanilla servers.\n"
 	"To get vanilla behavior, set to 0." )
+CG_CVAR( cg_gibsStopPlayerSounds, "cg_gibsStopPlayerSounds", "1", 0,
+	"Stop other player's sounds (pain, taunts) when they get gibbed.\n"
+	"Doesn't work for self." )
 CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
 	"Fraction of speed that gibs preserve when bouncing off a surface" )
 CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,

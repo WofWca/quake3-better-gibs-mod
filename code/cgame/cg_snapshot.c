@@ -100,6 +100,30 @@ void CG_SetInitialSnapshot( snapshot_t *snap ) {
 
 /*
 ===================
+CheckMoveFarIfGibbed
+
+See `cg_gibsStopPlayerSounds`
+===================
+*/
+static void CheckMoveFarIfGibbed( centity_t *cent ) {
+	entityState_t *es = &cent->currentState;
+	if ( es->number >= MAX_CLIENTS ) {
+		// Normally only real players get gibbed,
+		// so let's not mess with the state if we're unsure.
+		return;
+	}
+	if ( es->number == cg.snap->ps.clientNum ) {
+		// As was said in `cg_events`, this doesn't work for self.
+		return;
+	}
+	if ( es->eFlags & EF_DEAD && es->eType == ET_INVISIBLE ) {
+		es->pos.trBase[2] = cg.predictedPlayerState.origin[2] + 1024 * 1024;
+	}
+}
+
+
+/*
+===================
 CG_TransitionSnapshot
 
 The transition point from snap to nextSnap has passed
@@ -144,6 +168,24 @@ static void CG_TransitionSnapshot( void ) {
 
 		// remember time of snapshot this entity was last updated in
 		cent->snapShotTime = cg.snap->serverTime;
+	}
+	if ( !cg_oldGibs.integer && cg_gibsStopPlayerSounds.integer ) {
+		// `CG_TransitionEntity` has set the gibbled players' positions
+		// to their actual value. Let's move them far away again
+		// so that the sound doesn't come back.
+		//
+		// Note that we run this in another loop and not in the one above,
+		// otherwise it's possible that if the gib event is carried
+		// by a `G_TempEntity` then we would set the position of the player here
+		// _before_ handling their gib event,
+		// which would result in the gibs originating from this new position
+		// and not the actual player position.
+		for ( i = 0 ; i < cg.snap->numEntities ; i++ ) {
+			cent = &cg_entities[ cg.snap->entities[ i ].number ];
+			// `CG_TransitionEntity` has set the position to its actual value,
+			// let's move it far away again
+			CheckMoveFarIfGibbed( cent );
+		}
 	}
 
 	cg.nextSnap = NULL;
