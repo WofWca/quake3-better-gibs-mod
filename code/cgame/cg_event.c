@@ -1210,11 +1210,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position, int entityNum ) {
 		// not be played when someone is gibbed while just carrying the kamikaze
 #ifdef MISSIONPACK
 		if ( !(es->eFlags & EF_KAMIKAZE) ) {
+#else
+		{
+#endif
 			trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.gibSound );
 		}
-#else
-		trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.gibSound );
-#endif
 		CG_GibPlayer( cent->lerpOrigin );
 		break;
 
