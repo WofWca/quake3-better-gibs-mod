@@ -205,6 +205,10 @@ typedef struct centity_s {
 	// exact interpolated position of entity on this frame
 	vec3_t			lerpOrigin;
 	vec3_t			lerpAngles;
+
+	// Don't play any sounds for this entity,
+	// and interrupt ones that are already playing.
+	qboolean		soundsMuted;
 } centity_t;
 
 
@@ -1338,6 +1342,8 @@ void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
 							qhandle_t parentModel, const char *tagName );
 void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *parent, 
 							qhandle_t parentModel, const char *tagName );
+
+void CG_CheckMuteSoundsIfGibbed( centity_t *cent );
 
 
 
