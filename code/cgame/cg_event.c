@@ -1213,7 +1213,29 @@ void CG_EntityEvent( centity_t *cent, vec3_t position, int entityNum ) {
 #else
 		{
 #endif
-			trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.gibSound );
+			if ( !cg_oldGibs.integer
+				&& ( es->number == cg.snap->ps.clientNum
+					? cg_gibsStopPlayerSounds.integer & 0x2
+					: cg_gibsStopPlayerSounds.integer & 0x1
+				) )
+			{
+				// Might be different from `cent` if this is a `G_TempEntity`.
+				//
+				// Maybe we should DRY this with the stuff in `CG_GibPlayer`,
+				// but good enough.
+				centity_t *targCent = &cg_entities[ es->number ];
+
+				// If we were to attach the sound to the entity,
+				// then this sound would also get muted.
+				trap_S_StartSound( position, ENTITYNUM_WORLD, CHAN_BODY, cgs.media.gibSound );
+
+				targCent->soundsMuted = qtrue;
+				// Ensure `soundsMuted` takes effect immediately
+				// and not on next snap or something.
+				CG_SetEntitySoundPosition( targCent );
+			} else {
+				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.gibSound );
+			}
 		}
 		if (cg_oldGibs.integer) {
 			CG_GibPlayerOld( cent->lerpOrigin );
