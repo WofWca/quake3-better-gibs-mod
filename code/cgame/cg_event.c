@@ -1213,16 +1213,36 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_GIB_PLAYER:
 		DEBUGNAME("EV_GIB_PLAYER");
-		// don't play gib sound when using the kamikaze because it interferes
-		// with the kamikaze sound, downside is that the gib sound will also
-		// not be played when someone is gibbed while just carrying the kamikaze
-		if ( !(es->eFlags & EF_KAMIKAZE) ) {
-			trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.gibSound );
-		}
 		if (cg_oldGibs.integer) {
 			CG_GibPlayerOld( cent->lerpOrigin );
 		} else {
 			CG_GibPlayer2( cent, es, ci );
+		}
+
+		// don't play gib sound when using the kamikaze because it interferes
+		// with the kamikaze sound, downside is that the gib sound will also
+		// not be played when someone is gibbed while just carrying the kamikaze
+		if ( !(es->eFlags & EF_KAMIKAZE) ) {
+			if ( !cg_oldGibs.integer
+				&& cg_gibsStopPlayerSounds.integer
+				&& es->number != cg.snap->ps.clientNum )
+			{
+				// If we were to attach the sound to the entity,
+				// then this sound would also get interrupted.
+				trap_S_StartSound( position, ENTITYNUM_WORLD, CHAN_BODY, cgs.media.gibSound );
+
+				// Move the entity far away from listener to stop its souds.
+				// Do this only _after_ `CG_GibPlayer()`
+				// so that the gibs' origin is correct.
+				//
+				// Unfortunately this doesn't work for self on most engines,
+				// because for self-entity the sound is always attached
+				// to the listener (see `S_Base_StartSoundEx`).
+				es->pos.trBase[2] =
+					cg.predictedPlayerState.origin[2] + 1024 * 1024;
+			} else {
+				trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.gibSound );
+			}
 		}
 		break;
 
