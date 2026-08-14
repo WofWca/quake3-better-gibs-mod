@@ -113,6 +113,7 @@ so you can enjoy it on basically any server
 - `cg_gibsDuration`
 - `cg_gibsOriginalOrigin`
 - `cg_gibsNoLerpDelay`
+- `cg_gibsStopPlayerSounds`
 - `cg_gibsBounceFactor`
 - `cg_gibsBounceFactorRandomness`
 - `cg_gibsRotationFactor`
