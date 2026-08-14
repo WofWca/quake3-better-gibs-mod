@@ -1,4 +1,4 @@
-From 4c3374356a1dfee0d1821f23cbed997220f81996 Mon Sep 17 00:00:00 2001
+From d48e6a48cd43417c78c4a6cce312d5476ac28228 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 2 Feb 2026 14:41:58 +0400
 Subject: [PATCH] feat: gibs: damage-based random velocity
@@ -13,7 +13,7 @@ because otherwise they would stop getting reset
 when the player dies,
 because `P_DamageFeedback` early-returns when `PM_DEAD`.
 ---
- code/cgame/cg_cvar.h       |  3 +-
+ code/cgame/cg_cvar.h       |  9 +++++-
  code/cgame/cg_effects.c    |  7 +++--
  code/cgame/cg_event.c      |  9 ++++--
  code/cgame/cg_local.h      |  6 +++-
@@ -26,22 +26,28 @@ because `P_DamageFeedback` early-returns when `PM_DEAD`.
  code/game/g_cvar.h         |  1 +
  code/game/g_local.h        |  2 +-
  code/game/g_weapon.c       |  5 +++-
- 13 files changed, 106 insertions(+), 25 deletions(-)
+ 13 files changed, 112 insertions(+), 25 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 68e34b5f9..28f316c37 100644
+index c458c0b43..0d1a8c634 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -47,7 +47,8 @@ CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
+@@ -52,7 +52,14 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE,
+ 	"When set to 1, takes priority "
+ 	"over (almost) all the other `cg_gibs*` vars." )
  CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
 -CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.15", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.15", CVAR_ARCHIVE,
++	"Scale how much random velocity (spread) the gibs gain "
++	"from damage (knockback)." )
++CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_ARCHIVE,
++	"Like `cg_gibsRandomVelocityFromKnockback`, "
++	"but add a *fixed* amount of random velocity to each piece.\n"
++	"Ensures that even if the player was gibbed with the machine gun, "
++	"the gibs would still fly apart somewhat." )
  CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index 3197a8163..6bcccc8c8 100644
 --- a/code/cgame/cg_effects.c
@@ -338,12 +344,12 @@ index 549e94533..6ede89ec8 100644
  	} else {
  		// normal death
 diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
-index 6a399f342..f94102862 100644
+index 7f1d4152b..185db65b0 100644
 --- a/code/game/g_cvar.h
 +++ b/code/game/g_cvar.h
-@@ -115,6 +115,7 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
+@@ -116,6 +116,7 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
  	"\n"
- 	"Note that this affects not just the gibs\n"
+ 	"Note that this affects not just the gibs "
  	"but also the camera velocity of the gibbed player." )
 +G_CVAR( g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, NO_TRACK, NULL )
  

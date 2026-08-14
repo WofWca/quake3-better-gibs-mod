@@ -1,26 +1,29 @@
-From 495de686cf7723509f434dc97f60f0d09ec6200c Mon Sep 17 00:00:00 2001
+From cb541d50a4e739f574fe4ceca6e0521c572b7871 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 14:07:15 +0400
 Subject: [PATCH] refactor: add `cg_oldGibs` CVAR, `CG_GibPlayerOld`
 
 This is in preparation to some gibs improvements.
 ---
- code/cgame/cg_cvar.h      |  1 +
+ code/cgame/cg_cvar.h      |  4 +++
  code/cgame/cg_effects.c   | 76 +++++++++++++++++++++++++++++++++++++++
  code/cgame/cg_event.c     |  6 +++-
  code/cgame/cg_local.h     |  1 +
  code/cgame/cg_localents.c |  6 +++-
- 5 files changed, 88 insertions(+), 2 deletions(-)
+ 5 files changed, 91 insertions(+), 2 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index f2af7847a..e6334c3f4 100644
+index f2af7847a..fea3dff7f 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -45,6 +45,7 @@ CG_CVAR( cg_fov, "cg_fov", "90", CVAR_ARCHIVE, NULL )
+@@ -45,6 +45,10 @@ CG_CVAR( cg_fov, "cg_fov", "90", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE,
++	"Vanilla gibs, from 1999. "
++	"When set to 1, takes priority "
++	"over (almost) all the other `cg_gibs*` vars." )
  CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE, NULL )

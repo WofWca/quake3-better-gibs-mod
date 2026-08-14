@@ -1,26 +1,28 @@
-From 7beee4daabdb28c0ba72f3fb46fa2debe373210a Mon Sep 17 00:00:00 2001
+From 59f90359ba1d5d0e6710d14be86eec64f65ae23d Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 12 Jan 2026 22:49:16 +0400
 Subject: [PATCH] feat: non-binary `cg_gibs` to control gibs amount
 
 ---
- code/cgame/cg_cvar.h    |   2 +-
+ code/cgame/cg_cvar.h    |   4 +-
  code/cgame/cg_effects.c | 282 ++++++++++++++++++++++------------------
- 2 files changed, 159 insertions(+), 125 deletions(-)
+ 2 files changed, 161 insertions(+), 125 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 8553225de..31a10d03b 100644
+index 6ec6b3bf7..282c53ce1 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -44,7 +44,7 @@ CG_CVAR( cg_zoomFov, "cg_zoomfov", "22.5", CVAR_ARCHIVE, NULL )
+@@ -44,7 +44,9 @@ CG_CVAR( cg_zoomFov, "cg_zoomfov", "22.5", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_fov, "cg_fov", "90", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
 -CG_CVAR( cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE,
++	"Make a bloody explosion when a player takes a lot of damage.\n"
++	"The bigger the value the more pieces." )
+ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE,
+ 	"Vanilla gibs, from 1999. "
+ 	"When set to 1, takes priority "
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index 82efe8026..5a3a1dd7f 100644
 --- a/code/cgame/cg_effects.c

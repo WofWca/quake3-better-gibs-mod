@@ -1,25 +1,29 @@
-From ac6b7f11ee1bde3ffa69c361265869b1b32c694b Mon Sep 17 00:00:00 2001
+From 07159fdbffa35e1eeccd96ee4db6d1fd32acfd9f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 24 Jun 2026 19:08:01 +0400
 Subject: [PATCH] feat: `cg_gibsLinearVelocityFromKnockback`
 
 ---
- code/cgame/cg_cvar.h    | 1 +
+ code/cgame/cg_cvar.h    | 5 +++++
  code/cgame/cg_effects.c | 2 +-
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index c6e745b48..7b898b68f 100644
+index d380e6e52..23e767982 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -64,6 +64,7 @@ CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_A
- 	"Q: \"What sense does it make to have more gibs?\n"
+@@ -85,6 +85,11 @@ CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_A
+ 	"Q: \"What sense does it make to have more gibs? "
  	"Did the player got bigger from taking more damage??\":\n"
  	"A: No, they simlpy got split into more pieces." )
-+CG_CVAR( cg_gibsLinearVelocityFromKnockback, "cg_gibsLinearVelocityFromKnockback", "1.0", 0, NULL )
- CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsLinearVelocityFromKnockback, "cg_gibsLinearVelocityFromKnockback", "1.0", 0,
++	"Scale how fast the gibs move away from damage (knockback).\n"
++	"This sounds similar to `cg_gibsInheritPlayerVelocity`, "
++	"but this var doesn't scale the velocity that the player already had "
++	"when they received the damage." )
+ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE,
+ 	"Scale how much random velocity (spread) the gibs gain "
+ 	"from damage (knockback)." )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index 378a002bd..974691261 100644
 --- a/code/cgame/cg_effects.c

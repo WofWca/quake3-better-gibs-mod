@@ -1,22 +1,23 @@
-From f2c82b1f3e59a2d1cf0cd61113759551b45b9b59 Mon Sep 17 00:00:00 2001
+From d90eaa278ebc2e0eae44c0b32d859f2e95fd2f38 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 19 Jan 2026 21:36:34 +0400
 Subject: [PATCH] feat: make gibs tumble (rotate)
 
 ---
- code/cgame/cg_cvar.h    |  1 +
+ code/cgame/cg_cvar.h    |  2 ++
  code/cgame/cg_effects.c | 27 +++++++++++++++++++++++++++
- 2 files changed, 28 insertions(+)
+ 2 files changed, 29 insertions(+)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 31a10d03b..68e34b5f9 100644
+index 282c53ce1..c458c0b43 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -50,6 +50,7 @@ CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CV
- CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE, NULL )
+@@ -56,6 +56,8 @@ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_A
  CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
++CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
++	"Scale how fast gib pieces will rotate, depending on damage (knockback)." )
  CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE, NULL )

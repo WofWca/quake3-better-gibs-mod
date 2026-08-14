@@ -1,18 +1,18 @@
-From 90dccf9f29af9eb8ebd9afebb6e7f2c6343d2d2b Mon Sep 17 00:00:00 2001
+From 704af6a81ebd8262ff40f20f1a8713a47affac20 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 23 Jun 2026 19:44:50 +0400
 Subject: [PATCH] feat: `cg_gibsNoLerpDelay`
 
 ---
- code/cgame/cg_cvar.h     | 15 +++++++++
+ code/cgame/cg_cvar.h     | 18 ++++++++++
  code/cgame/cg_snapshot.c | 72 ++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 87 insertions(+)
+ 2 files changed, 90 insertions(+)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 01ac67a7c..b22e51224 100644
+index 195090116..0dc869e20 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -97,10 +97,25 @@ CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
+@@ -133,10 +133,28 @@ CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
  	"To get vanilla behavior, set to 0.\n"
  	"\n"
  	"Has no effect on vanilla servers (`g_gibsNewEvGibPlayerProtocol 0`).\n"
@@ -20,24 +20,27 @@ index 01ac67a7c..b22e51224 100644
  	"\n"
  	"Using the original position might make it seem\n"
  	"like the player \"telepoted\" one snapshot back (50ms at `snaps 20`)\n"
- 	"if they're already movnig at high speed." )
+ 	"if they're already moving at high speed." )
 +CG_CVAR( cg_gibsNoLerpDelay, "cg_gibsNoLerpDelay", "0", 0,
-+	"Don't wait for next snapshot to arrive (normally 50ms)\n"
++	"Don't wait for next snapshot to arrive (normally 50ms) "
 +	"before gibbing players.\n"
-+	"Consequently, this affects the position from which the gibs are launched,\n"
-+	"due to the gibbed player (or, rather, their camera) moving during those 50ms.\n"
-+	"See `cg_gibsOriginalOrigin`.\n"
++	"Otherwise after taking a shot the player's body will stay intact "
++	"for the said 50ms, then get gibbed.\n"
++	"Consequently, this affects the position from which the gibs are launched, "
++	"due to the gibbed player (or, rather, their camera) "
++	"moving during those 50ms. See `cg_gibsOriginalOrigin`.\n"
 +	"\n"
-+	"Note that when looking at another player (or missile) gibbing someone\n"
-+	"it will look like the player gets gibbed\n"
++	"Note that when looking at another player (or missile) gibbing someone "
++	"it will look like the player gets gibbed "
 +	"50ms before the actual shot is fired.\n"
-+	"That is, the gib even will happen ahead of the displayed state of the game.\n"
++	"That is, the gib event will happen "
++	"ahead of the displayed state of the game.\n"
 +	"\n"
 +	"Set this to 3 (2nd bit) to also do this on vanilla servers.\n"
 +	"To get vanilla behavior, set to 0." )
- CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
+ CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
 diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
 index 11b9a0678..5db612c72 100644
 --- a/code/cgame/cg_snapshot.c

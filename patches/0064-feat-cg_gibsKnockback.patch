@@ -1,32 +1,43 @@
-From 9333f0eb75fbf3d85c11b039bc32a49073fb56d1 Mon Sep 17 00:00:00 2001
+From 961da22ea108e27e0f11169c02640c88a9aadab8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 19 Jun 2026 23:38:21 +0400
 Subject: [PATCH] feat: `cg_gibsKnockback`
 
 ---
- code/cgame/cg_cvar.h      |  5 +++++
+ code/cgame/cg_cvar.h      | 16 +++++++++++++++-
  code/cgame/cg_effects.c   | 37 +++++++++++++++++++++++++++++++++----
  code/cgame/cg_local.h     |  3 ++-
  code/cgame/cg_localents.c |  2 +-
  code/game/g_combat.c      | 16 ++++++++++++++++
- code/game/g_cvar.h        |  2 +-
- 6 files changed, 58 insertions(+), 7 deletions(-)
+ code/game/g_cvar.h        | 13 +++++++------
+ 6 files changed, 74 insertions(+), 13 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 2b84ba542..f2aca1449 100644
+index 6a2750a7d..4fb817dc8 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -47,6 +47,11 @@ CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
+@@ -51,7 +51,21 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE,
+ 	"Vanilla gibs, from 1999. "
+ 	"When set to 1, takes priority "
+ 	"over (almost) all the other `cg_gibs*` vars." )
+-CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE,
++	"If the player is moving fast, their gibs will also move fast. "
++	"And the player will move fast when they receive damage (knockback). "
++	"The most important var of the Better Gibs mod.\n"
++	"\n"
++	"It's possible to set a value other than 1 or 0, "
++	"but if you simply want the gibs to have more speed, "
++	"you're probably after `cg_gibsKnockback` or other `cg_gibs` vars." )
 +CG_CVAR( cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0,
-+	"On vanilla servers this only has effect on random and vertical velocity\n"
++	"Scale the knockback when gibbing a player, "
++	"as if they received more (or less) damage.\n"
++	"On vanilla servers this only has effect on random and vertical velocity "
 +	"but not on directional velocity.\n"
-+	"Remember that this also affects own gibs, so having a value too high\n"
++	"Remember that this also affects own gibs, so having a value too high "
 +	"will make gibs fly faster than the camera." )
  CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_ARCHIVE,
- 	"For every 100 of knockback speed above 500 (100 damage),\n"
+ 	"For every 100 of knockback speed above 500 (100 damage), "
  	"add this many pieces of gibs, times the value of `cg_gibs`.\n"
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index a172ca894..37ef5df0f 100644
@@ -171,18 +182,40 @@ index 17eb2be2d..32ceea137 100644
  /*
  ==================
 diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
-index 11f9b7323..941813e89 100644
+index 3e38032d2..2783da549 100644
 --- a/code/game/g_cvar.h
 +++ b/code/game/g_cvar.h
-@@ -115,7 +115,7 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
- 	"\n"
- 	"Note that this affects not just the gibs\n"
- 	"but also the camera velocity of the gibbed player." )
+@@ -119,23 +119,24 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
+ // We could have simply made this a binary value to tell clients
+ // that the server is running Better Gibs mod. But let's make it flag-like,
+ // for forwards compatibility.
 -G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, NO_TRACK,
 +G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR_SYSTEMINFO, NO_TRACK,
- 	"This is not really intended to be changed by users to a value different from\n"
- 	"the default or 0, unless they're having mod compatibility issues\n"
+ 	"Bitmask, describing which gibs \"features\" are supported by the server.\n"
+ 	"This is not really intended to be changed by users "
+ 	"to a value different from the default or 0, "
+ 	"unless they're having mod compatibility issues "
  	"and really know what they're doing.\n"
+ 	"\n"
+-	"  - 0b0001: whether `es->eventParm` is knockback speed divided by 8, "
++	"  - 0b00001: whether `es->eventParm` is knockback speed divided by 8, "
+ 	"otherwise it's the `killer` entity num. "
+ 	"Deprecated. Kept for compatibility with servers "
+ 	"running an older version of Better Gibs mod.\n"
+-	"  - 0b0010: whether `es->generic1` is knockback speed divided by 8.\n"
+-	"  - 0b0100: whether `es->otherEntityNum` is the number of the entity "
++	"  - 0b00010: whether `es->generic1` is knockback speed divided by 8.\n"
++	"  - 0b00100: whether `es->otherEntityNum` is the number of the entity "
+ 	"that got gibbed by this event. Implies that gib events are communicated "
+ 	"via `G_TempEntity` and not the target's `event` and `eventParm`.\n"
+-	"  - 0b1000: whether `es->pos.trDelta` is the velocity of the target "
+-	"when it got gibbed." )
++	"  - 0b01000: whether `es->pos.trDelta` is the velocity of the target "
++	"when it got gibbed.\n"
++	"  - 0b10000: whether `es->legsAnim` is the knockback direction." )
+ G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, NO_TRACK,
+ 	"If a player's speed abruptly changes by this much or more, "
+ 	"as a result of collision with something (e.g. floor, wall), "
 -- 
 2.55.0
 

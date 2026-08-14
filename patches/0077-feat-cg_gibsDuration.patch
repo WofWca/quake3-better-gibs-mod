@@ -1,25 +1,27 @@
-From 032cc24c68f3035884a0aa2afb1bf5d805a3ae19 Mon Sep 17 00:00:00 2001
+From ed2f1386d80e1dc62253529f58b634fd6f534e60 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 9 Jul 2026 15:23:54 +0400
 Subject: [PATCH] feat: `cg_gibsDuration`
 
 ---
- code/cgame/cg_cvar.h    | 1 +
+ code/cgame/cg_cvar.h    | 3 +++
  code/cgame/cg_effects.c | 2 +-
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index b22e51224..0a94b8c7d 100644
+index 0dc869e20..86be0e8b4 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -86,6 +86,7 @@ CG_CVAR( cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnoc
- 	"If knockback is big, this helps keep at least some fraction of player speed.\n"
- 	"For example, if this is -0.75, we'll always keep at least 25%\n"
+@@ -122,6 +122,9 @@ CG_CVAR( cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnoc
+ 	"of player speed. "
+ 	"For example, if this is -0.75, we'll always keep at least 25% "
  	"of original player velocity." )
-+CG_CVAR( cg_gibsDuration, "cg_gibsDuration", "5000", 0, NULL )
++CG_CVAR( cg_gibsDuration, "cg_gibsDuration", "5000", 0,
++	"How long (in milliseconds) gibs stay around "
++	"before sinking into the ground." )
  CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
- 	"Whether to use the exact position where the player got gibbed\n"
- 	"as the initial gibs position, instead of the position of the gibbed player\n"
+ 	"Whether to use the exact position where the player got gibbed "
+ 	"as the initial gibs position, instead of the position "
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index eff93f46f..f1bc6608a 100644
 --- a/code/cgame/cg_effects.c

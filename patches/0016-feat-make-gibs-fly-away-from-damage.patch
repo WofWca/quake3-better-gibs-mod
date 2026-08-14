@@ -1,4 +1,4 @@
-From 3e705ea2a237cce0aee59bc01e7dc288ec1804ec Mon Sep 17 00:00:00 2001
+From ad338982d5f75807cc8533e060051f3c722933c9 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 7 Nov 2025 12:25:32 +0400
 Subject: [PATCH] feat: make gibs fly away from damage
@@ -14,13 +14,13 @@ most importantly, including the velocity they get from knockback.
  5 files changed, 54 insertions(+), 34 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index e6334c3f4..7fb4bf86d 100644
+index fea3dff7f..7bc63b279 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -46,6 +46,9 @@ CG_CVAR( cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibs, "cg_gibs", "1", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
+@@ -49,6 +49,9 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE,
+ 	"Vanilla gibs, from 1999. "
+ 	"When set to 1, takes priority "
+ 	"over (almost) all the other `cg_gibs*` vars." )
 +CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
 +CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE, NULL )
 +CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE, NULL )

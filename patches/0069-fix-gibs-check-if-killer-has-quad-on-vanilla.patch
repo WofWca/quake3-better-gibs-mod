@@ -1,4 +1,4 @@
-From 9c8c1680d32a40af24050fd157aa7cf1a546c5e2 Mon Sep 17 00:00:00 2001
+From 389912ada76f4e27b5c59fd67bbffc3c48fbf6b4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 27 Jun 2026 17:32:21 +0400
 Subject: [PATCH] fix: gibs: check if killer has quad on vanilla

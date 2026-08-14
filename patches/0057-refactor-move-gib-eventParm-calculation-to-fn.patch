@@ -1,4 +1,4 @@
-From 2c5e9d7b9f7ee74d2fb44631c513a7bd54446209 Mon Sep 17 00:00:00 2001
+From 14817dc76af800cff8650744a76e3ad5a4840eed Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 5 Jun 2026 23:19:55 +0400
 Subject: [PATCH] refactor: move gib `eventParm` calculation to fn

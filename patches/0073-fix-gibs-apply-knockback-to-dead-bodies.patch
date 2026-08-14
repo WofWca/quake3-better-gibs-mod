@@ -1,14 +1,14 @@
-From c8af5478e9b4a09243be77511b9d066540c6759e Mon Sep 17 00:00:00 2001
+From 6d93185771a6984a164096ea4b1fb8656f31ba0e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 16:58:03 +0400
 Subject: [PATCH] fix: gibs: apply knockback to dead bodies
 
 ---
  code/game/g_combat.c | 81 +++++++++++++++++++++++++++-----------------
- code/game/g_cvar.h   |  3 ++
+ code/game/g_cvar.h   |  4 +++
  code/game/g_local.h  |  2 +-
  code/game/g_weapon.c | 15 ++++----
- 4 files changed, 63 insertions(+), 38 deletions(-)
+ 4 files changed, 64 insertions(+), 38 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
 index cfb9c10cb..0c2f3784e 100644
@@ -168,19 +168,20 @@ index cfb9c10cb..0c2f3784e 100644
  		} else if ( targ->pain ) {
  			targ->pain (targ, attacker, take);
 diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
-index 941813e89..d4d963a62 100644
+index 2783da549..fc5861890 100644
 --- a/code/game/g_cvar.h
 +++ b/code/game/g_cvar.h
-@@ -122,6 +122,9 @@ G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR
- 	"We could have simply made this a binary value to tell clients\n"
- 	"that the server is running Better Gibs mod. But let's make it flag-like,\n"
- 	"for forwards compatibility." )
+@@ -137,6 +137,10 @@ G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR
+ 	"  - 0b01000: whether `es->pos.trDelta` is the velocity of the target "
+ 	"when it got gibbed.\n"
+ 	"  - 0b10000: whether `es->legsAnim` is the knockback direction." )
 +G_CVAR( g_gibsDeadBodyLinearVelocityFromKnockback, "g_gibsDeadBodyLinearVelocityFromKnockback", "1.0", NO_FLAGS, NO_TRACK,
-+	"Does not affect gameplay. Has no effect\n"
-+	"when `g_gibsNewEvGibPlayerProtocol 0`." )
++	"Scale how much the knockback affects dead bodies.\n"
++	"This does not actually affect gameplay, despite being a server-side var. "
++	"Has no effect when `g_gibsNewEvGibPlayerProtocol 0`." )
  G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, NO_TRACK,
- 	"If a dead player loses this much or more speed\n"
- 	"as a result of collision with something (e.g. floor, wall),\n"
+ 	"If a player's speed abruptly changes by this much or more, "
+ 	"as a result of collision with something (e.g. floor, wall), "
 diff --git a/code/game/g_local.h b/code/game/g_local.h
 index 0afb34c7c..1092726a5 100644
 --- a/code/game/g_local.h

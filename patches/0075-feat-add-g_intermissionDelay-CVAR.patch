@@ -1,23 +1,25 @@
-From a4f59c8458c5d454f9f16a14cd9bf491c7a64752 Mon Sep 17 00:00:00 2001
+From ef6e611c5c48fa87159c40b0fdeba7e172f75a22 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 6 Jul 2026 15:20:16 +0400
 Subject: [PATCH] feat: add `g_intermissionDelay` CVAR
 
 ---
- code/game/g_cvar.h  | 5 +++++
+ code/game/g_cvar.h  | 7 +++++++
  code/game/g_local.h | 5 +----
  code/game/g_main.c  | 6 ++++--
- 3 files changed, 10 insertions(+), 6 deletions(-)
+ 3 files changed, 12 insertions(+), 6 deletions(-)
 
 diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
-index d4d963a62..aabdbbe5c 100644
+index fc5861890..45b0e3b47 100644
 --- a/code/game/g_cvar.h
 +++ b/code/game/g_cvar.h
-@@ -135,6 +135,11 @@ G_CVAR( g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers"
- 	"This one affects gameplay significantly, and is basically just for fun." )
- G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NO_TRACK, NULL )
+@@ -161,6 +161,13 @@ G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerV
+ 	"and not *before* the collision. "
+ 	"Also see `cg_gibsInheritPlayerVelocity`." )
  
-+G_CVAR( g_intermissionDelay, "g_intermissionDelay", "1000", NO_FLAGS, TRACK, NULL )
++G_CVAR( g_intermissionDelay, "g_intermissionDelay", "1000", NO_FLAGS, TRACK,
++	"How long to wait after the final score before going to the scoreboard "
++	"or the podium, in milliseconds." )
 +#ifdef MISSIONPACK
 +G_CVAR( g_intermissionDelaySinglePlayer, "g_intermissionDelaySinglePlayer", "5000", NO_FLAGS, TRACK, NULL )
 +#endif

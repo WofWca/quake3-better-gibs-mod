@@ -1,4 +1,4 @@
-From 6de1f7fcb1210de84bad90860cf07880c9cd4e66 Mon Sep 17 00:00:00 2001
+From 283b05797aa962f1688b359374e52150a0d95862 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 9 Nov 2025 21:00:17 +0400
 Subject: [PATCH] improvement: gibs: keep player angles

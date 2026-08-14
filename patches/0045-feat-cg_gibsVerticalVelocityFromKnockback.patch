@@ -1,4 +1,4 @@
-From 0018affb8669fa811905e608044c6707c440e732 Mon Sep 17 00:00:00 2001
+From 6a7659284a2e6f5c0e51c3348c0fb926d1f3fd50 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 9 May 2026 22:53:46 +0400
 Subject: [PATCH] feat: `cg_gibsVerticalVelocityFromKnockback`
@@ -7,25 +7,32 @@ This makes gobbing with the machine gun and the lightning gun better.
 For 100 damage the vertical velocity remains the same,
 for 200+ damage it becomes 250.
 ---
- code/cgame/cg_cvar.h    | 3 ++-
+ code/cgame/cg_cvar.h    | 6 +++++-
  code/cgame/cg_effects.c | 4 +++-
- 2 files changed, 5 insertions(+), 2 deletions(-)
+ 2 files changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index a7c9eb778..335ee103f 100644
+index 0422c053a..22fc8216a 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -48,8 +48,9 @@ CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE, NULL )
+@@ -55,12 +55,16 @@ CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CV
+ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE,
+ 	"Scale how much random velocity (spread) the gibs gain "
+ 	"from damage (knockback)." )
++CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE,
++	"Scale how much vertical velocity the gibs gain from damage (knockback)." )
+ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE,
+ 	"Like `cg_gibsRandomVelocityFromKnockback`, "
+ 	"but add a *fixed* amount of random velocity to each piece.\n"
+ 	"Ensures that even if the player was gibbed with the machine gun, "
+ 	"the gibs would still fly apart somewhat." )
 -CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "150", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE,
++	"Like `cg_gibsVerticalVelocityFromKnockback`, "
++	"but adds a *fixed* amount of vertical speed to each piece" )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
+ CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index eb9f7d8bc..f9fa8c200 100644
 --- a/code/cgame/cg_effects.c

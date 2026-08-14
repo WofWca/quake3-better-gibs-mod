@@ -1,4 +1,4 @@
-From 6cc7b01229d335de437a57887dc8ffaa5dc59e05 Mon Sep 17 00:00:00 2001
+From 0d4df792da93e3f8a43dfedd6f6dcdffe01636bd Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 17:04:33 +0400
 Subject: [PATCH] fix: better dead bodies' explosion knockback dir

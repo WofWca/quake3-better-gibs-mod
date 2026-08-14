@@ -1,4 +1,4 @@
-From 6341e6bd67712ca8e0d40af2ed125d7a7597090e Mon Sep 17 00:00:00 2001
+From 318f6639da0f5280ab56f46cb60c827571e8ac23 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 24 Jan 2026 16:48:44 +0400
 Subject: [PATCH] feat: better gib positions for dead bodies

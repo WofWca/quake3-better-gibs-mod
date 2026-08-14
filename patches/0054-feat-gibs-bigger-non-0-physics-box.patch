@@ -1,4 +1,4 @@
-From 1aaba0ff6201cfb2566c61333438e994b531213f Mon Sep 17 00:00:00 2001
+From 849b7e1455655fbe91291829bbe3fbe884563797 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 30 May 2026 22:11:27 +0400
 Subject: [PATCH] feat: gibs: bigger (non-0) physics box

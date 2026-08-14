@@ -1,4 +1,4 @@
-From 1881d5445bee93a8a2f7ebb1c98900ddfa7d42d4 Mon Sep 17 00:00:00 2001
+From 355d9818ad08ceaa27e540eee4509e8eda5a0599 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 9 Jun 2026 15:50:47 +0400
 Subject: [PATCH] feat: `cg_gibsBloodTrailPeriod`
@@ -6,23 +6,24 @@ Subject: [PATCH] feat: `cg_gibsBloodTrailPeriod`
 Allows to disable blood trails, or keep only the initial "cloud"
 (both look kinda cool).
 ---
- code/cgame/cg_cvar.h      | 2 ++
+ code/cgame/cg_cvar.h      | 3 +++
  code/cgame/cg_localents.c | 9 ++++++++-
- 2 files changed, 10 insertions(+), 1 deletion(-)
+ 2 files changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 293f6d31d..87d2c5ee2 100644
+index 22735a55b..e6b099a23 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -65,6 +65,8 @@ CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVA
- CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
+@@ -84,6 +84,9 @@ CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5",
+ 	"This makes gibs look less uniform, and spread a little more." )
+ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
+ 	"Scale how fast gib pieces will rotate, depending on damage (knockback)." )
 +// Not archived because experimental
-+CG_CVAR( cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0, NULL )
- CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0,
++	"How often in milliseconds gibs leave blood \"clouds\"" )
+ CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE,
+ 	"When you get gibbed, makes your camera get knocked farther away "
+ 	"thanks to it being smaller than your player's bounding box, "
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
 index 6b7ad8d43..d608a0a56 100644
 --- a/code/cgame/cg_localents.c

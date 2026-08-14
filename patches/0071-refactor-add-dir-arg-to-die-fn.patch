@@ -1,4 +1,4 @@
-From 7d84881b0b84c087e10d6b8d5e3e64059f370914 Mon Sep 17 00:00:00 2001
+From a1ec2bfdc0fecd70818545447a2497aaafba4911 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 13:48:03 +0400
 Subject: [PATCH] refactor: add `dir` arg to `die()` fn

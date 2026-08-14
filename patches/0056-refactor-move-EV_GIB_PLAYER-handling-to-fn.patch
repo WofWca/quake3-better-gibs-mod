@@ -1,4 +1,4 @@
-From 4ce123b872ed744b37765849b1f46b3945b8cef4 Mon Sep 17 00:00:00 2001
+From 42288b1df2af676a9e25c890ea43095a6f6a660b Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 3 Jun 2026 14:04:52 +0400
 Subject: [PATCH] refactor: move `EV_GIB_PLAYER` handling to fn

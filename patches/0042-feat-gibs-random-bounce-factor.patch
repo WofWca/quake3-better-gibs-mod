@@ -1,25 +1,27 @@
-From f22bb85dc63ef1aabfdb719be25d54c33a3ddbb4 Mon Sep 17 00:00:00 2001
+From cb3c62b492637a0343945603784736d288262ac4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 27 Mar 2026 11:50:37 +0400
 Subject: [PATCH] feat: gibs: random bounce factor
 
 ---
- code/cgame/cg_cvar.h      | 1 +
+ code/cgame/cg_cvar.h      | 3 +++
  code/cgame/cg_localents.c | 8 +++++++-
- 2 files changed, 8 insertions(+), 1 deletion(-)
+ 2 files changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 24535bf6a..3caa48965 100644
+index bd5a6318f..09a09ec9c 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -51,6 +51,7 @@ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback
- CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_ARCHIVE, NULL )
+@@ -63,6 +63,9 @@ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_A
  CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "150", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
++CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
++	"Fraction of `cg_gibsBounceFactor` that is random. "
++	"This makes gibs look less uniform, and spread a little more." )
+ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
+ 	"Scale how fast gib pieces will rotate, depending on damage (knockback)." )
+ CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE,
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
 index 3a5d407b1..7801a1081 100644
 --- a/code/cgame/cg_localents.c

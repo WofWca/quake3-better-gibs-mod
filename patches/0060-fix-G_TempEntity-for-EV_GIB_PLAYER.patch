@@ -1,4 +1,4 @@
-From 5962102e508be58842ff35fff2384c0acdd101fd Mon Sep 17 00:00:00 2001
+From 31dc7c8ac0077482a3b683111f8ebc2c47125519 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 7 Jun 2026 15:45:08 +0400
 Subject: [PATCH] fix: `G_TempEntity` for `EV_GIB_PLAYER`
@@ -49,10 +49,10 @@ changes a few other things that are related to that:
  code/game/bg_pmove.c       |   5 --
  code/game/g_bot.c          |   5 --
  code/game/g_combat.c       | 125 +++++++++++++++++++++++++++----------
- code/game/g_cvar.h         |   8 ++-
+ code/game/g_cvar.h         |  21 ++++++-
  code/game/g_local.h        |   6 ++
  code/game/g_weapon.c       |  40 ++++++++++--
- 10 files changed, 219 insertions(+), 73 deletions(-)
+ 10 files changed, 232 insertions(+), 73 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index a67ecd397..6499f7279 100644
@@ -430,24 +430,37 @@ index 7e5d4f7f3..17eb2be2d 100644
  				// Note that there is a more accurate crash landing
  				// velocity calculation in `PM_CrashLand`,
 diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
-index 0f6a93be9..11f9b7323 100644
+index 0169496eb..3e38032d2 100644
 --- a/code/game/g_cvar.h
 +++ b/code/game/g_cvar.h
-@@ -115,7 +115,13 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
+@@ -116,7 +116,26 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
  	"\n"
- 	"Note that this affects not just the gibs\n"
+ 	"Note that this affects not just the gibs "
  	"but also the camera velocity of the gibbed player." )
 -G_CVAR( g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, NO_TRACK, NULL )
++// We could have simply made this a binary value to tell clients
++// that the server is running Better Gibs mod. But let's make it flag-like,
++// for forwards compatibility.
 +G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "14", CVAR_SYSTEMINFO, NO_TRACK,
-+	"This is not really intended to be changed by users to a value different from\n"
-+	"the default or 0, unless they're having mod compatibility issues\n"
++	"Bitmask, describing which gibs \"features\" are supported by the server.\n"
++	"This is not really intended to be changed by users "
++	"to a value different from the default or 0, "
++	"unless they're having mod compatibility issues "
 +	"and really know what they're doing.\n"
-+	"We could have simply made this a binary value to tell clients\n"
-+	"that the server is running Better Gibs mod. But let's make it flag-like,\n"
-+	"for forwards compatibility." )
++	"\n"
++	"  - 0b0001: whether `es->eventParm` is knockback speed divided by 8, "
++	"otherwise it's the `killer` entity num. "
++	"Deprecated. Kept for compatibility with servers "
++	"running an older version of Better Gibs mod.\n"
++	"  - 0b0010: whether `es->generic1` is knockback speed divided by 8.\n"
++	"  - 0b0100: whether `es->otherEntityNum` is the number of the entity "
++	"that got gibbed by this event. Implies that gib events are communicated "
++	"via `G_TempEntity` and not the target's `event` and `eventParm`.\n"
++	"  - 0b1000: whether `es->pos.trDelta` is the velocity of the target "
++	"when it got gibbed." )
  G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARCHIVE, NO_TRACK,
- 	"If a dead player loses this much or more speed\n"
- 	"as a result of collision with something (e.g. floor, wall),\n"
+ 	"If a player's speed abruptly changes by this much or more, "
+ 	"as a result of collision with something (e.g. floor, wall), "
 diff --git a/code/game/g_local.h b/code/game/g_local.h
 index c477414b3..dd521f5b3 100644
 --- a/code/game/g_local.h

@@ -1,35 +1,36 @@
-From 79fa6a86b62728469f4e7608496811aad4e765e0 Mon Sep 17 00:00:00 2001
+From 39604fbd22246315c2e972256c583d0c3d9aa740 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 6 May 2026 22:18:20 +0400
 Subject: [PATCH] feat: more gib pieces from damage
 
 ---
- code/cgame/cg_cvar.h    | 11 +++++++++++
+ code/cgame/cg_cvar.h    | 12 ++++++++++++
  code/cgame/cg_effects.c |  8 +++++++-
- 2 files changed, 18 insertions(+), 1 deletion(-)
+ 2 files changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 335ee103f..6ab977a1f 100644
+index 22fc8216a..a97c975c7 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -47,6 +47,17 @@ CG_CVAR( cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibs, "cg_gibs", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
+@@ -52,6 +52,18 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE,
+ 	"When set to 1, takes priority "
+ 	"over (almost) all the other `cg_gibs*` vars." )
  CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
 +CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_ARCHIVE,
-+	"For every 100 of knockback speed above 500 (100 damage),\n"
++	"For every 100 of knockback speed above 500 (100 damage), "
 +	"add this many pieces of gibs, times the value of `cg_gibs`.\n"
++	"This makes for more pieces when someone gets gibbed by Quad.\n"
 +	"\n"
-+	"With higher damage gibs fly further apart, so one starts to see gibs\n"
-+	"as individual pieces instead of a \"cloud\", which IMO is not good.\n"
-+	"Increasing the amount of gibs with damage fixes this.\n"
++	"With higher damage gibs fly further apart, so one starts to see gibs "
++	"as individual pieces instead of a \"cloud\", which IMO is not good. "
++	"Increasing the amount of gibs with damage fixes this. "
 +	"And overall it makes it more rewarding to deal more damage.\n"
-+	"Q: \"What sense does it make to have more gibs?\n"
++	"Q: \"What sense does it make to have more gibs? "
 +	"Did the player got bigger from taking more damage??\":\n"
 +	"A: No, they simlpy got split into more pieces." )
- CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE,
+ 	"Scale how much random velocity (spread) the gibs gain "
+ 	"from damage (knockback)." )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index 2be5b3733..613246e9c 100644
 --- a/code/cgame/cg_effects.c

@@ -1,4 +1,4 @@
-From 2388c3beea0fd35117fdfc22755bae8a54ff3d56 Mon Sep 17 00:00:00 2001
+From 5a28a8609b1fa96054c208ccfcceb7fdef9c51fa Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 1 May 2026 18:41:05 +0400
 Subject: [PATCH] fix: smash dead bodies' gibs into ground on fall
@@ -82,11 +82,11 @@ index 7852925b6..467560c5d 100644
  			targ->enemy = attacker;
  			targ->die (targ, inflictor, attacker, take, mod);
 diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
-index f94102862..e66ddfb11 100644
+index 185db65b0..2e2a5f0c3 100644
 --- a/code/game/g_cvar.h
 +++ b/code/game/g_cvar.h
-@@ -116,6 +116,7 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
- 	"Note that this affects not just the gibs\n"
+@@ -117,6 +117,7 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
+ 	"Note that this affects not just the gibs "
  	"but also the camera velocity of the gibbed player." )
  G_CVAR( g_gibsNewEvGibPlayerParmProtocol, "g_gibsNewEvGibPlayerParmProtocol", "1", CVAR_SYSTEMINFO | CVAR_ARCHIVE, NO_TRACK, NULL )
 +G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NO_TRACK, NULL )

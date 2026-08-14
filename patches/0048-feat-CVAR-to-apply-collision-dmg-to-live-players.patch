@@ -1,4 +1,4 @@
-From 46057272658a21dc1470df82b45d139a11423f40 Mon Sep 17 00:00:00 2001
+From d84b8a6edf95e58498afdd06473dfb401e329fa4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 5 May 2026 22:12:12 +0400
 Subject: [PATCH] feat: CVAR to apply collision dmg to live players
@@ -7,8 +7,8 @@ This affects gameplay significantly,
 and is basically just for fooling around.
 ---
  code/game/g_active.c | 10 +++++++---
- code/game/g_cvar.h   |  2 ++
- 2 files changed, 9 insertions(+), 3 deletions(-)
+ code/game/g_cvar.h   |  4 ++++
+ 2 files changed, 11 insertions(+), 3 deletions(-)
 
 diff --git a/code/game/g_active.c b/code/game/g_active.c
 index 457fbb51b..e45392a78 100644
@@ -44,18 +44,20 @@ index 457fbb51b..e45392a78 100644
  	}
  
 diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
-index a6e843d16..0f6a93be9 100644
+index 0916796f6..0169496eb 100644
 --- a/code/game/g_cvar.h
 +++ b/code/game/g_cvar.h
-@@ -122,6 +122,8 @@ G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARC
- 	"deal `g_gibsOnCollisionBaseDamage` or more damage to them\n"
- 	"(damage increases with the square of the speed)." )
- G_CVAR( g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_ARCHIVE, NO_TRACK, NULL )
+@@ -125,6 +125,10 @@ G_CVAR( g_gibsOnCollisionMinSpeed, "g_gibsOnCollisionMinSpeed", "1000", CVAR_ARC
+ G_CVAR( g_gibsOnCollisionBaseDamage, "g_gibsOnCollisionBaseDamage", "150", CVAR_ARCHIVE, NO_TRACK,
+ 	"See `g_gibsOnCollisionMinSpeed`. "
+ 	"Higher damage normally results in gibs getting spread more broadly." )
 +G_CVAR( g_gibsOnCollisionAffectLivePlayers, "g_gibsOnCollisionAffectLivePlayers", "0.0", NO_FLAGS, TRACK,
-+	"This one affects gameplay significantly, and is basically just for fun." )
- G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NO_TRACK, NULL )
- 
- G_CVAR( g_podiumDist, "g_podiumDist", "80", NO_FLAGS, NO_TRACK, NULL )
++	"This one affects gameplay significantly, and is basically just for fun.\n"
++	"Try setting this to 1 and jumping off the railgun platform "
++	"to the lowest level on q3dm19." )
+ G_CVAR( g_gibsOnCollisionInheritPlayerVelocity, "g_gibsOnCollisionInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NO_TRACK,
+ 	"Scale the speed of gibs "
+ 	"when gibbing as a result of `g_gibsOnCollision*`.\n"
 -- 
 2.55.0
 

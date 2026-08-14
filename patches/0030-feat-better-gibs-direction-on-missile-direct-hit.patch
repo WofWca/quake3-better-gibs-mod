@@ -1,4 +1,4 @@
-From 1b6c3f5d77299e4ebc6ab7df8317872f5ec1c31f Mon Sep 17 00:00:00 2001
+From 433c6fcc1936e15e59b08a2c5628b464ac79950b Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 22 Jan 2026 13:55:28 +0400
 Subject: [PATCH] feat: better gibs direction on missile direct hit
@@ -7,9 +7,9 @@ Related:
 - https://github.com/WofWca/quake3-better-gibs-mod/issues/2.
 ---
  code/game/g_combat.c  | 114 +++++++++++++++++++++++++++++++++++++++---
- code/game/g_cvar.h    |  13 +++++
+ code/game/g_cvar.h    |  14 ++++++
  code/game/g_missile.c |   5 +-
- 3 files changed, 125 insertions(+), 7 deletions(-)
+ 3 files changed, 126 insertions(+), 7 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
 index 9ed883d0c..9e9d89a95 100644
@@ -170,25 +170,26 @@ index 9ed883d0c..9e9d89a95 100644
  			targ->die (targ, inflictor, attacker, take, mod);
  			return;
 diff --git a/code/game/g_cvar.h b/code/game/g_cvar.h
-index a2e642782..6a399f342 100644
+index a2e642782..7f1d4152b 100644
 --- a/code/game/g_cvar.h
 +++ b/code/game/g_cvar.h
-@@ -102,6 +102,19 @@ G_CVAR( g_debugDamage, "g_debugDamage", "0", NO_FLAGS, NO_TRACK, NULL )
+@@ -102,6 +102,20 @@ G_CVAR( g_debugDamage, "g_debugDamage", "0", NO_FLAGS, NO_TRACK, NULL )
  G_CVAR( g_debugAlloc, "g_debugAlloc", "0", NO_FLAGS, NO_TRACK, NULL )
  G_CVAR( g_motd, "g_motd", "", NO_FLAGS, NO_TRACK, NULL )
  G_CVAR( g_blood, "com_blood", "1", NO_FLAGS, NO_TRACK, NULL )
 +G_CVAR( g_oldGibs, "g_oldGibs", "0", CVAR_ARCHIVE, NO_TRACK, NULL )
 +G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackWeight", "0.5", CVAR_ARCHIVE, NO_TRACK,
-+	"How much the movement direction of a missile affects the knockback direction\n"
-+	"when gibbing, as opposed to the direction from the center of the explosion.\n"
-+	"This makes sure that if the missile hits the player's feet,\n"
-+	"the gibs will fly up, so that there is not a big difference\n"
-+	"between hitting the player's feet and the ground not far\n"
++	"When gibbing someone, how much the movement direction of a missile "
++	"affects the knockback direction, "
++	"as opposed to the direction from the center of the explosion.\n"
++	"This makes sure that if the missile hits the player's feet, "
++	"the gibs will fly up, so that there is not a big difference "
++	"between hitting the player's feet and the ground not far "
 +	"from the player's feet.\n"
 +	"\n"
-+	"Setting to 1 restores the old behavior.\n"
++	"Setting to 1 restores the old (vanilla) behavior.\n"
 +	"\n"
-+	"Note that this affects not just the gibs\n"
++	"Note that this affects not just the gibs "
 +	"but also the camera velocity of the gibbed player." )
  
  G_CVAR( g_podiumDist, "g_podiumDist", "80", NO_FLAGS, NO_TRACK, NULL )

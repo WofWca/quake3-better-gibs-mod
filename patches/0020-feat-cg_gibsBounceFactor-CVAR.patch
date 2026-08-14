@@ -1,22 +1,23 @@
-From 36642e5132afc608fe3390a4a040eb506a6c3a06 Mon Sep 17 00:00:00 2001
+From 89c43493a39e7c286d18750f180e7c0dfab5d8b9 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 11 Nov 2025 11:39:56 +0400
 Subject: [PATCH] feat: `cg_gibsBounceFactor` CVAR
 
 ---
- code/cgame/cg_cvar.h    | 1 +
+ code/cgame/cg_cvar.h    | 2 ++
  code/cgame/cg_effects.c | 2 +-
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index f8f428083..7b39334ea 100644
+index 53e183a09..a1ad147db 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -49,6 +49,7 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
+@@ -52,6 +52,8 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE,
  CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.6", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.6", CVAR_ARCHIVE,
++	"Fraction of speed that gibs preserve when bouncing off a surface" )
  CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE, NULL )

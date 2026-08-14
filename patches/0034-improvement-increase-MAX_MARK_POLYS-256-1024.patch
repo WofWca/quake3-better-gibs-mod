@@ -1,4 +1,4 @@
-From 7930ce3376772cf347e1ef447445b3675d12bd62 Mon Sep 17 00:00:00 2001
+From c408a7dbc77f0ef30a44d983c94ff0fc87727012 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 29 Jan 2026 22:17:24 +0400
 Subject: [PATCH] improvement: increase `MAX_MARK_POLYS` 256 -> 1024

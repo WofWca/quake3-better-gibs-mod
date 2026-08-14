@@ -1,4 +1,4 @@
-From 002ba267a7119d25b4530b5e0c1d6966b94777cc Mon Sep 17 00:00:00 2001
+From e9dad8407858f1f395d7e9633a3bc9118b5a1ec8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 6 May 2026 23:29:47 +0400
 Subject: [PATCH] feat: add `cg_debugGibs`
@@ -10,10 +10,10 @@ Subject: [PATCH] feat: add `cg_debugGibs`
  3 files changed, 34 insertions(+)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 6ab977a1f..293f6d31d 100644
+index a97c975c7..22735a55b 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -105,6 +105,7 @@ CG_CVAR( cg_animSpeed, "cg_animspeed", "1", CVAR_CHEAT, NULL )
+@@ -129,6 +129,7 @@ CG_CVAR( cg_animSpeed, "cg_animspeed", "1", CVAR_CHEAT, NULL )
  CG_CVAR( cg_debugAnim, "cg_debuganim", "0", CVAR_CHEAT, NULL )
  CG_CVAR( cg_debugPosition, "cg_debugposition", "0", CVAR_CHEAT, NULL )
  CG_CVAR( cg_debugEvents, "cg_debugevents", "0", CVAR_CHEAT, NULL )

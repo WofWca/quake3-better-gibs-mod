@@ -1,4 +1,4 @@
-From 815e5ca97255ddfb4c08d188eaafdbe24e7aea64 Mon Sep 17 00:00:00 2001
+From e50ec002d028fa3f7fa46f1173f57b842ceb1c66 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 20 Feb 2026 14:12:27 +0400
 Subject: [PATCH] feat: make camera fly farther on gib + fix a bug
@@ -13,28 +13,35 @@ because with direct hit weapons the knockback is usually directed
 a bit towards the ground, because in order to aim at the center
 of a player your pitch needs to be a little below the horizon.
 ---
- code/cgame/cg_cvar.h  |  3 ++-
+ code/cgame/cg_cvar.h  |  8 +++++++-
  code/game/bg_pmove.c  | 35 +++++++++++++++++++++++++++++++++--
  code/game/bg_public.h |  8 ++++++++
  code/game/g_bot.c     |  5 +++++
  code/game/g_client.c  |  3 +++
  code/game/g_combat.c  | 13 +++++++++++++
  code/game/g_local.h   |  3 +++
- 7 files changed, 67 insertions(+), 3 deletions(-)
+ 7 files changed, 72 insertions(+), 3 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 28f316c37..24535bf6a 100644
+index 0d1a8c634..bd5a6318f 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -49,9 +49,10 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.15", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_ARCHIVE, NULL )
+@@ -60,11 +60,17 @@ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "175", CVAR_A
+ 	"but add a *fixed* amount of random velocity to each piece.\n"
+ 	"Ensures that even if the player was gibbed with the machine gun, "
+ 	"the gibs would still fly apart somewhat." )
 -CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE, NULL )
 +CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "150", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE, NULL )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
+ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
+ 	"Scale how fast gib pieces will rotate, depending on damage (knockback)." )
++CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE,
++	"When you get gibbed, makes your camera get knocked farther away "
++	"thanks to it being smaller than your player's bounding box, "
++	"and thus not having friction with the ground until it falls down.\n"
++	"Mostly noticeable when getting gibbed with a shotgun or a railgun.\n"
++	"Doesn't work on vanilla servers." )
  CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE, NULL )

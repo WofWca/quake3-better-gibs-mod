@@ -1,4 +1,4 @@
-From 85344ca49f7e0fcc3bd0fbd0ed574691d8aab5a5 Mon Sep 17 00:00:00 2001
+From 929c8e1a2d350a2a188318e76f6e7fb01d2d4221 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 18 Nov 2025 19:14:07 +0400
 Subject: [PATCH] improvement: lower gibs bounceFactor
@@ -9,18 +9,18 @@ This makes the gibs feel more "dead" and less frog-like.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 7b39334ea..8553225de 100644
+index a1ad147db..6ec6b3bf7 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -49,7 +49,7 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE, NULL )
+@@ -52,7 +52,7 @@ CG_CVAR( cg_oldGibs, "cg_oldGibs", "0", CVAR_ARCHIVE,
  CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "250", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "100", CVAR_ARCHIVE, NULL )
--CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.6", CVAR_ARCHIVE, NULL )
-+CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE, NULL )
+-CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.6", CVAR_ARCHIVE,
++CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
  CG_CVAR( cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_drawStatus, "cg_drawStatus", "1", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_drawTimer, "cg_drawTimer", "0", CVAR_ARCHIVE, NULL )
 -- 
 2.55.0
 

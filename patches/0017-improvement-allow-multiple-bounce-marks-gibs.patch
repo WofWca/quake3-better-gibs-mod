@@ -1,4 +1,4 @@
-From 4238249fc3094997d85ba5e9718650faffb98d01 Mon Sep 17 00:00:00 2001
+From a8d2ee2c0e59e9daf7dc363dfb0b4a4687ef9273 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Nov 2025 13:54:51 +0400
 Subject: [PATCH] improvement: allow multiple bounce marks (gibs)
@@ -13,10 +13,10 @@ should they keep high velocity after the first impact.
  2 files changed, 22 insertions(+), 10 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 7fb4bf86d..4db37c41a 100644
+index 7bc63b279..f36b158bf 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -68,6 +68,8 @@ CG_CVAR( cg_crosshairY, "cg_crosshairY", "0", CVAR_ARCHIVE, NULL )
+@@ -71,6 +71,8 @@ CG_CVAR( cg_crosshairY, "cg_crosshairY", "0", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_brassTime, "cg_brassTime", "2500", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_simpleItems, "cg_simpleItems", "0", CVAR_ARCHIVE, NULL )
  CG_CVAR( cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE, NULL )

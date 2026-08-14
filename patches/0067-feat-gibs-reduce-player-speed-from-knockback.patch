@@ -1,41 +1,43 @@
-From 5eefc189f8a316e69b6077cd409dc6237937d428 Mon Sep 17 00:00:00 2001
+From ffc832618ff153a30a47f936b882216488e2affc Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 21 Jun 2026 18:33:20 +0400
 Subject: [PATCH] feat: gibs: reduce player speed from knockback
 
 ---
- code/cgame/cg_cvar.h    | 17 +++++++++++++++++
+ code/cgame/cg_cvar.h    | 19 +++++++++++++++++++
  code/cgame/cg_effects.c | 36 ++++++++++++++++++++++++++++++++++++
- 2 files changed, 53 insertions(+)
+ 2 files changed, 55 insertions(+)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 7b898b68f..01ac67a7c 100644
+index 23e767982..195090116 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -69,6 +69,23 @@ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback
- CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE, NULL )
- CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE, NULL )
+@@ -103,6 +103,25 @@ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_A
+ CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE,
+ 	"Like `cg_gibsVerticalVelocityFromKnockback`, "
+ 	"but adds a *fixed* amount of vertical speed to each piece" )
 +CG_CVAR( cg_gibsPlayerSpeedFromKnockback, "cg_gibsPlayerSpeedFromKnockback", "-0.25", 0,
-+	"How much to slow down the player depending on how much damage (knockback)\n"
-+	"they took.\n"
-+	"This makes the original player velocity have less effect\n"
++	"How much to slow down the player "
++	"depending on how much damage (knockback) they took.\n"
++	"This makes the original player velocity have less effect "
 +	"on the final gib velocity, thus giving more emphasis to the damage direction.\n"
 +	"\n"
-+	"Unlike reducing `cg_gibsInheritPlayerVelocity`,\n"
-+	"this works better if the player is already moving at high speed\n"
-+	"(e.g. on a jump pad), or falling.\n"
-+	"This will not reduce player velocity if the knockback was low\n"
++	"Unlike reducing `cg_gibsInheritPlayerVelocity`, "
++	"this works better if the player is already moving at high speed "
++	"(e.g. on a jump pad), or falling. "
++	"This will not reduce player velocity if the knockback was low "
 +	"or if damage had no direction (e.g. falling).\n"
 +	"\n"
 +	"Has no effect on vanilla servers." )
 +CG_CVAR( cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnockbackMaxFraction", "-0.5", 0,
-+	"If knockback is big, this helps keep at least some fraction of player speed.\n"
-+	"For example, if this is -0.75, we'll always keep at least 25%\n"
++	"See `cg_gibsPlayerSpeedFromKnockback`. "
++	"If knockback is big, this helps keep at least some fraction "
++	"of player speed. "
++	"For example, if this is -0.75, we'll always keep at least 25% "
 +	"of original player velocity." )
  CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
- 	"Whether to use the exact position where the player got gibbed\n"
- 	"as the initial gibs position, instead of the position of the gibbed player\n"
+ 	"Whether to use the exact position where the player got gibbed "
+ 	"as the initial gibs position, instead of the position "
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index 974691261..eda4d618c 100644
 --- a/code/cgame/cg_effects.c
