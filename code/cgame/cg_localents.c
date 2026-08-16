@@ -319,6 +319,35 @@ CG_FragmentBounceSound
 */
 void CG_FragmentBounceSound( localEntity_t *le, trace_t *trace ) {
 	if ( le->leBounceSoundType == LEBS_BLOOD ) {
+		// Limit simultaneous sounds, otherwise on some engines
+		// (e.g. ioquake3 with `s_useOpenAL 1`) lots of gibs hitting a wall
+		// at the same time make a ridiculously loud sound.
+		// On the vanilla engine there apparently is a limit,
+		// see `S_Base_StartSound`.
+		static qboolean isOpenALChecked = qfalse;
+		static qboolean isOpenAL = qfalse;
+		static int soundsPlayedInWindow = 0;
+		static int windowStartTime = 0;
+		if ( !isOpenALChecked ) {
+			char var[ sizeof( "OpenAL" ) ];
+			trap_Cvar_VariableStringBuffer( "s_backend", var, sizeof( var ) );
+			isOpenAL = !Q_stricmp( var, "OpenAL" );
+			isOpenALChecked = qtrue;
+			// Yes, we don't do anything if the variable changes. Good enough.
+		}
+		if ( isOpenAL ) {
+			const int sinceWindowStart = cg.time - windowStartTime;
+			if ( sinceWindowStart > 75 * cg_timescale.value
+				|| sinceWindowStart < 0
+			) {
+				windowStartTime = cg.time;
+				soundsPlayedInWindow = 0;
+			}
+			if ( soundsPlayedInWindow >= 3 ) {
+				return;
+			}
+		}
+
 		// half the gibs will make splat sounds
 		if ( rand() & 1 ) {
 			int r = rand()&3;
@@ -331,6 +360,7 @@ void CG_FragmentBounceSound( localEntity_t *le, trace_t *trace ) {
 			} else {
 				s = cgs.media.gibBounce3Sound;
 			}
+			soundsPlayedInWindow++;
 			trap_S_StartSound( trace->endpos, ENTITYNUM_WORLD, CHAN_AUTO, s );
 		}
 	} else if ( le->leBounceSoundType == LEBS_BRASS ) {
