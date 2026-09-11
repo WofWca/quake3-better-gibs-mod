@@ -283,5 +283,131 @@ CG_CVAR( cg_teamColors, "cg_teamColors", "", CVAR_ARCHIVE, NULL )
 CG_CVAR( cg_deadBodyDarken, "cg_deadBodyDarken", "1", CVAR_ARCHIVE, NULL )
 CG_CVAR( cg_fovAdjust, "cg_fovAdjust", "0", CVAR_ARCHIVE, NULL )
 CG_CVAR( cg_followKiller, "cg_followKiller", "0", CVAR_ARCHIVE, NULL )
+CG_CVAR( cg_killcam, "cg_killcam", "1", 0,
+	"When 1, dying to another player shows a killcam: a replay of the last "
+	"few seconds with the camera at the killer, aimed at you. Ends on its "
+	"own shortly after the kill, or as soon as you respawn (clicking to "
+	"respawn still works during the replay). "
+	"When second bit is set (e.g. the value is 2), "
+	"disables killcam when spectating." )
+// Note that respawn delay after death is 1700 (see `respawnTime`).
+// Let's also use the killcam transition as an indication
+// that "you can respawn".
+// But it overall feels good for it to be at ~1700.
+// Though we want to make sure that when "Fire" is held
+// then we don't transition to the killcam for a frame or two.
+// Exactly 1700 would be better, but we seem to have some miscalculations.
+CG_CVAR( cg_killcamStartDelay, "cg_killcamStartDelay", "1800", 0,
+	"Death replay timing, all in milliseconds. The view switches "
+	"cg_killcamStartDelay after dying; the replay covers from "
+	"cg_killcamPreroll before the kill to cg_killcamPostroll after it. "
+	"The replay history is limited by the snapshot ring buffer, "
+	"(`KILLCAM_SNAPSHOT_BACKUP` times `cg_killcamRecordInterval` milliseconds): "
+	"if it no longer holds the full preroll, "
+	"the replay starts at the oldest recorded snapshot instead." )
+CG_CVAR( cg_killcamStartOnClickDelay, "cg_killcamStartOnClickDelay", "9999999", 0,
+	"After dying, freshly pressing attack (clicking) starts the death "
+	"replay right away instead of waiting out cg_killcamStartDelay. "
+	"Clicks within this many milliseconds of the death are ignored, as "
+	"a grace period against accidental clicks; -1 disables starting on "
+	"attack entirely. Note that only clicks within ~1.7 s of dying can "
+	"start the replay: later ones make the server respawn us, ending "
+	"the killcam as usual, so a second click still skips the replay. "
+	"Disabled by default, because this might cause the player "
+	"to respawn by mistake if they tried to click to start killcam "
+	"but the respawn delay is already up." )
+CG_CVAR( cg_killcamStartOnJumpDelay, "cg_killcamStartOnJumpDelay", "750", 0,
+	"Same, for the jump key, which (unlike attack) never respawns us, so "
+	"it can always start the replay early. The delay is just a grace "
+	"period against jumps pressed around the moment of death; -1 disables "
+	"starting on jump entirely." )
+CG_CVAR( cg_killcamSkipOnJumpDelay, "cg_killcamSkipOnJumpDelay", "750", 0, NULL )
+CG_CVAR( cg_killcamSkipPreRespawn, "cg_killcamSkipPreRespawn", "1", 0,
+	"If `cg_killcamPreroll` starts at a time before we respawned, "
+	"skip to the respawn" )
+CG_CVAR( cg_killcamPreroll, "cg_killcamPreroll", "2500", 0, NULL )
+CG_CVAR( cg_killcamPostroll, "cg_killcamPostroll", "2500", 0, NULL )
+CG_CVAR( cg_killcamTimescale, "cg_killcamTimescale", "1", 0, NULL )
+CG_CVAR( cg_killcamTimescaleBefore, "cg_killcamTimescaleBefore", "20", 0,
+	"How much of the replay runs at cg_killcamTimescale, in milliseconds "
+	"before and after the kill." )
+CG_CVAR( cg_killcamTimescaleAfter, "cg_killcamTimescaleAfter", "20", 0, NULL )
+CG_CVAR( cg_killcamTimescaleFadeIn, "cg_killcamTimescaleFadeIn", "50", 0,
+	"How long to ease into cg_killcamTimescale before that window and "
+	"back out to real time after it, in milliseconds. The fades sit "
+	"outside the window, so the window itself still runs at the full "
+	"timescale. 0 = change speed instantly." )
+CG_CVAR( cg_killcamTimescaleFadeOut, "cg_killcamTimescaleFadeOut", "400", 0, NULL )
+CG_CVAR( cg_killcamRecordInterval, "cg_killcamRecordInterval", "20", 0,
+	"How often to record snapshots for the killcam, in milliseconds: "
+	"if we get a snapshot sooner than this since the last recorded one, "
+	"we'll skip it. "
+	"The resulting possible killcam duration will be "
+	"this times `KILLCAM_SNAPSHOT_BACKUP`. "
+	"See also `snaps` and `sv_fps` CVARs. "
+	"TODO we probably should determine this dynamically, "
+	"based on the total killcam duration (the CVARs above)? "
+	"And maybe this should not be needed at all, "
+	"as we should simply always have a big enough buffer. "
+	"But I guess it's fun to know that we can just drop some snapshots "
+	"and things will still work fine." )
+CG_CVAR( cg_killcamSuicides, "cg_killcamSuicides", "1", 0,
+	"When 1, suicides and world deaths (lava, falling, ...) also get a "
+	"killcam: a replay of ourselves (own first-person view while still "
+	"alive, third person after the death). When 0, only deaths caused by "
+	"other players do (also see cg_killcamLastAttacker)." )
+CG_CVAR( cg_killcamLastAttacker, "cg_killcamLastAttacker", "7500", 0,
+	"For suicides and world deaths: if another player damaged us within "
+	"this many milliseconds before the death (e.g. knocked us off a "
+	"ledge), show the killcam from their side instead. Works regardless "
+	"of cg_killcamSuicides. 0 = off." )
+CG_CVAR( cg_killcamFirstPerson, "cg_killcamFirstPerson", "0", 0,
+	"When 1, the death replay is shown from the killer's eyes (with their "
+	"view weapon), like a classic killcam. When 0, a third-person camera "
+	"floats behind the killer (see the placement cvars below). Falls back "
+	"to third person when the killer is dead or not in the recorded data. "
+	"TODO kinda experimental. For example, there is a bug "
+	"where there are visibly 2 lightning beams." )
+CG_CVAR( cg_killcamRange, "cg_killcamRange", "50", 0,
+	"Killcam camera placement: how far behind, above and to the side of "
+	"the killer's head the camera floats. The height and side offsets keep "
+	"the killer's model and the award icons above their head from covering "
+	"the victim at the center of the screen. Positive side = camera to the "
+	"killer's right (the killer appears left of center), negative = left." )
+CG_CVAR( cg_killcamHeight, "cg_killcamHeight", "24", 0, NULL )
+CG_CVAR( cg_killcamSide, "cg_killcamSide", "-15", 0, NULL )
+#ifndef KILLCAM_NO_MISSILE_CHASE
+CG_CVAR( cg_killcamMissile, "cg_killcamMissile", "1", 0,
+	"When the kill was scored with a slow missile (rocket, grenade, BFG), "
+	"chase that missile with the camera from launch to explosion, then "
+	"watch the victim from the explosion point for the rest of the "
+	"replay. Plasma is deliberately not followed (cells are a fast "
+	"stream; chasing one for a fraction of a second is jarring)." )
+CG_CVAR( cg_killcamMissileMinDuration, "cg_killcamMissileMinDuration", "300", 0,
+	"Don't switch to the missile-chase camera if the missile's recorded "
+	"flight (first sighting to explosion) is shorter than this many "
+	"milliseconds -- e.g. a point-blank rocket; the killer camera is "
+	"kept instead. 0 = always chase." )
+CG_CVAR( cg_killcamMissileRange, "cg_killcamMissileRange", "", 0,
+	"How far behind / above / to the side of the missile the chase camera "
+	"floats. When empty (the default), these are derived from where the "
+	"camera already is at the moment the chase begins, so the cut to the "
+	"missile camera doesn't make the camera jump. Set a number to "
+	"override an axis. The side convention matches cg_killcamSide "
+	"(positive = to the right of the flight direction)." )
+CG_CVAR( cg_killcamMissileHeight, "cg_killcamMissileHeight", "", 0, NULL )
+CG_CVAR( cg_killcamMissileSide, "cg_killcamMissileSide", "", 0, NULL )
+CG_CVAR( cg_killcamMissileLookAtTarget, "cg_killcamMissileLookAtTarget", "1", 0,
+	"Where the missile-chase camera looks: "
+	"0 = along the missile's flight direction; "
+	"1 = at the target (the victim); "
+	"2 = at the target for grenades (whose lobbed arcs rarely point at "
+	"the victim), along the flight direction for the rest." )
+#endif // KILLCAM_NO_MISSILE_CHASE
+CG_CVAR( cg_killcamHitSounds, "cg_killcamHitSounds", "0", 0, NULL )
+CG_CVAR( cg_killcamTest, "cg_killcamTest", "0", 0,
+	"Killcam development / testing: when > 0, render the world this many "
+	"milliseconds in the past (from your own point of view), replayed from "
+	"recorded snapshots in the killcam context. 0 = off." )
 
 #undef CG_CVAR

@@ -9,10 +9,18 @@
 
 static	pmove_t		cg_pmove;
 
-static	int			cg_numSolidEntities;
-static	centity_t	*cg_solidEntities[MAX_ENTITIES_IN_SNAPSHOT];
-static	int			cg_numTriggerEntities;
-static	centity_t	*cg_triggerEntities[MAX_ENTITIES_IN_SNAPSHOT];
+static	int			cg_numSolidEntitiesCtx[CG_NUM_CONTEXTS];
+static	centity_t	*cg_solidEntitiesCtx[CG_NUM_CONTEXTS][MAX_ENTITIES_IN_SNAPSHOT];
+static	int			cg_numTriggerEntitiesCtx[CG_NUM_CONTEXTS];
+static	centity_t	*cg_triggerEntitiesCtx[CG_NUM_CONTEXTS][MAX_ENTITIES_IN_SNAPSHOT];
+
+// per-context views, switched by CG_SetContext().
+// The solid list holds pointers into cg_entities and is rebuilt by
+// CG_BuildSolidList on snapshot transitions, so each context needs its own.
+#define cg_numSolidEntities		( cg_numSolidEntitiesCtx[cg_contextNum] )
+#define cg_solidEntities		( cg_solidEntitiesCtx[cg_contextNum] )
+#define cg_numTriggerEntities	( cg_numTriggerEntitiesCtx[cg_contextNum] )
+#define cg_triggerEntities		( cg_triggerEntitiesCtx[cg_contextNum] )
 
 /*
 ====================
