@@ -1,4 +1,4 @@
-From b423c60541a351701139c7b392196bc05d4bde04 Mon Sep 17 00:00:00 2001
+From 72b1ea254d9258ce1b1ea9c924aa8010ad00d906 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 31 May 2026 17:36:50 +0400
 Subject: [PATCH] fix: better blood trail puffs position offsets

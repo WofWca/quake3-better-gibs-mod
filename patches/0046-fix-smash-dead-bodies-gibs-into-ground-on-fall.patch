@@ -1,4 +1,4 @@
-From 5a28a8609b1fa96054c208ccfcceb7fdef9c51fa Mon Sep 17 00:00:00 2001
+From 8250959ad4bb8bb17332719b2961d0e3ce306b18 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 1 May 2026 18:41:05 +0400
 Subject: [PATCH] fix: smash dead bodies' gibs into ground on fall
@@ -94,7 +94,7 @@ index 185db65b0..2e2a5f0c3 100644
  G_CVAR( g_podiumDist, "g_podiumDist", "80", NO_FLAGS, NO_TRACK, NULL )
  G_CVAR( g_podiumDrop, "g_podiumDrop", "70", NO_FLAGS, NO_TRACK, NULL )
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index c61ceece3..c477414b3 100644
+index b055422fd..fd214dcb8 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -274,6 +274,8 @@ struct gclient_s {

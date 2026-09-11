@@ -1,4 +1,4 @@
-From 6a7659284a2e6f5c0e51c3348c0fb926d1f3fd50 Mon Sep 17 00:00:00 2001
+From ee499a5768baa9d4e17a1e80027621663b6084a8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 9 May 2026 22:53:46 +0400
 Subject: [PATCH] feat: `cg_gibsVerticalVelocityFromKnockback`

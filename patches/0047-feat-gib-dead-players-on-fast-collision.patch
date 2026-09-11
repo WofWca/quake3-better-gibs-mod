@@ -1,4 +1,4 @@
-From 4f4c31e9013fa7c89c28ef535c379d183ad769e8 Mon Sep 17 00:00:00 2001
+From 2442f8ea639cf7dd3b4be0df2aac86b18a2d77e0 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 2 May 2026 16:37:18 +0400
 Subject: [PATCH] feat: gib dead players on fast collision

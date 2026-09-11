@@ -1,4 +1,4 @@
-From e9dad8407858f1f395d7e9633a3bc9118b5a1ec8 Mon Sep 17 00:00:00 2001
+From b9068fcba9ce90fe08c185f952b7f8c17bbb0da8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 6 May 2026 23:29:47 +0400
 Subject: [PATCH] feat: add `cg_debugGibs`

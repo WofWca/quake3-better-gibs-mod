@@ -1,18 +1,18 @@
-From 704af6a81ebd8262ff40f20f1a8713a47affac20 Mon Sep 17 00:00:00 2001
+From 6ee6e61c3c51e3d178437b75a4a732852d4dc8f2 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 23 Jun 2026 19:44:50 +0400
 Subject: [PATCH] feat: `cg_gibsNoLerpDelay`
 
 ---
- code/cgame/cg_cvar.h     | 18 ++++++++++
- code/cgame/cg_snapshot.c | 72 ++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 90 insertions(+)
+ code/cgame/cg_cvar.h     | 21 ++++++++++
+ code/cgame/cg_snapshot.c | 82 ++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 103 insertions(+)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 195090116..0dc869e20 100644
+index 195090116..ad50c23ef 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -133,10 +133,28 @@ CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
+@@ -133,10 +133,31 @@ CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
  	"To get vanilla behavior, set to 0.\n"
  	"\n"
  	"Has no effect on vanilla servers (`g_gibsNewEvGibPlayerProtocol 0`).\n"
@@ -37,15 +37,18 @@ index 195090116..0dc869e20 100644
 +	"ahead of the displayed state of the game.\n"
 +	"\n"
 +	"Set this to 3 (2nd bit) to also do this on vanilla servers.\n"
++	"Set this to 5 (3rd bit) to keep the body visible "
++	"until the next snapshot. That is, both the body and the gibs "
++	"will be visible together for ~50ms.\n"
 +	"To get vanilla behavior, set to 0." )
  CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
  	"Fraction of speed that gibs preserve when bouncing off a surface" )
  CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
 diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
-index 11b9a0678..5db612c72 100644
+index 11b9a0678..8a27774cf 100644
 --- a/code/cgame/cg_snapshot.c
 +++ b/code/cgame/cg_snapshot.c
-@@ -186,6 +186,76 @@ static void CG_TransitionSnapshot( void ) {
+@@ -186,6 +186,86 @@ static void CG_TransitionSnapshot( void ) {
  }
  
  
@@ -114,7 +117,17 @@ index 11b9a0678..5db612c72 100644
 +			// so we also need to make it invisible ahead of time,
 +			// otherwise both gibs and the player body will be visible
 +			// at the same time for a few frames, until the next snap.
-+			targCent->currentState.eType = targCent->nextState.eType;
++			//
++			// TODO fix: for `predictedPlayerEntity` this doesn't work,
++			// because that is re-created each frame,
++			// with `BG_PlayerStateToEntityState`.
++			// This matters e.g. during demo playback
++			// with `cg.renderingThirdPerson`,
++			// where the player state is interpolated,
++			// see `CG_InterpolatePlayerState`.
++			if ( !( cg_gibsNoLerpDelay.integer & 0x4 ) ) {
++				targCent->currentState.eType = targCent->nextState.eType;
++			}
 +		}
 +	}
 +}
@@ -122,7 +135,7 @@ index 11b9a0678..5db612c72 100644
  /*
  ===================
  CG_SetNextSnap
-@@ -240,6 +310,8 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
+@@ -240,6 +320,8 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
  
  	// sort out solid entities
  	CG_BuildSolidList();

@@ -1,4 +1,4 @@
-From e50ec002d028fa3f7fa46f1173f57b842ceb1c66 Mon Sep 17 00:00:00 2001
+From d6d1ffb32edb280b3337bdef2595a469b83d68a0 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 20 Feb 2026 14:12:27 +0400
 Subject: [PATCH] feat: make camera fly farther on gib + fix a bug
@@ -19,8 +19,8 @@ of a player your pitch needs to be a little below the horizon.
  code/game/g_bot.c     |  5 +++++
  code/game/g_client.c  |  3 +++
  code/game/g_combat.c  | 13 +++++++++++++
- code/game/g_local.h   |  3 +++
- 7 files changed, 72 insertions(+), 3 deletions(-)
+ code/game/g_local.h   |  2 ++
+ 7 files changed, 71 insertions(+), 3 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
 index 0d1a8c634..bd5a6318f 100644
@@ -172,7 +172,7 @@ index 6ede89ec8..51035ee62 100644
  	if ( attacker ) {
  		killer = attacker->s.number;
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 4af3f87e4..c61ceece3 100644
+index 4af3f87e4..b055422fd 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -241,6 +241,7 @@ typedef struct {
@@ -183,15 +183,14 @@ index 4af3f87e4..c61ceece3 100644
  	char		netname[MAX_NETNAME];
  	int			maxHealth;			// for handicapping
  	int			enterTime;			// level.time the client entered the game
-@@ -302,6 +303,8 @@ struct gclient_s {
+@@ -294,6 +295,7 @@ struct gclient_s {
  
- 	int			lastKillTime;		// for multiple kill rewards
- 
+ 	// timers
+ 	int			respawnTime;		// can respawn when time > this, force after g_forcerespwan
 +	int			deathTime;			// 0 if alive
-+
- 	qboolean	fireHeld;			// used for hook
- 	gentity_t	*hook;				// grapple hook if out
- 
+ 	int			inactivityTime;		// kick players when time > this
+ 	qboolean	inactivityWarning;	// qtrue if the five seoond warning has been given
+ 	int			rewardTime;			// clear the EF_AWARD_IMPRESSIVE, etc when time > this
 -- 
 2.55.0
 

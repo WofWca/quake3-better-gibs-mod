@@ -1,4 +1,4 @@
-From 31dc7c8ac0077482a3b683111f8ebc2c47125519 Mon Sep 17 00:00:00 2001
+From 0c16128a9bf3093fd817175c9cb5391a61cbb474 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 7 Jun 2026 15:45:08 +0400
 Subject: [PATCH] fix: `G_TempEntity` for `EV_GIB_PLAYER`
@@ -44,15 +44,15 @@ changes a few other things that are related to that:
 ---
  code/cgame/cg_effects.c    |  82 +++++++++++++++++++-----
  code/cgame/cg_local.h      |   2 +-
- code/cgame/cg_localents.c  |   7 +--
+ code/cgame/cg_localents.c  |   7 +-
  code/cgame/cg_servercmds.c |  12 +++-
  code/game/bg_pmove.c       |   5 --
  code/game/g_bot.c          |   5 --
- code/game/g_combat.c       | 125 +++++++++++++++++++++++++++----------
- code/game/g_cvar.h         |  21 ++++++-
+ code/game/g_combat.c       | 128 +++++++++++++++++++++++++++----------
+ code/game/g_cvar.h         |  21 +++++-
  code/game/g_local.h        |   6 ++
  code/game/g_weapon.c       |  40 ++++++++++--
- 10 files changed, 232 insertions(+), 73 deletions(-)
+ 10 files changed, 235 insertions(+), 73 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index a67ecd397..6499f7279 100644
@@ -257,10 +257,10 @@ index 544f96e9f..b6b205f11 100644
  	trap_SetUserinfo( clientNum, userinfo );
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 7e5d4f7f3..17eb2be2d 100644
+index 7e5d4f7f3..d44e991ad 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -242,29 +242,54 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
+@@ -242,29 +242,57 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
  
  /*
  ==================
@@ -307,6 +307,9 @@ index 7e5d4f7f3..17eb2be2d 100644
 +	VectorCopy( self->r.mins, tent->r.mins );
 +	VectorCopy( self->r.maxs, tent->r.maxs );
 +	trap_LinkEntity(tent);
++	// For non-zero bounding boxes `trap_LinkEntity` sets `s.solid`,
++	// which is unused by clients but costs bandwidth. Reset back to 0.
++	self->s.solid = 0;
 +
 +	// For super-duper compatibility with possible mods
 +	// we could have also utilized `BG_PlayerStateToEntityState`
@@ -333,7 +336,7 @@ index 7e5d4f7f3..17eb2be2d 100644
  
  	if ( self->client ) {
  		// We prefer actual damage over `client->damage_knockback`
-@@ -290,15 +315,33 @@ static int GetGibEntityEventParm( gentity_t *self, const int killer,
+@@ -290,15 +318,33 @@ static int GetGibEntityEventParm( gentity_t *self, const int killer,
  	if ( knockback > MAX_KNOCKBACK ) {
  		knockback = MAX_KNOCKBACK;
  	}
@@ -373,7 +376,7 @@ index 7e5d4f7f3..17eb2be2d 100644
  }
  /*
  ==================
-@@ -325,8 +368,22 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
+@@ -325,8 +371,22 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
  		}
  	}
  
@@ -398,7 +401,7 @@ index 7e5d4f7f3..17eb2be2d 100644
  
  	self->takedamage = qfalse;
  	self->s.eType = ET_INVISIBLE;
-@@ -741,12 +798,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
+@@ -741,12 +801,16 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
  			self->health = GIB_HEALTH+1;
  		}
  
@@ -420,7 +423,7 @@ index 7e5d4f7f3..17eb2be2d 100644
  
  		// the body can still be gibbed
  		self->die = body_die;
-@@ -1302,8 +1363,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -1302,8 +1366,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  				// Set player velocity to what it was before they hit the ground
  				// so that the gibs inherit this velocity
  				// (see `cg_gibsInheritPlayerVelocity`).
@@ -462,7 +465,7 @@ index 0169496eb..3e38032d2 100644
  	"If a player's speed abruptly changes by this much or more, "
  	"as a result of collision with something (e.g. floor, wall), "
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index c477414b3..dd521f5b3 100644
+index fd214dcb8..744ab67f2 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -144,6 +144,12 @@ struct gentity_s {

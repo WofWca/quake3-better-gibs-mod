@@ -1,0 +1,76 @@
+From 1b7c5cd9e7c351e56e84f6a11e8c4444d00ab9ba Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sun, 16 Aug 2026 13:44:33 +0400
+Subject: [PATCH] fix: mega loud sound when many gibs hit a wall
+
+---
+ code/cgame/cg_cvar.h      |  2 ++
+ code/cgame/cg_localents.c | 32 ++++++++++++++++++++++++++++++++
+ 2 files changed, 34 insertions(+)
+
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 89d2630d0..ab076883e 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -166,6 +166,8 @@ CG_CVAR( cg_gibsStopPlayerSounds, "cg_gibsStopPlayerSounds", "3", 0,
+ 	"Doesn't work for self as of writing. "
+ 	"Set 1st bit to apply this to other players. "
+ 	"Set 2nd bit to still try to apply this to self." )
++CG_CVAR( cg_gibsMaxSimultaneousBounceSounds, "cg_gibsMaxSimultaneousBounceSounds", "3", 0,
++	"" )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
+ CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index bd8a7e955..215f20628 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -319,6 +319,37 @@ CG_FragmentBounceSound
+ */
+ void CG_FragmentBounceSound( localEntity_t *le, trace_t *trace ) {
+ 	if ( le->leBounceSoundType == LEBS_BLOOD ) {
++		// Limit simultaneous sounds, otherwise on some engines
++		// (e.g. ioquake3 with `s_useOpenAL 1`) lots of gibs hitting a wall
++		// at the same time make a ridiculously loud sound.
++		// On the vanilla engine there apparently is a limit,
++		// (see `S_Base_StartSound`),
++		// but applying the limit probably still makes sense either way.
++		static int soundsPlayedInWindow = 0;
++		static int windowStartTime = 0;
++		// static qboolean isOpenALChecked = qfalse;
++		// static qboolean isOpenAL = qfalse;
++		// if ( !isOpenALChecked ) {
++		// 	char var[ sizeof( "OpenAL" ) ];
++		// 	trap_Cvar_VariableStringBuffer( "s_backend", var, sizeof( var ) );
++		// 	isOpenAL = !Q_stricmp( var, "OpenAL" );
++		// 	isOpenALChecked = qtrue;
++		// 	// Yes, we don't do anything if the variable changes. Good enough.
++		// }
++		// if ( isOpenAL && !cg_oldGibs.integer ) {
++		if ( !cg_oldGibs.integer ) {
++			const int sinceWindowStart = cg.time - windowStartTime;
++			if ( sinceWindowStart > 75 * cg_timescale.value
++				|| sinceWindowStart < 0
++			) {
++				windowStartTime = cg.time;
++				soundsPlayedInWindow = 0;
++			}
++			if ( soundsPlayedInWindow >= cg_gibsMaxSimultaneousBounceSounds.integer ) {
++				return;
++			}
++		}
++
+ 		// half the gibs will make splat sounds
+ 		if ( rand() & 1 ) {
+ 			int r = rand()&3;
+@@ -331,6 +362,7 @@ void CG_FragmentBounceSound( localEntity_t *le, trace_t *trace ) {
+ 			} else {
+ 				s = cgs.media.gibBounce3Sound;
+ 			}
++			soundsPlayedInWindow++;
+ 			trap_S_StartSound( trace->endpos, ENTITYNUM_WORLD, CHAN_AUTO, s );
+ 		}
+ 	} else if ( le->leBounceSoundType == LEBS_BRASS ) {
+-- 
+2.55.0
+

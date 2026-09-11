@@ -1,4 +1,4 @@
-From 3e4bbd61c16e70a9440b8f540086acc654594b86 Mon Sep 17 00:00:00 2001
+From 3e8e921543eacc7d31a1a01107031d71e45e11ea Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 21 Feb 2026 23:11:14 +0400
 Subject: [PATCH] refactor: simplify `cg_event.c` EV_GIB a little

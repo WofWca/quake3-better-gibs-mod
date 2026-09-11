@@ -1,4 +1,4 @@
-From 9fb6b7122ed1cec1b2c079f034b9869c0a24f630 Mon Sep 17 00:00:00 2001
+From 194ae844ec0184e15442f8e49df174e617600df0 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 8 Jun 2026 18:07:26 +0400
 Subject: [PATCH] fix: gibs: better synced random seed

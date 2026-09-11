@@ -114,6 +114,7 @@ so you can enjoy it on basically any server
 - `cg_gibsOriginalOrigin`
 - `cg_gibsNoLerpDelay`
 - `cg_gibsStopPlayerSounds`
+- `cg_gibsMaxSimultaneousBounceSounds`
 - `cg_gibsBounceFactor`
 - `cg_gibsBounceFactorRandomness`
 - `cg_gibsRotationFactor`
@@ -159,6 +160,7 @@ set cg_gibsInheritPlayerVelocity 0
 set cg_gibsExtraRandomVelocity 250
 set cg_gibsRandomVelocityFromKnockback 0
 set cg_gibsExtraVerticalVelocity 250
+set cg_gibsMaxSimultaneousBounceSounds 999999999
 set cg_gibsBounceFactor 0.6
 set cg_gibsRotationFactor 0
 set cg_gibsBetterCameraOnGib 0

@@ -1,4 +1,4 @@
-From ed2f1386d80e1dc62253529f58b634fd6f534e60 Mon Sep 17 00:00:00 2001
+From dbb1a1f902ff81b454d5f113646101d305b676f8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 9 Jul 2026 15:23:54 +0400
 Subject: [PATCH] feat: `cg_gibsDuration`
@@ -9,7 +9,7 @@ Subject: [PATCH] feat: `cg_gibsDuration`
  2 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 0dc869e20..86be0e8b4 100644
+index ad50c23ef..fcfe9c1d9 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
 @@ -122,6 +122,9 @@ CG_CVAR( cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnoc

@@ -1,4 +1,4 @@
-From 961da22ea108e27e0f11169c02640c88a9aadab8 Mon Sep 17 00:00:00 2001
+From bff83aeb67164a7221872cd8ae53b8cace6c23b2 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 19 Jun 2026 23:38:21 +0400
 Subject: [PATCH] feat: `cg_gibsKnockback`
@@ -155,10 +155,10 @@ index e631d1c18..53e61d9d8 100644
  	}
  	else {
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 17eb2be2d..32ceea137 100644
+index d44e991ad..17e306c4d 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
-@@ -342,6 +342,22 @@ static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
+@@ -345,6 +345,22 @@ static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
  		// because we are never going to change `s.pos.trOrigin`.
  		tent->s.pos.trType = TR_STATIONARY;
  	}
