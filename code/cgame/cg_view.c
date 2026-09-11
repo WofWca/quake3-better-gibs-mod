@@ -596,6 +596,385 @@ static void CG_DamageBlendBlob( void ) {
 }
 
 
+// see cg_local.h
+qboolean cg_killcamRenderingFirstPerson = qfalse;
+
+#ifndef KILLCAM_NO_MISSILE_CHASE
+// missile-chase camera "hold": where the camera was when the missile
+// exploded; it stays there watching the victim for the rest of the replay
+static vec3_t	cg_killcamMissileHoldOrg;
+static qboolean	cg_killcamMissileHoldValid = qfalse;
+
+// where the killcam camera was on the previous killcam frame, whichever
+// camera it was; used to derive the missile-chase offsets so the cut to
+// the missile camera doesn't make the camera jump
+static vec3_t	cg_killcamViewOrg;
+static qboolean	cg_killcamViewOrgValid = qfalse;
+
+// missile-chase offsets derived at the moment the chase begins
+// (used unless overridden by the cg_killcamMissile* cvars)
+static float	cg_killcamMissileAutoRange;
+static float	cg_killcamMissileAutoHeight;
+static float	cg_killcamMissileAutoSide;
+static qboolean	cg_killcamMissileParamsValid = qfalse;
+
+// the chased missile's last flight direction, kept so the camera
+// doesn't jump when the missile comes to rest (e.g. a grenade waiting
+// out its fuse becomes TR_STATIONARY, losing its velocity)
+static vec3_t	cg_killcamMissileLastDir;
+static qboolean	cg_killcamMissileLastDirValid = qfalse;
+
+// fallbacks for the derived offsets, when there is no previous camera
+// position to derive from (or it is degenerate)
+#define KILLCAM_MISSILE_DEFAULT_RANGE	48
+#define KILLCAM_MISSILE_DEFAULT_HEIGHT	12
+#define KILLCAM_MISSILE_DEFAULT_SIDE	-15
+#endif // KILLCAM_NO_MISSILE_CHASE
+
+/*
+===============
+CG_KillcamViewReset
+
+Called by CG_KillcamStart so per-replay camera state can't leak from a
+previous replay
+===============
+*/
+void CG_KillcamViewReset( void ) {
+#ifndef KILLCAM_NO_MISSILE_CHASE
+	cg_killcamMissileHoldValid = qfalse;
+	cg_killcamViewOrgValid = qfalse;
+	cg_killcamMissileParamsValid = qfalse;
+	cg_killcamMissileLastDirValid = qfalse;
+#endif // KILLCAM_NO_MISSILE_CHASE
+}
+
+/*
+===============
+CG_KillcamTargetPoint
+
+The point on the victim that killcam cameras aim at: head height,
+raised by cg_killcamHeight so that a camera raised by the same amount
+looks horizontally when level with the victim
+===============
+*/
+static void CG_KillcamTargetPoint( vec3_t target ) {
+	VectorCopy( cg.predictedPlayerState.origin, target );
+	target[2] += DEFAULT_VIEWHEIGHT + cg_killcamHeight.value;
+}
+
+#ifndef KILLCAM_NO_MISSILE_CHASE
+/*
+===============
+CG_KillcamCalcMissileView
+
+Death replay camera chasing the missile that scored the kill, looking
+along its flight direction. After the explosion the camera holds its
+last chase position, watching the victim (and their gibs). Returns
+qfalse before the missile appears, or when it's out of the victim's
+recorded PVS -- the caller falls back to the killer cameras.
+===============
+*/
+static qboolean CG_KillcamCalcMissileView( void ) {
+	static const vec3_t	camMins = { -6, -6, -6 };
+	static const vec3_t	camMaxs = { 6, 6, 6 };
+	centity_t	*missile;
+	trace_t		trace;
+	vec3_t		dir, camOrg, target;
+	int			missileNum;
+
+	missileNum = CG_KillcamMissileNum();
+	if ( missileNum < 0 ) {
+		return qfalse;
+	}
+
+	if ( cg.time < CG_KillcamMissileStartTime() ) {
+		// back then, this entity number belonged to a different missile
+		// (the server reuses entity numbers): don't chase that one
+		return qfalse;
+	}
+
+	if ( cg.time >= CG_KillcamMissileExplodeTime() ) {
+		// after the explosion: hold the last chase position, watching
+		// the victim (and their gibs)
+		if ( !cg_killcamMissileHoldValid ) {
+			return qfalse;
+		}
+		VectorCopy( cg_killcamMissileHoldOrg, cg.refdef.vieworg );
+		CG_KillcamTargetPoint( target );
+		VectorSubtract( target, cg.refdef.vieworg, dir );
+		if ( VectorNormalize( dir ) < 1 ) {
+			return qfalse;
+		}
+		vectoangles( dir, cg.refdefViewAngles );
+		return qtrue;
+	}
+
+	missile = &cg_entities[missileNum];
+	if ( !missile->currentValid || missile->currentState.eType != ET_MISSILE ) {
+		// not fired yet, or out of the victim's recorded PVS
+		return qfalse;
+	}
+
+	// see the comment in CG_KillcamCalcKillerView
+	CG_SetFrameInterpolation();
+	CG_CalcEntityLerpPositions( missile );
+
+	// the chase position is behind the missile along its flight direction
+	BG_EvaluateTrajectoryDelta( &missile->currentState.pos, cg.time, dir );
+	if ( VectorNormalize( dir ) < 1 ) {
+		// near-stationary (e.g. a grenade at rest waiting out its fuse)
+		if ( cg_killcamMissileLastDirValid ) {
+			// keep the direction it was flying in, so the camera
+			// doesn't jump the moment the missile stops
+			VectorCopy( cg_killcamMissileLastDir, dir );
+		} else {
+			// never seen flying: place the camera on the far side
+			// from the victim
+			VectorSubtract( cg.predictedPlayerState.origin, missile->lerpOrigin, dir );
+			if ( VectorNormalize( dir ) < 1 ) {
+				return qfalse;
+			}
+		}
+	} else {
+		VectorCopy( dir, cg_killcamMissileLastDir );
+		cg_killcamMissileLastDirValid = qtrue;
+	}
+	vectoangles( dir, cg.refdefViewAngles );
+
+	// chase from behind, slightly above and to the side, without going
+	// into walls. The chase position trails the *horizontal* flight
+	// direction only: a floor bounce flips the vertical velocity, and
+	// trailing the full direction would put the camera under the floor
+	// (the wall trace then pins it onto the grenade itself)
+	{
+		float		range, height, side;
+		vec3_t		dirH;
+		vec3_t		right;
+		qboolean	haveRight;
+
+		dirH[0] = dir[0];
+		dirH[1] = dir[1];
+		dirH[2] = 0;
+		if ( VectorNormalize( dirH ) < 0.1f ) {
+			// near-vertical flight: no meaningful horizontal direction
+			VectorCopy( dir, dirH );
+		}
+
+		// horizontal perpendicular of the flight direction, same
+		// convention as cg_killcamSide (positive = to the right)
+		right[0] = dirH[1];
+		right[1] = -dirH[0];
+		right[2] = 0;
+		haveRight = VectorNormalize( right ) > 0.1f;
+
+		if ( !cg_killcamMissileParamsValid ) {
+			// derive the chase offsets from where the camera is right
+			// now (the previous frame's killcam camera, whichever it
+			// was), so the camera doesn't jump at the cut
+			cg_killcamMissileAutoRange = KILLCAM_MISSILE_DEFAULT_RANGE;
+			cg_killcamMissileAutoHeight = KILLCAM_MISSILE_DEFAULT_HEIGHT;
+			cg_killcamMissileAutoSide = KILLCAM_MISSILE_DEFAULT_SIDE;
+			if ( cg_killcamViewOrgValid && haveRight ) {
+				vec3_t	delta;
+
+				// decompose (previous camera - missile) in the frame
+				// the chase position is composed in below:
+				// delta = -range*dirH + height*up + side*right
+				VectorSubtract( cg_killcamViewOrg, missile->lerpOrigin, delta );
+				cg_killcamMissileAutoSide = DotProduct( delta, right );
+				cg_killcamMissileAutoRange =
+					-( delta[0] * dirH[0] + delta[1] * dirH[1] );
+				cg_killcamMissileAutoHeight = delta[2];
+
+				// keep the derived offsets sane: the previous camera
+				// can be anywhere (e.g. the victim's own view far from
+				// the launch point)
+				if ( cg_killcamMissileAutoRange < 8 ) cg_killcamMissileAutoRange = 8;
+				if ( cg_killcamMissileAutoRange > 120 ) cg_killcamMissileAutoRange = 120;
+				if ( cg_killcamMissileAutoHeight < -30 ) cg_killcamMissileAutoHeight = -30;
+				if ( cg_killcamMissileAutoHeight > 60 ) cg_killcamMissileAutoHeight = 60;
+				if ( cg_killcamMissileAutoSide < -60 ) cg_killcamMissileAutoSide = -60;
+				if ( cg_killcamMissileAutoSide > 60 ) cg_killcamMissileAutoSide = 60;
+			}
+			cg_killcamMissileParamsValid = qtrue;
+		}
+
+		// the cvars, when set, override the derived offsets
+		range = cg_killcamMissileRange.string[0] != '\0'
+			? cg_killcamMissileRange.value : cg_killcamMissileAutoRange;
+		height = cg_killcamMissileHeight.string[0] != '\0'
+			? cg_killcamMissileHeight.value : cg_killcamMissileAutoHeight;
+		side = cg_killcamMissileSide.string[0] != '\0'
+			? cg_killcamMissileSide.value : cg_killcamMissileAutoSide;
+
+		VectorMA( missile->lerpOrigin, -range, dirH, camOrg );
+		camOrg[2] += height;
+		if ( side != 0 && haveRight ) {
+			VectorMA( camOrg, side, right, camOrg );
+		}
+	}
+	CG_Trace( &trace, missile->lerpOrigin, camMins, camMaxs, camOrg, missileNum, MASK_SOLID );
+	VectorCopy( trace.endpos, cg.refdef.vieworg );
+
+	// where to look: along the flight direction (already set above), or
+	// at the target -- the default for grenades, whose lobbed arcs
+	// rarely point at the victim
+	if ( cg_killcamMissileLookAtTarget.integer == 1 ||
+		( cg_killcamMissileLookAtTarget.integer == 2 &&
+			missile->currentState.weapon == WP_GRENADE_LAUNCHER ) )
+	{
+		CG_KillcamTargetPoint( target );
+		VectorSubtract( target, cg.refdef.vieworg, dir );
+		if ( VectorNormalize( dir ) >= 1 ) {
+			vectoangles( dir, cg.refdefViewAngles );
+		}
+	}
+
+	VectorCopy( cg.refdef.vieworg, cg_killcamMissileHoldOrg );
+	cg_killcamMissileHoldValid = qtrue;
+
+	// the victim's bob state doesn't apply here
+	cg.bobcycle = 0;
+	cg.bobfracsin = 0;
+	cg.xyspeed = 0;
+
+	return qtrue;
+}
+#endif // KILLCAM_NO_MISSILE_CHASE
+
+/*
+===============
+CG_KillcamCalcKillerFirstPersonView
+
+Death replay camera from the killer's eyes. Returns qfalse (falling
+back to the third-person killer camera) if the killer isn't in the
+replayed snapshot or is dead.
+===============
+*/
+static qboolean CG_KillcamCalcKillerFirstPersonView( void ) {
+	centity_t	*killer;
+	int			killerNum;
+	int			legsAnim;
+
+	killerNum = CG_KillcamKillerNum();
+	if ( killerNum < 0 || killerNum >= MAX_CLIENTS ||
+		killerNum == cg.snap->ps.clientNum )
+	{
+		return qfalse;
+	}
+
+	killer = &cg_entities[killerNum];
+	if ( !killer->currentValid ) {
+		return qfalse;
+	}
+	if ( killer->currentState.eFlags & EF_DEAD ) {
+		// first person from a corpse (mutual kill) looks broken
+		return qfalse;
+	}
+
+	// see the comment in CG_KillcamCalcKillerView
+	CG_SetFrameInterpolation();
+	CG_CalcEntityLerpPositions( killer );
+
+	VectorCopy( killer->lerpOrigin, cg.refdef.vieworg );
+	legsAnim = killer->currentState.legsAnim & ~ANIM_TOGGLEBIT;
+	if ( legsAnim == LEGS_WALKCR || legsAnim == LEGS_IDLECR ) {
+		cg.refdef.vieworg[2] += CROUCH_VIEWHEIGHT;
+	} else {
+		cg.refdef.vieworg[2] += DEFAULT_VIEWHEIGHT;
+	}
+	VectorCopy( killer->lerpAngles, cg.refdefViewAngles );
+
+	// the victim's bob state doesn't apply to the killer's view weapon
+	cg.bobcycle = 0;
+	cg.bobfracsin = 0;
+	cg.xyspeed = 0;
+
+	return qtrue;
+}
+
+/*
+===============
+CG_KillcamCalcKillerView
+
+Death replay camera: place the camera at (slightly behind) the killer,
+aiming at the victim -- the recorded local player. Returns qfalse if the
+killer isn't in the replayed snapshot (out of the victim's PVS), in
+which case the caller keeps the normal view of the victim.
+===============
+*/
+static qboolean CG_KillcamCalcKillerView( void ) {
+	static const vec3_t	camMins = { -6, -6, -6 };
+	static const vec3_t	camMaxs = { 6, 6, 6 };
+	centity_t	*killer;
+	trace_t		trace;
+	vec3_t		eye, target, forward, camOrg;
+	int			killerNum;
+
+	killerNum = CG_KillcamKillerNum();
+	if ( killerNum < 0 || killerNum >= MAX_CLIENTS ||
+		killerNum == cg.snap->ps.clientNum )
+	{
+		return qfalse;
+	}
+
+	killer = &cg_entities[killerNum];
+	if ( !killer->currentValid ) {
+		return qfalse;
+	}
+
+	// cg.frameInterpolation is normally set later in the frame, by
+	// CG_AddPacketEntities. Without this the killer's lerpOrigin here
+	// is computed with the previous frame's interpolation fraction and
+	// disagrees with where the killer model is actually drawn, which
+	// makes the camera shake.
+	CG_SetFrameInterpolation();
+	CG_CalcEntityLerpPositions( killer );
+	VectorCopy( killer->lerpOrigin, eye );
+	eye[2] += DEFAULT_VIEWHEIGHT;
+
+	CG_KillcamTargetPoint( target );
+
+	// raise the camera above the killer's head, tracing so that a low
+	// ceiling doesn't put it in solid
+	VectorCopy( eye, camOrg );
+	camOrg[2] += cg_killcamHeight.value;
+	CG_Trace( &trace, eye, camMins, camMaxs, camOrg, killerNum, MASK_SOLID );
+	VectorCopy( trace.endpos, eye );
+
+	// and shift it sideways, so that neither the killer's model nor the
+	// award icons above their head cover the victim
+	if ( cg_killcamSide.value != 0 ) {
+		vec3_t	right;
+
+		VectorSubtract( target, eye, forward );
+		forward[2] = 0;
+		if ( VectorNormalize( forward ) >= 1 ) {
+			right[0] = forward[1];
+			right[1] = -forward[0];
+			right[2] = 0;
+			VectorMA( eye, cg_killcamSide.value, right, camOrg );
+			CG_Trace( &trace, eye, camMins, camMaxs, camOrg, killerNum, MASK_SOLID );
+			VectorCopy( trace.endpos, eye );
+		}
+	}
+
+	VectorSubtract( target, eye, forward );
+	if ( VectorNormalize( forward ) < 1 ) {
+		// killer is right on top of the victim
+		return qfalse;
+	}
+	vectoangles( forward, cg.refdefViewAngles );
+
+	// back away from the killer's head so their model is visible,
+	// without going into a wall
+	VectorMA( eye, -cg_killcamRange.value, forward, camOrg );
+	CG_Trace( &trace, eye, camMins, camMaxs, camOrg, killerNum, MASK_SOLID );
+	VectorCopy( trace.endpos, cg.refdef.vieworg );
+
+	return qtrue;
+}
+
 /*
 ===============
 CG_CalcViewValues
@@ -605,6 +984,7 @@ Sets cg.refdef view values
 */
 static int CG_CalcViewValues( void ) {
 	playerState_t	*ps;
+	qboolean		killcamCameraPlaced;
 
 	memset( &cg.refdef, 0, sizeof( cg.refdef ) );
 
@@ -667,13 +1047,46 @@ static int CG_CalcViewValues( void ) {
 		}
 	}
 
-	if ( cg.renderingThirdPerson ) {
+	cg_killcamRenderingFirstPerson = qfalse;
+	killcamCameraPlaced = qfalse;
+	if ( cg_contextNum == CG_CONTEXT_KILLCAM && CG_KillcamMode() == KILLCAM_KILLER ) {
+#ifndef KILLCAM_NO_MISSILE_CHASE
+		if ( CG_KillcamCalcMissileView() ) {
+			// camera is chasing the killing missile
+			killcamCameraPlaced = qtrue;
+		} else
+#endif // KILLCAM_NO_MISSILE_CHASE
+		if ( cg_killcamFirstPerson.integer &&
+			CG_KillcamCalcKillerFirstPersonView() )
+		{
+			// camera was placed at the killer's eyes
+			cg_killcamRenderingFirstPerson = qtrue;
+			killcamCameraPlaced = qtrue;
+		} else if ( CG_KillcamCalcKillerView() ) {
+			// camera was placed at the killer
+			killcamCameraPlaced = qtrue;
+		}
+	}
+
+	if ( killcamCameraPlaced ) {
+		// the victim must be drawn: the camera is looking at them
+		cg.renderingThirdPerson = qtrue;
+	} else if ( cg.renderingThirdPerson ) {
 		// back away from character
 		CG_OffsetThirdPersonView();
 	} else {
 		// offset for local bobbing and kicks
 		CG_OffsetFirstPersonView();
 	}
+
+#ifndef KILLCAM_NO_MISSILE_CHASE
+	// remember where the killcam camera ended up, whichever camera it
+	// was, so the missile chase can pick up from here without a jump
+	if ( cg_contextNum == CG_CONTEXT_KILLCAM && CG_KillcamMode() == KILLCAM_KILLER ) {
+		VectorCopy( cg.refdef.vieworg, cg_killcamViewOrg );
+		cg_killcamViewOrgValid = qtrue;
+	}
+#endif // KILLCAM_NO_MISSILE_CHASE
 
 	// position eye relative to origin
 	AnglesToAxis( cg.refdefViewAngles, cg.refdef.viewaxis );
@@ -781,35 +1194,33 @@ static void CG_FirstFrame( void )
 }
 
 
+// qtrue while the live context is processed hidden behind the killcam
+// replay: no rendering, no engine-global side effects (its sounds are
+// muted separately via cg_soundMuted)
+static qboolean cg_passHidden = qfalse;
+
 /*
 =================
-CG_DrawActiveFrame
+CG_DrawActiveFrameCtx
 
-Generates and draws a game scene and status information at the given time.
+Processes the current context up to the given time and, unless this is
+a hidden pass, generates and draws its scene and status information.
 =================
 */
-void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demoPlayback ) {
+static void CG_DrawActiveFrameCtx( int serverTime, stereoFrame_t stereoView, qboolean demoPlayback ) {
 	int		inwater;
 
 	cg.time = serverTime;
 	cg.demoPlayback = demoPlayback;
 
-	// update cvars
-	CG_UpdateCvars();
+	if ( !cg_passHidden ) {
+		// any looped sounds will be respecified as entities
+		// are added to the render list
+		trap_S_ClearLoopingSounds(qfalse);
 
-	// if we are only updating the screen as a loading
-	// pacifier, don't even try to read snapshots
-	if ( cg.infoScreenText[0] != 0 ) {
-		CG_DrawInformation();
-		return;
+		// clear all the render lists
+		trap_R_ClearScene();
 	}
-
-	// any looped sounds will be respecified as entities
-	// are added to the render list
-	trap_S_ClearLoopingSounds(qfalse);
-
-	// clear all the render lists
-	trap_R_ClearScene();
 
 	// set up cg.snap and possibly cg.nextSnap
 	CG_ProcessSnapshots();
@@ -817,15 +1228,19 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// if we haven't received any snapshots yet, all
 	// we can draw is the information screen
 	if ( !cg.snap || ( cg.snap->snapFlags & SNAPFLAG_NOT_ACTIVE ) ) {
-		CG_DrawInformation();
+		if ( !cg_passHidden ) {
+			CG_DrawInformation();
+		}
 		return;
 	}
 
-	// let the client system know what our weapon and zoom settings are
-	trap_SetUserCmdValue( cg.weaponSelect, cg.zoomSensitivity );
+	if ( cg_contextNum == CG_CONTEXT_LIVE ) {
+		// let the client system know what our weapon and zoom settings are
+		trap_SetUserCmdValue( cg.weaponSelect, cg.zoomSensitivity );
 
-	if ( cg.clientFrame == 0 )
-		CG_FirstFrame();
+		if ( cg.clientFrame == 0 )
+			CG_FirstFrame();
+	}
 
 	// update cg.predictedPlayerState
 	CG_PredictPlayerState();
@@ -833,7 +1248,15 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// decide on third person view
 	cg.renderingThirdPerson = cg_thirdPerson.integer || (cg.snap->ps.stats[STAT_HEALTH] <= 0);
 
-	CG_TrackClientTeamChange();
+	// note: when the killcam manages to place a camera looking at the
+	// victim, CG_CalcViewValues forces renderingThirdPerson so the
+	// victim's body is drawn; when it can't (killer not in the recorded
+	// data), this default stands and the victim gets their own normal
+	// view -- first person while still alive in the replay
+
+	if ( cg_contextNum == CG_CONTEXT_LIVE ) {
+		CG_TrackClientTeamChange();
+	}
 
 	// follow killer
 	if ( cg.followTime && cg.followTime < cg.time ) {
@@ -846,19 +1269,39 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// build cg.refdef
 	inwater = CG_CalcViewValues();
 
-	// first person blend blobs, done after AnglesToAxis
-	if ( !cg.renderingThirdPerson ) {
-		CG_DamageBlendBlob();
-	}
+	if ( !cg_passHidden ) {
+		// first person blend blobs, done after AnglesToAxis
+		if ( !cg.renderingThirdPerson ) {
+			CG_DamageBlendBlob();
+		}
 
-	// build the render lists
+		// build the render lists
+		if ( !cg.hyperspace ) {
+			CG_AddPacketEntities();	// alter calcViewValues, so predicted player state is correct
+			CG_AddMarks();
+			CG_AddParticles ();
+		}
+	}
+	// Local entities (gibs!) carry their own physics state -- bouncing
+	// rewrites their trajectory -- so they must keep being simulated
+	// even while this context is processed hidden behind the killcam.
+	// Otherwise they freeze and, when the view switches back, get hit
+	// with all the accumulated gravity at once and plummet straight
+	// down. In a hidden pass the refEntities added here are discarded
+	// by the killcam pass's trap_R_ClearScene, and the bounce sounds
+	// are muted via cg_soundMuted.
 	if ( !cg.hyperspace ) {
-		CG_AddPacketEntities();	// alter calcViewValues, so predicted player state is correct
-		CG_AddMarks();
-		CG_AddParticles ();
 		CG_AddLocalEntities();
 	}
-	CG_AddViewWeapon( &cg.predictedPlayerState );
+	if ( !cg_passHidden ) {
+		if ( cg_killcamRenderingFirstPerson ) {
+			// the killer's weapon; the normal view weapon is skipped
+			// anyway because the killcam forces renderingThirdPerson
+			CG_KillcamAddViewWeapon();
+		} else {
+			CG_AddViewWeapon( &cg.predictedPlayerState );
+		}
+	}
 
 	// add buffered sounds
 	CG_PlayBufferedSounds();
@@ -869,7 +1312,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 #endif
 
 	// finish up the rest of the refdef
-	if ( cg.testModelEntity.hModel ) {
+	if ( !cg_passHidden && cg.testModelEntity.hModel ) {
 		CG_AddTestModel();
 	}
 	cg.refdef.time = cg.time;
@@ -878,8 +1321,10 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// warning sounds when powerup is wearing off
 	CG_PowerupTimerSounds();
 
-	// update audio positions
-	trap_S_Respatialize( cg.snap->ps.clientNum, cg.refdef.vieworg, cg.refdef.viewaxis, inwater );
+	if ( !cg_passHidden ) {
+		// update audio positions
+		trap_S_Respatialize( cg.snap->ps.clientNum, cg.refdef.vieworg, cg.refdef.viewaxis, inwater );
+	}
 
 	// make sure the lagometerSample and frame timing isn't done twice when in stereo
 	if ( stereoView != STEREO_RIGHT ) {
@@ -888,31 +1333,83 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 			cg.frametime = 0;
 		}
 		cg.oldTime = cg.time;
-		CG_AddLagometerFrameInfo();
+		if ( cg_contextNum == CG_CONTEXT_LIVE ) {
+			CG_AddLagometerFrameInfo();
+		}
 	}
-	if (cg_timescale.value != cg_timescaleFadeEnd.value) {
-		if (cg_timescale.value < cg_timescaleFadeEnd.value) {
-			cg_timescale.value += cg_timescaleFadeSpeed.value * ((float)cg.frametime) / 1000;
-			if (cg_timescale.value > cg_timescaleFadeEnd.value)
-				cg_timescale.value = cg_timescaleFadeEnd.value;
-		}
-		else {
-			cg_timescale.value -= cg_timescaleFadeSpeed.value * ((float)cg.frametime) / 1000;
-			if (cg_timescale.value < cg_timescaleFadeEnd.value)
-				cg_timescale.value = cg_timescaleFadeEnd.value;
-		}
-		if (cg_timescaleFadeSpeed.value) {
-			trap_Cvar_Set("timescale", va("%f", cg_timescale.value));
+	if ( cg_contextNum == CG_CONTEXT_LIVE ) {
+		if (cg_timescale.value != cg_timescaleFadeEnd.value) {
+			if (cg_timescale.value < cg_timescaleFadeEnd.value) {
+				cg_timescale.value += cg_timescaleFadeSpeed.value * ((float)cg.frametime) / 1000;
+				if (cg_timescale.value > cg_timescaleFadeEnd.value)
+					cg_timescale.value = cg_timescaleFadeEnd.value;
+			}
+			else {
+				cg_timescale.value -= cg_timescaleFadeSpeed.value * ((float)cg.frametime) / 1000;
+				if (cg_timescale.value < cg_timescaleFadeEnd.value)
+					cg_timescale.value = cg_timescaleFadeEnd.value;
+			}
+			if (cg_timescaleFadeSpeed.value) {
+				trap_Cvar_Set("timescale", va("%f", cg_timescale.value));
+			}
 		}
 	}
 
-	// actually issue the rendering calls
-	CG_DrawActive( stereoView );
+	if ( !cg_passHidden ) {
+		// actually issue the rendering calls
+		CG_DrawActive( stereoView );
+	}
 
 	// this counter will be bumped for every valid scene we generate
 	cg.clientFrame++;
 
 	if ( cg_stats.integer ) {
 		CG_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
+	}
+}
+
+/*
+=================
+CG_DrawActiveFrame
+
+Generates and draws a game scene and status information at the given time.
+
+When the killcam is active, the live context is still processed every
+frame (hidden and muted, so its state stays current), and the killcam
+context is processed and rendered at a delayed time from recorded
+snapshots.
+=================
+*/
+void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demoPlayback ) {
+	int			killcamDelay;
+	qboolean	killcamView;
+
+	CG_SetContext( CG_CONTEXT_LIVE );
+
+	// update cvars
+	CG_UpdateCvars();
+
+	// if we are only updating the screen as a loading
+	// pacifier, don't even try to read snapshots
+	if ( cg.infoScreenText[0] != 0 ) {
+		CG_DrawInformation();
+		return;
+	}
+
+	// killcam: death replay / test mode
+	killcamDelay = CG_KillcamUpdate( serverTime );
+	killcamView = killcamDelay > 0;
+
+	cg_passHidden = killcamView;
+	cg_soundMuted = killcamView;
+	CG_DrawActiveFrameCtx( serverTime, stereoView, demoPlayback );
+	cg_passHidden = qfalse;
+	cg_soundMuted = qfalse;
+
+	if ( killcamView ) {
+		CG_SetContext( CG_CONTEXT_KILLCAM );
+		// the replayed stream is conceptually a demo
+		CG_DrawActiveFrameCtx( serverTime - killcamDelay, stereoView, qtrue );
+		CG_SetContext( CG_CONTEXT_LIVE );
 	}
 }

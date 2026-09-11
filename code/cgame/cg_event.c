@@ -99,6 +99,37 @@ static void CG_Obituary( entityState_t *ent ) {
 
 	following = cg.snap->ps.pm_flags & PMF_FOLLOW;
 
+	// killcam: replay own deaths
+	// (CG_KillcamScheduleDeathReplay ignores obituaries that the replay
+	// itself re-fires in the killcam context)
+	if ( target == cg.snap->ps.clientNum && cg_killcam.integer &&
+		!( following && cg_killcam.integer & 0x2 ) )
+	{
+		int subject = -1;
+
+		if ( attacker != target && attacker != ENTITYNUM_WORLD ) {
+			// killed by another player: show it from their side
+			subject = attacker;
+		} else if ( cg_killcamLastAttacker.integer > 0 && cg.attackerTime &&
+			cg.time - cg.attackerTime <= cg_killcamLastAttacker.integer &&
+			(unsigned)cg.attackerClientNum < MAX_CLIENTS )
+		{
+			// suicide or world death, but another player damaged us
+			// recently (e.g. knocked us off a ledge): show it from
+			// their side. cg.attackerTime is refreshed on every damage
+			// event from another player (CG_DamageFeedback).
+			subject = cg.attackerClientNum;
+		} else if ( cg_killcamSuicides.integer ) {
+			// plain suicide / world death: the camera code falls back
+			// to a third-person view of ourselves when the subject is
+			// the victim
+			subject = target;
+		}
+		if ( subject != -1 ) {
+			CG_KillcamScheduleDeathReplay( subject, mod, cg.time );
+		}
+	}
+
 	message2 = "";
 
 	// check for single client messages
@@ -894,7 +925,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position, int entityNum ) {
 	//
 	case EV_PLAYER_TELEPORT_IN:
 		trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.teleInSound );
-		CG_SpawnEffect( position, cg.snap->ps.clientNum == clientNum && cg_thirdPerson.integer == 0 );
+		CG_SpawnEffect( position, cg.snap->ps.clientNum == clientNum && !cg.renderingThirdPerson );
 		break;
 
 	case EV_PLAYER_TELEPORT_OUT:
@@ -984,7 +1015,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position, int entityNum ) {
 	case EV_RAILTRAIL:
 		cent->currentState.weapon = WP_RAILGUN;
 
-		if ( cent->currentState.clientNum == cg.snap->ps.clientNum && !cg_thirdPerson.integer ) 
+		if ( cent->currentState.clientNum == cg.snap->ps.clientNum && !cg.renderingThirdPerson ) 
 		{
 			VectorCopy( cg.refdef.vieworg, vec );
 			fovOffset = -0.2f * ( cgs.fov - 90.0f );

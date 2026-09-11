@@ -1521,6 +1521,73 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 }
 
 /*
+==============
+CG_KillcamAddViewWeapon
+
+The killcam first-person counterpart of CG_AddViewWeapon: draws the
+killer's weapon from their entity state. Passing a NULL playerState to
+CG_AddPlayerWeapon puts it in the "other player" mode it already
+supports (muzzle flashes and the lightning beam come from the killer's
+centity).
+==============
+*/
+void CG_KillcamAddViewWeapon( void ) {
+	refEntity_t	hand;
+	centity_t	*cent;
+	const clientInfo_t *ci;
+	const weaponInfo_t *weapon;
+	vec3_t		fovOffset;
+	vec3_t		angles;
+	int			weaponNum;
+
+	cent = &cg_entities[ CG_KillcamKillerNum() ];
+	weaponNum = cent->currentState.weapon;
+	if ( weaponNum <= WP_NONE || weaponNum >= WP_NUM_WEAPONS ) {
+		return;
+	}
+
+	if ( !cg_drawGun.integer || cg.testGun ) {
+		return;
+	}
+
+	// drop gun lower at higher fov
+	if ( cgs.fov > 90.0 ) {
+		fovOffset[0] = 0;
+		fovOffset[2] = -0.2 * ( cgs.fov - 90.0 );
+	} else {
+		// move gun forward at lowerer fov
+		fovOffset[0] = -0.2 * ( cgs.fov - 90.0 );
+		fovOffset[2] = 0;
+	}
+
+	CG_RegisterWeapon( weaponNum );
+	weapon = &cg_weapons[ weaponNum ];
+
+	memset (&hand, 0, sizeof(hand));
+
+	// set up gun position
+	CG_CalculateWeaponPosition( hand.origin, angles );
+
+	VectorMA( hand.origin, (cg_gun_x.value+fovOffset[0]), cg.refdef.viewaxis[0], hand.origin );
+	VectorMA( hand.origin, cg_gun_y.value, cg.refdef.viewaxis[1], hand.origin );
+	VectorMA( hand.origin, (cg_gun_z.value+fovOffset[2]), cg.refdef.viewaxis[2], hand.origin );
+
+	AnglesToAxis( angles, hand.axis );
+
+	// map the killer's torso animation to weapon animation
+	ci = &cgs.clientinfo[ cent->currentState.clientNum ];
+	hand.frame = CG_MapTorsoToWeaponFrame( ci, cent->pe.torso.frame );
+	hand.oldframe = CG_MapTorsoToWeaponFrame( ci, cent->pe.torso.oldFrame );
+	hand.backlerp = cent->pe.torso.backlerp;
+
+	hand.hModel = weapon->handsModel;
+	hand.renderfx = RF_DEPTHHACK | RF_FIRST_PERSON | RF_MINLIGHT;
+
+	// add everything onto the hand
+	CG_AddPlayerWeapon( &hand, NULL, cent, ci->team );
+}
+
+/*
 ==============================================================================
 
 WEAPON SELECTION

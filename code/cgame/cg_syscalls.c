@@ -8,6 +8,10 @@
 
 #include "cg_local.h"
 
+// this file defines the real syscalls, not the killcam mute wrappers
+#undef trap_S_StartSound
+#undef trap_S_StartLocalSound
+
 static dllSyscall_t syscall = (dllSyscall_t)-1;
 
 DLLEXPORT void dllEntry( dllSyscall_t syscallptr ) {
