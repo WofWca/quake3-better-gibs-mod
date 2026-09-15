@@ -985,7 +985,7 @@ static void AdjustKnockbackIfDirectMissileHit( const gentity_t *targ,
 	VectorClear( velChange );
 
 	if (!(
-		knockback && targ->client &&
+		dir && knockback && targ->client &&
 		inflictor &&
 		inflictor->s.eType == ET_MISSILE &&
 		// Make sure it has big splash radius,
@@ -1333,7 +1333,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				targ->health <= GIB_HEALTH && g_blood.integer &&
 				!g_oldGibs.integer &&
 				g_gibsMissileDirectionKnockbackWeight.value != 1.0 &&
-				targ->client ) {
+				targ->client &&
+				dir ) {
 				vec3_t velChange;
 				AdjustKnockbackIfDirectMissileHit( targ, inflictor, dir, point,
 					knockback, kvel, dflags, mod, velChange );
