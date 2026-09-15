@@ -977,12 +977,18 @@ Assumes that the new `targ->health` is already set.
 */
 static void AdjustKnockbackIfDirectMissileHit( const gentity_t *targ,
 	const gentity_t *inflictor, const vec3_t dir, const vec3_t point,
-	int knockback, const vec3_t oldKvel, int dflags, int mod, vec3_t velChange )
+	int knockback, const vec3_t oldKvel, int dflags, int mod,
+	vec3_t velChange, vec3_t finalDir )
 {
 	vec3_t	dir2; // Direction from the explosion to the player's center.
-	vec3_t	kvel2, finalDir;
+	vec3_t	kvel2;
 
 	VectorClear( velChange );
+	if ( dir ) {
+		VectorCopy( dir, finalDir );
+	} else {
+		VectorClear( finalDir );
+	}
 
 	if (!(
 		dir && knockback && targ->client &&
@@ -1022,16 +1028,14 @@ static void AdjustKnockbackIfDirectMissileHit( const gentity_t *targ,
 	if ( VectorNormalize( finalDir ) <= 0.0 ) {
 		// No particular direction, so let's just apply no knockback at all.
 		VectorScale( oldKvel, -1, velChange );
+		VectorClear( finalDir );
 		return;
 	}
 
 	// "Cancel" the old knockback.
 	VectorScale( oldKvel, -1, velChange );
-	VectorScale (finalDir, KnockbackToKnockbackSpeed( knockback ), kvel2);
-	VectorAdd (velChange, kvel2, velChange);
-	if ( targ->client ) {
-		VectorCopy( finalDir, targ->client->damage_from );
-	}
+	VectorScale ( finalDir, KnockbackToKnockbackSpeed( knockback ), kvel2 );
+	VectorAdd ( velChange, kvel2, velChange );
 }
 
 /*
@@ -1059,16 +1063,23 @@ dflags		these flags are used to control how T_Damage works
 */
 
 void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
-			   vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
+			   vec3_t dirOriginal, vec3_t point, int damage, int dflags, int mod ) {
 	gclient_t	*client;
 	int			take;
 	int			asave;
 	int			knockback;
+	vec3_t		_dir;
+	vec_t		*dir = NULL;
 	vec3_t		kvel;
 	int			max;
 #ifdef MISSIONPACK
 	vec3_t		bouncedir, impactpoint;
 #endif
+
+	if ( dirOriginal ) {
+		dir = _dir;
+		VectorCopy( dirOriginal, dir );
+	}
 
 	VectorClear( kvel );
 
@@ -1335,10 +1346,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				g_gibsMissileDirectionKnockbackWeight.value != 1.0 &&
 				targ->client &&
 				dir ) {
-				vec3_t velChange;
+				vec3_t velChange, newDir;
 				AdjustKnockbackIfDirectMissileHit( targ, inflictor, dir, point,
-					knockback, kvel, dflags, mod, velChange );
-				VectorAdd(targ->client->ps.velocity, velChange, targ->client->ps.velocity);
+					knockback, kvel, dflags, mod, velChange, newDir );
+				VectorAdd( targ->client->ps.velocity, velChange,
+					targ->client->ps.velocity );
+				VectorCopy( newDir, targ->client->damage_from );
+				VectorCopy( newDir, dir );
 			}
 			// If we already got to max knockback, don't apply any more of it.
 			// Otherwise one quad shotgun shot can get you 330 knockback,
