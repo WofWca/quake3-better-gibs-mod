@@ -494,6 +494,8 @@ typedef struct {
 	snapshot_t	*snap;				// cg.snap->serverTime <= cg.time
 	snapshot_t	*nextSnap;			// cg.nextSnap->serverTime > cg.time, or NULL
 	snapshot_t	activeSnapshots[2];
+	// `qtrue` when we're currently inside of `CG_TransitionNoLerpEntities`.
+	qboolean	transitioningNoLerpEvents;
 
 	float		frameInterpolation;	// (float)( cg.time - cg.frame->serverTime ) / (cg.nextFrame->serverTime - cg.frame->serverTime)
 
@@ -1157,12 +1159,32 @@ typedef struct {
 
 //==============================================================================
 
+// Multiple parallel world contexts, so that a second, independent game
+// state can be maintained and rendered alongside the live one (killcam).
+// Per-world state owned by other files (local entities, marks, particles,
+// solid entity lists) follows the same pattern with file-local arrays
+// indexed by cg_contextNum.
+#define CG_NUM_CONTEXTS		2
+#define CG_CONTEXT_LIVE		0
+#define CG_CONTEXT_KILLCAM	1
+
+typedef struct {
+	cg_t		state;
+	centity_t	entities[MAX_GENTITIES];
+} cgContext_t;
+
+extern	cgContext_t		cg_contexts[CG_NUM_CONTEXTS];
+extern	cgContext_t		*cgc;			// current context, never NULL
+extern	int				cg_contextNum;	// index of cgc within cg_contexts
+
+// All existing code transparently accesses the current context
+// through these.
+#define cg			(cgc->state)
+#define cg_entities	(cgc->entities)
+
 extern	cgs_t			cgs;
-extern	cg_t			cg;
-extern	centity_t		cg_entities[MAX_GENTITIES];
 extern	weaponInfo_t	cg_weapons[MAX_WEAPONS];
 extern	itemInfo_t		cg_items[MAX_ITEMS];
-extern	markPoly_t		cg_markPolys[MAX_MARK_POLYS];
 
 #define EXTERN_CG_CVAR
 	#include "cg_cvar.h"
@@ -1174,6 +1196,7 @@ extern const char		*eventnames[EV_MAX];
 //
 // cg_main.c
 //
+void CG_SetContext( int contextNum );
 const char *CG_ConfigString( int index );
 const char *CG_Argv( int arg );
 
@@ -1335,6 +1358,8 @@ void CG_PainEvent( centity_t *cent, int health );
 //
 void CG_SetEntitySoundPosition( const centity_t *cent );
 void CG_AddPacketEntities( void );
+void CG_SetFrameInterpolation( void );
+void CG_CalcEntityLerpPositions( centity_t *cent );
 void CG_Beam( const centity_t *cent );
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out, const vec3_t angles_in, vec3_t angles_out );
 
@@ -1375,6 +1400,8 @@ void CG_OutOfAmmoChange( void );	// should this be in pmove?
 // cg_marks.c
 //
 void	CG_InitMarkPolys( void );
+void	CG_InitMarkPolysCtx( int ctx );
+void	CG_ClearParticlesCtx( int ctx );
 void	CG_AddMarks( void );
 void	CG_ImpactMark( qhandle_t markShader, 
 				    const vec3_t origin, const vec3_t dir, 
@@ -1387,6 +1414,7 @@ void	CG_ImpactMark( qhandle_t markShader,
 // cg_localents.c
 //
 void	CG_InitLocalEntities( void );
+void	CG_InitLocalEntitiesCtx( int ctx );
 localEntity_t	*CG_AllocLocalEntity( void );
 void	CG_AddLocalEntities( void );
 
@@ -1418,6 +1446,7 @@ void CG_ScorePlum( int client, const vec3_t origin, int score );
 void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 				const vec3_t playerVelocityOriginal,
 				const vec3_t knockbackDir, const int knockbackSpeedOriginal,
+				const vec3_t explosionPointOriginal,
 				const lerpFrame_t *bodyAnimation, const clientInfo_t *ci,
 				const int randSeed );
 // Same as `CG_GibPlayer`, but takes different params.
@@ -1436,6 +1465,40 @@ localEntity_t *CG_MakeExplosion( const vec3_t origin, const vec3_t dir,
 // cg_snapshot.c
 //
 void CG_ProcessSnapshots( void );
+
+// killcam snapshot recording / delayed playback
+typedef enum {
+	KILLCAM_OFF,
+	KILLCAM_TEST,	// cg_killcamTest: own view at a fixed delay
+	KILLCAM_KILLER	// death replay: camera at the killer, aimed at the victim
+} killcamMode_t;
+
+qboolean CG_KillcamRunning( void );
+qboolean CG_KillcamHasSnapshotFor( int time );
+void CG_KillcamStart( int time, killcamMode_t mode );
+void CG_KillcamStop( void );
+const entityState_t *CG_SnapEntity( const snapshot_t *snap, int number );
+killcamMode_t CG_KillcamMode( void );
+int CG_KillcamKillerNum( void );
+void CG_KillcamScheduleDeathReplay( int killerNum, int mod, int time );
+int CG_KillcamUpdate( int serverTime );
+#ifndef KILLCAM_NO_MISSILE_CHASE
+// the missile that scored the kill (for the missile-chase camera),
+// -1 if none; and the serverTimes of its recorded explosion and of its
+// first recorded snapshot (before which the same entity number may
+// have belonged to a different missile)
+int CG_KillcamMissileNum( void );
+int CG_KillcamMissileExplodeTime( void );
+int CG_KillcamMissileStartTime( void );
+#endif // KILLCAM_NO_MISSILE_CHASE
+// resets cg_view.c's per-replay camera state (called by CG_KillcamStart)
+void CG_KillcamViewReset( void );
+
+// qtrue while the current killcam frame is rendered from the killer's
+// eyes (set by CG_CalcViewValues): the killer's own model is hidden
+// (cg_players.c) and their view weapon is drawn (cg_weapons.c)
+extern qboolean cg_killcamRenderingFirstPerson;
+void CG_KillcamAddViewWeapon( void );
 
 //
 // cg_info.c
@@ -1573,6 +1636,18 @@ void		trap_S_StopLoopingSound(int entnum);
 
 // a local sound is always played full volume
 void		trap_S_StartLocalSound( sfxHandle_t sfx, int channelNum );
+
+// Killcam: while the killcam replay is on screen, the live context keeps
+// processing snapshots hidden in the background; cg_soundMuted makes these
+// wrappers swallow its sounds. Redirecting the trap names here keeps the
+// call sites unchanged (cg_main.c and cg_syscalls.c #undef these to reach
+// the real syscalls).
+extern qboolean cg_soundMuted;
+void		CG_S_StartSoundWrapper( const vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx );
+void		CG_S_StartLocalSoundWrapper( sfxHandle_t sfx, int channelNum );
+#define trap_S_StartSound CG_S_StartSoundWrapper
+#define trap_S_StartLocalSound CG_S_StartLocalSoundWrapper
+
 void		trap_S_ClearLoopingSounds( qboolean killall );
 void		trap_S_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx );
 void		trap_S_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx );

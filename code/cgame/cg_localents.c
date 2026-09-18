@@ -7,26 +7,49 @@
 #include "cg_local.h"
 
 #define	MAX_LOCAL_ENTITIES	2048
-localEntity_t	cg_localEntities[MAX_LOCAL_ENTITIES];
-localEntity_t	cg_activeLocalEntities;		// double linked list
-localEntity_t	*cg_freeLocalEntities;		// single linked list
+static localEntity_t	cg_localEntitiesCtx[CG_NUM_CONTEXTS][MAX_LOCAL_ENTITIES];
+static localEntity_t	cg_activeLocalEntitiesCtx[CG_NUM_CONTEXTS];	// double linked lists
+static localEntity_t	*cg_freeLocalEntitiesCtx[CG_NUM_CONTEXTS];	// single linked lists
+
+// per-context views, switched by CG_SetContext()
+#define cg_localEntities		( cg_localEntitiesCtx[cg_contextNum] )
+#define cg_activeLocalEntities	( cg_activeLocalEntitiesCtx[cg_contextNum] )
+#define cg_freeLocalEntities	( cg_freeLocalEntitiesCtx[cg_contextNum] )
+
+/*
+===================
+CG_InitLocalEntitiesCtx
+
+Resets one context's local entity pool (e.g. when a killcam replay starts)
+===================
+*/
+void	CG_InitLocalEntitiesCtx( int ctx ) {
+	int		i;
+	localEntity_t	*localEntities = cg_localEntitiesCtx[ctx];
+	localEntity_t	*active = &cg_activeLocalEntitiesCtx[ctx];
+
+	memset( localEntities, 0, sizeof( cg_localEntitiesCtx[ctx] ) );
+	active->next = active;
+	active->prev = active;
+	cg_freeLocalEntitiesCtx[ctx] = localEntities;
+	for ( i = 0 ; i < MAX_LOCAL_ENTITIES - 1 ; i++ ) {
+		localEntities[i].next = &localEntities[i+1];
+	}
+}
 
 /*
 ===================
 CG_InitLocalEntities
 
-This is called at startup and for tournement restarts
+This is called at startup and for tournement restarts.
+Initializes all contexts.
 ===================
 */
 void	CG_InitLocalEntities( void ) {
-	int		i;
+	int		ctx;
 
-	memset( cg_localEntities, 0, sizeof( cg_localEntities ) );
-	cg_activeLocalEntities.next = &cg_activeLocalEntities;
-	cg_activeLocalEntities.prev = &cg_activeLocalEntities;
-	cg_freeLocalEntities = cg_localEntities;
-	for ( i = 0 ; i < MAX_LOCAL_ENTITIES - 1 ; i++ ) {
-		cg_localEntities[i].next = &cg_localEntities[i+1];
+	for ( ctx = 0 ; ctx < CG_NUM_CONTEXTS ; ctx++ ) {
+		CG_InitLocalEntitiesCtx( ctx );
 	}
 }
 
@@ -1045,7 +1068,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
 			randSeed = Q_rand(&randSeed) + cgs.levelStartTime;
 
 			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta,
-				NULL, knockbackSpeed, NULL, NULL, randSeed );
+				NULL, NULL, knockbackSpeed, NULL, NULL, randSeed );
 		}
 	}
 	else {

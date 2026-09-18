@@ -269,6 +269,8 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 #endif
 	int	highScore, reward;
 	sfxHandle_t sfx;
+	const qboolean playHitSounds = cg_contextNum != CG_CONTEXT_KILLCAM
+		|| cg_killcamHitSounds.integer;
 
 	// don't play the sounds if the player just changed teams
 	if ( ps->persistant[PERS_TEAM] != ops->persistant[PERS_TEAM] ) {
@@ -276,7 +278,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 	}
 
 	// hit changes
-	if ( ps->persistant[PERS_HITS] > ops->persistant[PERS_HITS] ) {
+	if ( playHitSounds && ps->persistant[PERS_HITS] > ops->persistant[PERS_HITS] ) {
 #ifdef MISSIONPACK
 		armor  = ps->persistant[PERS_ATTACKEE_ARMOR] & 0xff;
 		health = ps->persistant[PERS_ATTACKEE_ARMOR] >> 8;
@@ -311,7 +313,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 			trap_S_StartLocalSound( cgs.media.hitSound, CHAN_LOCAL_SOUND );
 		}
 #endif
-	} else if ( ps->persistant[PERS_HITS] < ops->persistant[PERS_HITS] ) {
+	} else if ( playHitSounds && ps->persistant[PERS_HITS] < ops->persistant[PERS_HITS] ) {
 		trap_S_StartLocalSound( cgs.media.hitTeamSound, CHAN_LOCAL_SOUND );
 	}
 

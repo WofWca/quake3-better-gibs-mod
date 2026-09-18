@@ -2544,6 +2544,14 @@ void CG_Player( centity_t *cent ) {
 		}
 	}
 
+	// killcam first person: the view is from the killer's eyes, so
+	// don't draw their own model (their view weapon is drawn instead)
+	if ( cg_killcamRenderingFirstPerson &&
+		cent->currentState.number == CG_KillcamKillerNum() )
+	{
+		renderfx = RF_THIRD_PERSON;				// only draw in mirrors
+	}
+
 	if ( cg_deadBodyDarken.integer && cent->currentState.eFlags & EF_DEAD )
 		darken = qtrue;
 	else

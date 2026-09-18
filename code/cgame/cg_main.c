@@ -82,11 +82,63 @@ DLLEXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2 ) {
 }
 
 
-cg_t				cg;
+cgContext_t			cg_contexts[CG_NUM_CONTEXTS];
+cgContext_t			*cgc = &cg_contexts[CG_CONTEXT_LIVE];
+int					cg_contextNum = CG_CONTEXT_LIVE;
 cgs_t				cgs;
-centity_t			cg_entities[MAX_GENTITIES];
 weaponInfo_t		cg_weapons[MAX_WEAPONS];
 itemInfo_t			cg_items[MAX_ITEMS];
+
+/*
+=================
+CG_SetContext
+
+Switch the current world context (live game vs killcam replay).
+Everything accessed through cg / cg_entities and the per-context
+file-local arrays (local entities, marks, particles, solid lists)
+switches with it.
+=================
+*/
+void CG_SetContext( int contextNum ) {
+	cgc = &cg_contexts[contextNum];
+	cg_contextNum = contextNum;
+}
+
+// Sound wrappers that swallow sounds while the live context is being
+// processed hidden behind the killcam replay. See cg_local.h.
+qboolean cg_soundMuted = qfalse;
+
+#undef trap_S_StartSound
+#undef trap_S_StartLocalSound
+
+void CG_S_StartSoundWrapper( const vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx ) {
+	if ( cg_soundMuted ) {
+		return;
+	}
+	trap_S_StartSound( origin, entityNum, entchannel, sfx );
+}
+
+void CG_S_StartLocalSoundWrapper( sfxHandle_t sfx, int channelNum ) {
+	// The announcer is an exception.
+	// Firstly during killcam it's not great to re-announce
+	// what's already been announced during live gameplay
+	// (frag limit, lead changes, awards).
+	// Secondly, "n frags left" seems to get re-announced
+	// every time you enter or exit killcam.
+	// Thirdly, you probably want to hear live game announcements
+	// even if you're watching a killcam
+	// (e.g. you might want to skip killcam when you hear "one frag left").
+	//
+	// TODO maybe also need to ignore "powerup spawn" sounds and more?
+	if ( channelNum == CHAN_ANNOUNCER ) {
+		if ( cg_contextNum == CG_CONTEXT_KILLCAM ) {
+			return;
+		}
+	} else if ( cg_soundMuted ) {
+		return;
+	}
+	trap_S_StartLocalSound( sfx, channelNum );
+}
 
 #define DECLARE_CG_CVAR
 	#include "cg_cvar.h"
@@ -1679,8 +1731,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 
 	// clear everything
 	memset( &cgs, 0, sizeof( cgs ) );
-	memset( &cg, 0, sizeof( cg ) );
-	memset( cg_entities, 0, sizeof(cg_entities) );
+	memset( cg_contexts, 0, sizeof( cg_contexts ) );
+	CG_SetContext( CG_CONTEXT_LIVE );
 	memset( cg_weapons, 0, sizeof(cg_weapons) );
 	memset( cg_items, 0, sizeof(cg_items) );
 
