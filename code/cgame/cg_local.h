@@ -494,6 +494,8 @@ typedef struct {
 	snapshot_t	*snap;				// cg.snap->serverTime <= cg.time
 	snapshot_t	*nextSnap;			// cg.nextSnap->serverTime > cg.time, or NULL
 	snapshot_t	activeSnapshots[2];
+	// `qtrue` when we're currently inside of `CG_TransitionNoLerpEntities`.
+	qboolean	transitioningNoLerpEvents;
 
 	float		frameInterpolation;	// (float)( cg.time - cg.frame->serverTime ) / (cg.nextFrame->serverTime - cg.frame->serverTime)
 
@@ -1444,6 +1446,7 @@ void CG_ScorePlum( int client, const vec3_t origin, int score );
 void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 				const vec3_t playerVelocityOriginal,
 				const vec3_t knockbackDir, const int knockbackSpeedOriginal,
+				const vec3_t explosionPointOriginal,
 				const lerpFrame_t *bodyAnimation, const clientInfo_t *ci,
 				const int randSeed );
 // Same as `CG_GibPlayer`, but takes different params.
@@ -1474,6 +1477,7 @@ qboolean CG_KillcamRunning( void );
 qboolean CG_KillcamHasSnapshotFor( int time );
 void CG_KillcamStart( int time, killcamMode_t mode );
 void CG_KillcamStop( void );
+const entityState_t *CG_SnapEntity( const snapshot_t *snap, int number );
 killcamMode_t CG_KillcamMode( void );
 int CG_KillcamKillerNum( void );
 void CG_KillcamScheduleDeathReplay( int killerNum, int mod, int time );
