@@ -1420,6 +1420,7 @@ void CG_ScorePlum( int client, const vec3_t origin, int score );
 void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 				const vec3_t playerVelocityOriginal,
 				const vec3_t knockbackDir, const int knockbackSpeedOriginal,
+				const vec3_t explosionPointOriginal,
 				const lerpFrame_t *bodyAnimation, const clientInfo_t *ci,
 				const int randSeed );
 // Same as `CG_GibPlayer`, but takes different params.
@@ -1438,6 +1439,7 @@ localEntity_t *CG_MakeExplosion( const vec3_t origin, const vec3_t dir,
 // cg_snapshot.c
 //
 void CG_ProcessSnapshots( void );
+const entityState_t *CG_SnapEntity( const snapshot_t *snap, int number );
 
 //
 // cg_info.c
