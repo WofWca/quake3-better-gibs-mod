@@ -78,6 +78,19 @@ CG_CVAR( cg_gibsExplosionDistanceOffset, "cg_gibsExplosionDistanceOffset", "-3.0
 	"For comparison, player height and width are 56 and 30 units.\n"
 	"This lets you increase the spread. "
 	"This doesn't affect the damage and knockback.\n" )
+CG_CVAR( cg_gibsKnockbackFromHitPointFalloff, "cg_gibsKnockbackFromHitPointFalloff", "0.5", 0,
+	"When getting gibbed by a direct hit (e.g. railgun), "
+	"scale the knockback of each gib piece based on how far it is "
+	"from the line of the shot (passing through the point "
+	"where the shot hit the body, along the knockback direction): "
+	"the closer the piece, the faster it flies. "
+	"The direction stays the same.\n"
+	"The knockback is scaled by 1 / (1 + this * distance / playerHeight)^2, "
+	"i.e. the piece on the line gets the full knockback, "
+	"and with `0.5` the piece a full player height away gets 0.44 of it, "
+	"with `1` 0.25, with `2` 0.11.\n"
+	"0 disables. "
+	"Has no effect on servers without Better Gibs mod.\n" )
 CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.3", CVAR_ARCHIVE,
 	"Scale how much random velocity (spread) the gibs gain "
 	"from damage (knockback)." )

@@ -1446,7 +1446,7 @@ void CG_ScorePlum( int client, const vec3_t origin, int score );
 void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 				const vec3_t playerVelocityOriginal,
 				const vec3_t knockbackDir, const int knockbackSpeedOriginal,
-				const vec3_t explosionPointOriginal,
+				const vec3_t explosionPointOriginal, const vec3_t hitPoint,
 				const lerpFrame_t *bodyAnimation, const clientInfo_t *ci,
 				const int randSeed );
 // Same as `CG_GibPlayer`, but takes different params.

@@ -130,6 +130,11 @@ struct gentity_s {
 	int			setDeathAnimScheduled;
 	// Whether to `GibEntity` after applying all the pellets of a shotgun shot.
 	qboolean	gibScheduled;
+	// The `point` of the last non-splash `G_Damage`
+	// (see `SpawnGibEventTempEntity`).
+	// Only valid if `lastDamagePointTime == level.time`.
+	vec3_t		lastDamagePoint;
+	int			lastDamagePointTime;
 
 	int			damage;
 	int			splashDamage;	// quad will increase this without increasing radius

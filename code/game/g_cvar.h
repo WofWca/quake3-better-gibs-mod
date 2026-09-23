@@ -92,7 +92,7 @@ G_CVAR( g_gibsMissileDirectionKnockbackWeight, "g_gibsMissileDirectionKnockbackW
 // We could have simply made this a binary value to tell clients
 // that the server is running Better Gibs mod. But let's make it flag-like,
 // for forwards compatibility.
-G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR_SYSTEMINFO, NO_TRACK,
+G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "62", CVAR_SYSTEMINFO, NO_TRACK,
 	"Bitmask, describing which gibs \"features\" are supported by the server.\n"
 	"This is not really intended to be changed by users "
 	"to a value different from the default or 0, "
@@ -109,7 +109,11 @@ G_CVAR( g_gibsNewEvGibPlayerProtocol, "g_gibsNewEvGibPlayerProtocol", "30", CVAR
 	"via `G_TempEntity` and not the target's `event` and `eventParm`.\n"
 	"  - 0b01000: whether `es->pos.trDelta` is the velocity of the target "
 	"when it got gibbed.\n"
-	"  - 0b10000: whether `es->legsAnim` is the knockback direction." )
+	"  - 0b10000: whether `es->legsAnim` is the knockback direction.\n"
+	"  - 0b100000: whether `es->origin2` is the point where the damage "
+	"that gibbed the target hit the body (e.g. where the rail hit), "
+	"relative to `es->pos.trBase`. "
+	"(0, 0, 0) means unknown, e.g. for splash damage." )
 G_CVAR( g_gibsDeadBodyLinearVelocityFromKnockback, "g_gibsDeadBodyLinearVelocityFromKnockback", "1.0", NO_FLAGS, NO_TRACK,
 	"Scale how much the knockback affects dead bodies.\n"
 	"This does not actually affect gameplay, despite being a server-side var. "
