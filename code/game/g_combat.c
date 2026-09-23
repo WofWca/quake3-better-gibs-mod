@@ -361,6 +361,15 @@ static void SpawnGibEventTempEntity( gentity_t *self, const int killer,
 		}
 		tent->s.legsAnim = dirByte;
 	}
+
+	if ( g_gibsNewEvGibPlayerProtocol.integer & 0x20
+		&& self->lastDamagePointTime == level.time ) {
+		// Relative to the event origin: small integers are cheaper to send.
+		// (0, 0, 0) means "unknown", same as with `legsAnim`.
+		VectorSubtract( self->lastDamagePoint, tent->s.pos.trBase,
+			tent->s.origin2 );
+		trap_SnapVector( tent->s.origin2 );
+	}
 }
 /*
 ==================
@@ -783,7 +792,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, con
 
 	// don't allow respawn until the death anim is done
 	// g_forcerespawn may force spawning at some later time
-	self->client->respawnTime = level.time + 1700;
+	self->client->respawnTime = level.time + g_respawnDelay.value;
 
 	// remove powerups
 	memset( self->client->ps.powerups, 0, sizeof(self->client->ps.powerups) );
@@ -1085,6 +1094,15 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 	if (!targ->takedamage) {
 		return;
+	}
+
+	// For splash damage `point` is the explosion origin,
+	// not a point on the body, so forget the point instead.
+	if ( point && !( dflags & DAMAGE_RADIUS ) ) {
+		VectorCopy( point, targ->lastDamagePoint );
+		targ->lastDamagePointTime = level.time;
+	} else {
+		targ->lastDamagePointTime = 0;
 	}
 
 	// the intermission has allready been qualified for, so don't
