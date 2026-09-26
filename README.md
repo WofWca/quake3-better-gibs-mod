@@ -104,6 +104,8 @@ so you can enjoy it on basically any server
 - `cg_gibsExtraKnockback`
 - `cg_gibsPiecesFromKnockback`
 - `cg_gibsLinearVelocityFromKnockback`
+- `cg_gibsVelocityFromExplosionFraction`
+- `cg_gibsExplosionDistanceOffset`
 - `cg_gibsRandomVelocityFromKnockback`
 - `cg_gibsVerticalVelocityFromKnockback`
 - `cg_gibsExtraRandomVelocity`

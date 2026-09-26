@@ -1,0 +1,40 @@
+From bb0c379b0cd13b1f39a54dffd7e8ce067a35b87a Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 22 Sep 2026 17:21:38 +0400
+Subject: [PATCH] refactor: add `transitioningNoLerpEvents`
+
+---
+ code/cgame/cg_local.h    | 2 ++
+ code/cgame/cg_snapshot.c | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 68abad75c..016346126 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -473,6 +473,8 @@ typedef struct {
+ 	snapshot_t	*snap;				// cg.snap->serverTime <= cg.time
+ 	snapshot_t	*nextSnap;			// cg.nextSnap->serverTime > cg.time, or NULL
+ 	snapshot_t	activeSnapshots[2];
++	// `qtrue` when we're currently inside of `CG_TransitionNoLerpEntities`.
++	qboolean	transitioningNoLerpEvents;
+ 
+ 	float		frameInterpolation;	// (float)( cg.time - cg.frame->serverTime ) / (cg.nextFrame->serverTime - cg.frame->serverTime)
+ 
+diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
+index fd8185412..e11645c45 100644
+--- a/code/cgame/cg_snapshot.c
++++ b/code/cgame/cg_snapshot.c
+@@ -328,7 +328,9 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
+ 	// sort out solid entities
+ 	CG_BuildSolidList();
+ 
++	cg.transitioningNoLerpEvents = qtrue;
+ 	CG_TransitionNoLerpEntities( snap );
++	cg.transitioningNoLerpEvents = qfalse;
+ }
+ 
+ 
+-- 
+2.55.0
+
