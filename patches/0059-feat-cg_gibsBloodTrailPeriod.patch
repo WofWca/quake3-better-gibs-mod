@@ -1,0 +1,56 @@
+From 3cea52eba2c885c3cff30a3da8fcdd69b5a3d628 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 9 Jun 2026 15:50:47 +0400
+Subject: [PATCH] feat: `cg_gibsBloodTrailPeriod`
+
+Allows to disable blood trails, or keep only the initial "cloud"
+(both look kinda cool).
+---
+ code/cgame/cg_cvar.h      | 3 +++
+ code/cgame/cg_localents.c | 9 ++++++++-
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 18e00877e..b79480e77 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -84,6 +84,9 @@ CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5",
+ 	"This makes gibs look less uniform, and spread a little more." )
+ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
+ 	"Scale how fast gib pieces will rotate, depending on damage (knockback)." )
++// Not archived because experimental
++CG_CVAR( cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0,
++	"How often in milliseconds gibs leave blood \"clouds\"" )
+ CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE,
+ 	"When you get gibbed, makes your camera get knocked farther away "
+ 	"thanks to it being smaller than your player's bounding box, "
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index bbd4889ac..6eb280670 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -138,6 +138,13 @@ void CG_BloodTrail( localEntity_t *le ) {
+ 		// + le->pos.trDelta[2] * 0x100
+ 		;
+ 
++	// Comparing to 1 and not 0 because step randomness can result
++	// in step being 0.
++	// But anyways, anything below ~20 is not a sane value.
++	if ( cg_gibsBloodTrailPeriod.integer <= 1 ) {
++		return;
++	}
++
+ 	// Delay each puff for a bit, so that the initial trails
+ 	// are spread over a bigger volume, which looks more natural.
+ 	// At 1000 speed this is 63 units, i.e. a little more than player height
+@@ -153,7 +160,7 @@ void CG_BloodTrail( localEntity_t *le ) {
+ 
+ 	// Also a bit of randomness for the step looks more natural,
+ 	// doesn't give an impression that gib pieces are somehow "synced".
+-	step = 134 + (31 & Q_rand(&seed));
++	step = cg_gibsBloodTrailPeriod.integer * (1 + 0.125*Q_crandom(&seed));
+ 	t = tBase + step * ( ( cg.time - cg.frametime - tBase + step ) / step );
+ 	t2 = tBase + step * ( ( cg.time - tBase ) / step );
+ 
+-- 
+2.55.0
+

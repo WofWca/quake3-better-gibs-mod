@@ -1,0 +1,53 @@
+From 894136b06137a7191a344d27a17b15b82347936c Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Sat, 9 May 2026 22:53:46 +0400
+Subject: [PATCH] feat: `cg_gibsVerticalVelocityFromKnockback`
+
+This makes gobbing with the machine gun and the lightning gun better.
+For 100 damage the vertical velocity remains the same,
+for 200+ damage it becomes 250.
+---
+ code/cgame/cg_cvar.h    | 6 +++++-
+ code/cgame/cg_effects.c | 4 +++-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 0422c053a..22fc8216a 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -55,12 +55,16 @@ CG_CVAR( cg_gibsInheritPlayerVelocity, "cg_gibsInheritPlayerVelocity", "1.0", CV
+ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.4", CVAR_ARCHIVE,
+ 	"Scale how much random velocity (spread) the gibs gain "
+ 	"from damage (knockback)." )
++CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE,
++	"Scale how much vertical velocity the gibs gain from damage (knockback)." )
+ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE,
+ 	"Like `cg_gibsRandomVelocityFromKnockback`, "
+ 	"but add a *fixed* amount of random velocity to each piece.\n"
+ 	"Ensures that even if the player was gibbed with the machine gun, "
+ 	"the gibs would still fly apart somewhat." )
+-CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "150", CVAR_ARCHIVE, NULL )
++CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE,
++	"Like `cg_gibsVerticalVelocityFromKnockback`, "
++	"but adds a *fixed* amount of vertical speed to each piece" )
+ CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
+ 	"Fraction of speed that gibs preserve when bouncing off a surface" )
+ CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index fd4584e81..fdd548325 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -679,7 +679,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 	int seed = randSeed;
+ 
+ 	vec3_t playerVelocityScaled;
+-	float jump = cg_gibsExtraVerticalVelocity.value;
++	float jump =
++		cg_gibsExtraVerticalVelocity.value +
++		cg_gibsVerticalVelocityFromKnockback.value * knockbackSpeed;
+ 	int numGibs = cg_gibs.value * DEFAULT_NUM_GIBS;
+ 	qboolean skullLaunched = qfalse; // launch only one skull.
+ 
+-- 
+2.55.0
+

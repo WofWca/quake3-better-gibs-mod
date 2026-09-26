@@ -1,0 +1,154 @@
+From 74150b0b6b68b5ad004113da899f7e4dc90738e6 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 30 Jun 2026 13:48:03 +0400
+Subject: [PATCH] refactor: add `dir` arg to `die()` fn
+
+---
+ code/game/g_cmds.c    |  4 ++--
+ code/game/g_combat.c  | 11 +++++++----
+ code/game/g_local.h   |  6 +++---
+ code/game/g_misc.c    |  2 +-
+ code/game/g_missile.c |  2 +-
+ code/game/g_team.c    |  2 +-
+ 6 files changed, 15 insertions(+), 12 deletions(-)
+
+diff --git a/code/game/g_cmds.c b/code/game/g_cmds.c
+index f349a1bc4..998d4b405 100644
+--- a/code/game/g_cmds.c
++++ b/code/game/g_cmds.c
+@@ -480,7 +480,7 @@ void Cmd_Kill_f( gentity_t *ent ) {
+ 	}
+ 	ent->flags &= ~FL_GODMODE;
+ 	ent->client->ps.stats[STAT_HEALTH] = ent->health = -999;
+-	player_die (ent, ent, ent, 100000, MOD_SUICIDE);
++	player_die (ent, ent, ent, NULL, 100000, MOD_SUICIDE);
+ }
+ 
+ /*
+@@ -612,7 +612,7 @@ void SetTeam( gentity_t *ent, const char *s ) {
+ 		// Kill him (makes sure he loses flags, etc)
+ 		ent->flags &= ~FL_GODMODE;
+ 		ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
+-		player_die (ent, ent, ent, 100000, MOD_SUICIDE);
++		player_die (ent, ent, ent, NULL, 100000, MOD_SUICIDE);
+ 
+ 	}
+ 
+diff --git a/code/game/g_combat.c b/code/game/g_combat.c
+index bb9b842be..12a0aa869 100644
+--- a/code/game/g_combat.c
++++ b/code/game/g_combat.c
+@@ -426,7 +426,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
+ body_die
+ ==================
+ */
+-void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) {
++void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int meansOfDeath ) {
+ 	if ( self->health > GIB_HEALTH ) {
+ 		return;
+ 	}
+@@ -597,7 +597,7 @@ void CheckAlmostScored( gentity_t *self, gentity_t *attacker ) {
+ player_die
+ ==================
+ */
+-void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) {
++void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int meansOfDeath ) {
+ 	gentity_t	*ent;
+ 	int			anim;
+ 	int			contents;
+@@ -1104,9 +1104,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+ 
+ 			targ->health = targ->health - damage;
+ 			if ( targ->health <= 0 ) {
++				if ( dir ) {
++					VectorNormalize(dir);
++				}
+ 				// `body_die` doesn't use any of its arguments (except `targ`),
+ 				// so it's fine if they're `NULL`.
+-				targ->die (targ, inflictor, attacker, damage, mod);
++				targ->die (targ, inflictor, attacker, dir, damage, mod);
+ 			}
+ 		}
+ 
+@@ -1433,7 +1436,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+ 			}
+ 
+ 			targ->enemy = attacker;
+-			targ->die (targ, inflictor, attacker, take, mod);
++			targ->die (targ, inflictor, attacker, dir, take, mod);
+ 			return;
+ 		} else if ( targ->pain ) {
+ 			targ->pain (targ, attacker, take);
+diff --git a/code/game/g_local.h b/code/game/g_local.h
+index 744ab67f2..730dc5b6d 100644
+--- a/code/game/g_local.h
++++ b/code/game/g_local.h
+@@ -135,7 +135,7 @@ struct gentity_s {
+ 	void		(*touch)(gentity_t *self, gentity_t *other, trace_t *trace);
+ 	void		(*use)(gentity_t *self, gentity_t *other, gentity_t *activator);
+ 	void		(*pain)(gentity_t *self, gentity_t *attacker, int damage);
+-	void		(*die)(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
++	void		(*die)(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int mod);
+ 
+ 	int			pain_debounce_time;
+ 	int			fly_sound_debounce_time;	// wind tunnel
+@@ -519,7 +519,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback );
+ #define SetFlNoKnockback( ent ) {ent->flags |= FL_NO_KNOCKBACK;}
+ qboolean G_RadiusDamage (vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod);
+ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t impactpoint, vec3_t bouncedir );
+-void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
++void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int meansOfDeath );
+ void TossClientItems( gentity_t *self );
+ #ifdef MISSIONPACK
+ void TossClientPersistantPowerups( gentity_t *self );
+@@ -597,7 +597,7 @@ void ClientRespawn(gentity_t *ent);
+ void BeginIntermission (void);
+ void InitBodyQue (void);
+ void ClientSpawn( gentity_t *ent );
+-void player_die (gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
++void player_die (gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int mod);
+ void AddScore( gentity_t *ent, vec3_t origin, int score );
+ void CalculateRanks( void );
+ qboolean SpotWouldTelefrag( gentity_t *spot );
+diff --git a/code/game/g_misc.c b/code/game/g_misc.c
+index 4a16d33f3..ae7fbc420 100644
+--- a/code/game/g_misc.c
++++ b/code/game/g_misc.c
+@@ -338,7 +338,7 @@ void SP_shooter_grenade( gentity_t *ent ) {
+ 
+ 
+ #ifdef MISSIONPACK
+-static void PortalDie (gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod) {
++static void PortalDie (gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int mod) {
+ 	G_FreeEntity( self );
+ 	//FIXME do something more interesting
+ }
+diff --git a/code/game/g_missile.c b/code/game/g_missile.c
+index 821e554ba..faeee7c8c 100644
+--- a/code/game/g_missile.c
++++ b/code/game/g_missile.c
+@@ -113,7 +113,7 @@ static void ProximityMine_Explode( gentity_t *mine ) {
+ ProximityMine_Die
+ ================
+ */
+-static void ProximityMine_Die( gentity_t *ent, gentity_t *inflictor, gentity_t *attacker, int damage, int mod ) {
++static void ProximityMine_Die( gentity_t *ent, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int mod ) {
+ 	ent->think = ProximityMine_Explode;
+ 	ent->nextthink = level.time + 1;
+ }
+diff --git a/code/game/g_team.c b/code/game/g_team.c
+index ada16f113..d7dde5855 100644
+--- a/code/game/g_team.c
++++ b/code/game/g_team.c
+@@ -1223,7 +1223,7 @@ static void ObeliskRespawn( gentity_t *self ) {
+ }
+ 
+ 
+-static void ObeliskDie( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod ) {
++static void ObeliskDie( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, const vec3_t dir, int damage, int mod ) {
+ 	int			otherTeam;
+ 
+ 	otherTeam = OtherTeam( self->spawnflags );
+-- 
+2.55.0
+

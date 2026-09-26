@@ -1,4 +1,4 @@
-From abb4643da6ebd9bf4858f8f902850d14e0effd21 Mon Sep 17 00:00:00 2001
+From 9017e33673754e0d51e7c789af503ae2141fade1 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 17 Feb 2026 19:46:52 +0400
 Subject: [PATCH] fix: shotgun not respecting `MAX_KNOCKBACK`
@@ -8,7 +8,7 @@ Subject: [PATCH] fix: shotgun not respecting `MAX_KNOCKBACK`
  1 file changed, 30 insertions(+), 2 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index edd3cac0c..549e94533 100644
+index 4c16a87bb..1251a6516 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -229,6 +229,7 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker )
@@ -19,7 +19,7 @@ index edd3cac0c..549e94533 100644
  /*
  ==================
  KnockbackToKnockbackSpeed
-@@ -1004,8 +1005,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -1015,8 +1016,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  	}
  
  	knockback = damage;
@@ -30,9 +30,9 @@ index edd3cac0c..549e94533 100644
  	}
  	if ( targ->flags & FL_NO_KNOCKBACK ) {
  		knockback = 0;
-@@ -1192,6 +1193,33 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
- 					knockback, kvel, dflags, mod, velChange );
- 				VectorAdd(targ->client->ps.velocity, velChange, targ->client->ps.velocity);
+@@ -1207,6 +1208,33 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+ 				VectorCopy( newDir, targ->client->damage_from );
+ 				VectorCopy( newDir, dir );
  			}
 +			// If we already got to max knockback, don't apply any more of it.
 +			// Otherwise one quad shotgun shot can get you 330 knockback,

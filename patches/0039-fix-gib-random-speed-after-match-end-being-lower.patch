@@ -1,4 +1,4 @@
-From 359cfe93c11b98ddb83d4a82a91cdbf8ece65122 Mon Sep 17 00:00:00 2001
+From 41236f4c9e1c91fb28750480a1db34a138c7c75e Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 9 May 2026 13:47:52 +0400
 Subject: [PATCH] fix: gib random speed after match end being lower
@@ -8,7 +8,7 @@ Subject: [PATCH] fix: gib random speed after match end being lower
  1 file changed, 22 insertions(+), 14 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 51035ee62..7852925b6 100644
+index 52bf75a79..39880ac15 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -278,22 +278,30 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {

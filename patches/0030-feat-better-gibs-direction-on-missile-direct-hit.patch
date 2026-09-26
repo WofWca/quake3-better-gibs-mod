@@ -1,4 +1,4 @@
-From 433c6fcc1936e15e59b08a2c5628b464ac79950b Mon Sep 17 00:00:00 2001
+From 3bc45bad55cf135544e69dfd98052c969b76367d Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 22 Jan 2026 13:55:28 +0400
 Subject: [PATCH] feat: better gibs direction on missile direct hit
@@ -6,13 +6,13 @@ Subject: [PATCH] feat: better gibs direction on missile direct hit
 Related:
 - https://github.com/WofWca/quake3-better-gibs-mod/issues/2.
 ---
- code/game/g_combat.c  | 114 +++++++++++++++++++++++++++++++++++++++---
- code/game/g_cvar.h    |  14 ++++++
+ code/game/g_combat.c  | 131 +++++++++++++++++++++++++++++++++++++++---
+ code/game/g_cvar.h    |  14 +++++
  code/game/g_missile.c |   5 +-
- 3 files changed, 126 insertions(+), 7 deletions(-)
+ 3 files changed, 142 insertions(+), 8 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 9ed883d0c..9e9d89a95 100644
+index 9ed883d0c..6d98bbfb8 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -229,6 +229,20 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker )
@@ -36,7 +36,7 @@ index 9ed883d0c..9e9d89a95 100644
  /*
  ==================
  GibEntity
-@@ -782,6 +796,80 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
+@@ -782,6 +796,84 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
  	}
  }
  #endif
@@ -57,15 +57,21 @@ index 9ed883d0c..9e9d89a95 100644
 +*/
 +static void AdjustKnockbackIfDirectMissileHit( const gentity_t *targ,
 +	const gentity_t *inflictor, const vec3_t dir, const vec3_t point,
-+	int knockback, const vec3_t oldKvel, int dflags, int mod, vec3_t velChange )
++	int knockback, const vec3_t oldKvel, int dflags, int mod,
++	vec3_t velChange, vec3_t finalDir )
 +{
 +	vec3_t	dir2; // Direction from the explosion to the player's center.
-+	vec3_t	kvel2, finalDir;
++	vec3_t	kvel2;
 +
 +	VectorClear( velChange );
++	if ( dir ) {
++		VectorCopy( dir, finalDir );
++	} else {
++		VectorClear( finalDir );
++	}
 +
 +	if (!(
-+		knockback && targ->client &&
++		dir && knockback && targ->client &&
 +		inflictor &&
 +		inflictor->s.eType == ET_MISSILE &&
 +		// Make sure it has big splash radius,
@@ -102,37 +108,48 @@ index 9ed883d0c..9e9d89a95 100644
 +	if ( VectorNormalize( finalDir ) <= 0.0 ) {
 +		// No particular direction, so let's just apply no knockback at all.
 +		VectorScale( oldKvel, -1, velChange );
++		VectorClear( finalDir );
 +		return;
 +	}
 +
 +	// "Cancel" the old knockback.
 +	VectorScale( oldKvel, -1, velChange );
-+	VectorScale (finalDir, KnockbackToKnockbackSpeed( knockback ), kvel2);
-+	VectorAdd (velChange, kvel2, velChange);
-+	if ( targ->client ) {
-+		VectorCopy( finalDir, targ->client->damage_from );
-+	}
++	VectorScale ( finalDir, KnockbackToKnockbackSpeed( knockback ), kvel2 );
++	VectorAdd ( velChange, kvel2, velChange );
 +}
 +
  /*
  ============
  G_Damage
-@@ -812,11 +900,14 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -807,16 +899,26 @@ dflags		these flags are used to control how T_Damage works
+ */
+ 
+ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+-			   vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
++			   vec3_t dirOriginal, vec3_t point, int damage, int dflags, int mod ) {
+ 	gclient_t	*client;
  	int			take;
  	int			asave;
  	int			knockback;
++	vec3_t		_dir;
++	vec_t		*dir = NULL;
 +	vec3_t		kvel;
  	int			max;
  #ifdef MISSIONPACK
  	vec3_t		bouncedir, impactpoint;
  #endif
  
++	if ( dirOriginal ) {
++		dir = _dir;
++		VectorCopy( dirOriginal, dir );
++	}
++
 +	VectorClear( kvel );
 +
  	if (!targ->takedamage) {
  		return;
  	}
-@@ -917,12 +1008,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -917,12 +1019,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  
  	// figure momentum add, even if the damage won't be taken
  	if ( knockback && targ->client ) {
@@ -146,7 +163,7 @@ index 9ed883d0c..9e9d89a95 100644
  		VectorAdd (targ->client->ps.velocity, kvel, targ->client->ps.velocity);
  
  		// set the timer so that the other client can't cancel
-@@ -1083,6 +1169,22 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+@@ -1083,6 +1180,26 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
  			if (targ->health < -999)
  				targ->health = -999;
  
@@ -159,11 +176,15 @@ index 9ed883d0c..9e9d89a95 100644
 +				targ->health <= GIB_HEALTH && g_blood.integer &&
 +				!g_oldGibs.integer &&
 +				g_gibsMissileDirectionKnockbackWeight.value != 1.0 &&
-+				targ->client ) {
-+				vec3_t velChange;
++				targ->client &&
++				dir ) {
++				vec3_t velChange, newDir;
 +				AdjustKnockbackIfDirectMissileHit( targ, inflictor, dir, point,
-+					knockback, kvel, dflags, mod, velChange );
-+				VectorAdd(targ->client->ps.velocity, velChange, targ->client->ps.velocity);
++					knockback, kvel, dflags, mod, velChange, newDir );
++				VectorAdd( targ->client->ps.velocity, velChange,
++					targ->client->ps.velocity );
++				VectorCopy( newDir, targ->client->damage_from );
++				VectorCopy( newDir, dir );
 +			}
 +
  			targ->enemy = attacker;

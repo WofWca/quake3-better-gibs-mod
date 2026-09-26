@@ -1,0 +1,406 @@
+From d2bf641b8460f93855a254de816a9ffe438e622f Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Fri, 26 Jun 2026 13:07:28 +0400
+Subject: [PATCH] feat: gibs: fire trails
+
+---
+ code/cgame/cg_cvar.h      | 11 ++++++
+ code/cgame/cg_effects.c   | 63 ++++++++++++++++--------------
+ code/cgame/cg_local.h     |  3 ++
+ code/cgame/cg_localents.c | 80 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 129 insertions(+), 28 deletions(-)
+
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index b79480e77..e5857bf9a 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -87,6 +87,17 @@ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
+ // Not archived because experimental
+ CG_CVAR( cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0,
+ 	"How often in milliseconds gibs leave blood \"clouds\"" )
++CG_CVAR( cg_gibsFireTrailPeriod, "cg_gibsFireTrailPeriod", "30", 0,
++	"How often in milliseconds gibs leave fire \"clouds\".\n"
++	"Remember to set `cg_gibsFireTrailMinKnockback` >= 0 for this to work" )
++CG_CVAR( cg_gibsFireTrailDuration, "cg_gibsFireTrailDuration", "1024", 0,
++	"How long in milliseconds gibs leave fire trails for.\n"
++	"Remember to set `cg_gibsFireTrailMinKnockback` >= 0 for this to work" )
++CG_CVAR( cg_gibsFireTrailMinKnockback, "cg_gibsFireTrailMinKnockback", "-1", 0,
++	"How much knockback the player must receive "
++	"for their gibs to leave fire trails.\n"
++	"100 damage is 500 knockback.\n"
++	"`-1` to disable." )
+ CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE,
+ 	"When you get gibbed, makes your camera get knocked farther away "
+ 	"thanks to it being smaller than your player's bounding box, "
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index 6242ce45b..02a0dbedd 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -530,6 +530,7 @@ CG_LaunchGib
+ */
+ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
+ 					const vec3_t velocity, const qhandle_t hModel,
++					const qboolean fireTrail,
+ 					const int randSeed ) {
+ 	localEntity_t	*le;
+ 	refEntity_t		*re;
+@@ -584,6 +585,9 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
+ 			le->angles.trDelta[i] = speedIsh * axisMul *
+ 				cg_gibsRotationFactor.value * Q_crandom(&seed);
+ 		}
++		if ( fireTrail ) {
++			le->light = LIGHT_GIB_FIRE_TRAIL;
++		}
+ 	}
+ 
+ 	le->leBounceSoundType = LEBS_BLOOD;
+@@ -690,6 +694,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		( (knockbackSpeed - 500) < 0 ? 0 : (knockbackSpeed - 500) ) /
+ 		1000.0f;
+ 	int numGibs = numGibsFactor * cg_gibs.value * DEFAULT_NUM_GIBS;
++	const qboolean fireTrail =
++		cg_gibsFireTrailMinKnockback.integer >= 0 &&
++		knockbackSpeed >= cg_gibsFireTrailMinKnockback.integer;
+ 	qboolean skullLaunched = qfalse; // launch only one skull.
+ 
+ 	if ( !cg_blood.integer ) {
+@@ -752,10 +759,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		velocity[2] += jump;
+ 		VectorAdd( velocity, playerVelocityScaled, velocity );
+ 		if ( !skullLaunched && (Q_rand(&seed) & 1) ) {
+-			CG_LaunchGib( origin, lookDirAngles, velocity, cgs.media.gibSkull, Q_rand(&seed) );
++			CG_LaunchGib( origin, lookDirAngles, velocity, cgs.media.gibSkull, fireTrail, Q_rand(&seed) );
+ 			skullLaunched = qtrue;
+ 		} else {
+-			CG_LaunchGib( origin, lookDirAngles, velocity, cgs.media.gibBrain, Q_rand(&seed) );
++			CG_LaunchGib( origin, lookDirAngles, velocity, cgs.media.gibBrain, fireTrail, Q_rand(&seed) );
+ 		}
+ 		if (--numGibs <= 0) {
+ 			return;
+@@ -768,7 +775,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
+ 		velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
+ 		VectorAdd( velocity, playerVelocityScaled, velocity );
+-		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibAbdomen, Q_rand(&seed) );
++		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibAbdomen, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -786,7 +793,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] += 70;
+ 		angles[PITCH] += 45;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -800,7 +807,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		velocity[1] = 0.5*Q_crandom(&seed)*baseRandomVelocity;
+ 		velocity[2] = jump + 0.5*Q_crandom(&seed)*baseRandomVelocity;
+ 		VectorAdd( velocity, playerVelocityScaled, velocity );
+-		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibChest, Q_rand(&seed) );
++		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibChest, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -817,7 +824,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[PITCH] -= 80;
+ 		angles[YAW] += 50;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibFist, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibFist, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -838,7 +845,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
+ 		velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
+ 		VectorAdd( velocity, playerVelocityScaled, velocity );
+-		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibFoot, Q_rand(&seed) );
++		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibFoot, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -856,7 +863,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] -= 90;
+ 		angles[PITCH] -= 75;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibForearm, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibForearm, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -868,7 +875,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
+ 		velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
+ 		VectorAdd( velocity, playerVelocityScaled, velocity );
+-		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibIntestine, Q_rand(&seed) );
++		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibIntestine, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -886,7 +893,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] -= 30;
+ 		angles[PITCH] -= 15;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -903,7 +910,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocityScaled, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[PITCH] += 15;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -925,7 +932,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		angles[ROLL] += 90;
+ 		angles[YAW] += 180;
+ 		angles[PITCH] -= 30;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -944,7 +951,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] += 90;
+ 		angles[PITCH] += 10;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -969,7 +976,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		angles[ROLL] += 90;
+ 		angles[YAW] += 180;
+ 		angles[PITCH] -= 30;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -985,7 +992,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocityScaled, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[PITCH] -= 45;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibFoot, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibFoot, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -1005,7 +1012,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] += 85;
+ 		angles[PITCH] += 90;
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibForearm, Q_rand(&seed) );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibForearm, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+ 		}
+@@ -1025,7 +1032,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 			angles[0] += Q_random(&seed) * 360;
+ 			angles[1] += Q_random(&seed) * 360;
+ 			angles[2] += Q_random(&seed) * 360;
+-			CG_LaunchGib( origin, angles, velocity, cgs.media.gibIntestine, Q_rand(&seed) );
++			CG_LaunchGib( origin, angles, velocity, cgs.media.gibIntestine, fireTrail, Q_rand(&seed) );
+ 			if (--numGibs <= 0) {
+ 				return;
+ 			}
+@@ -1118,9 +1125,9 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+ 	if ( rand() & 1 ) {
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibSkull, 0 );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibSkull, qfalse, 0 );
+ 	} else {
+-		CG_LaunchGib( origin, angles, velocity, cgs.media.gibBrain, 0 );
++		CG_LaunchGib( origin, angles, velocity, cgs.media.gibBrain, qfalse, 0 );
+ 	}
+ 
+ 	// allow gibs to be turned off for speed
+@@ -1132,55 +1139,55 @@ void CG_GibPlayerOld( vec3_t playerOrigin ) {
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibAbdomen, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibAbdomen, qfalse, 0 );
+ 
+ 	VectorCopy( playerOrigin, origin );
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibArm, qfalse, 0 );
+ 
+ 	VectorCopy( playerOrigin, origin );
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibChest, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibChest, qfalse, 0 );
+ 
+ 	VectorCopy( playerOrigin, origin );
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibFist, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibFist, qfalse, 0 );
+ 
+ 	VectorCopy( playerOrigin, origin );
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibFoot, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibFoot, qfalse, 0 );
+ 
+ 	VectorCopy( playerOrigin, origin );
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibForearm, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibForearm, qfalse, 0 );
+ 
+ 	VectorCopy( playerOrigin, origin );
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibIntestine, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibIntestine, qfalse, 0 );
+ 
+ 	VectorCopy( playerOrigin, origin );
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, qfalse, 0 );
+ 
+ 	VectorCopy( playerOrigin, origin );
+ 	velocity[0] = crandom()*GIB_VELOCITY;
+ 	velocity[1] = crandom()*GIB_VELOCITY;
+ 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
+-	CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, 0 );
++	CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, qfalse, 0 );
+ }
+ 
+ /*
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 2c118c6dd..58c0f17cc 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -92,6 +92,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ #define DEFAULT_REDTEAM_NAME		"Stroggs"
+ #define DEFAULT_BLUETEAM_NAME		"Pagans"
+ 
++// Special value, not used for actual light
++#define LIGHT_GIB_FIRE_TRAIL	-0xffff
++
+ typedef enum {
+ 	FOOTSTEP_NORMAL,
+ 	FOOTSTEP_BOOT,
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index 6eb280670..efabc4c3c 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -181,6 +181,82 @@ void CG_BloodTrail( localEntity_t *le ) {
+ 		blood->pos.trDelta[2] = 40;
+ 	}
+ }
++void CG_FireTrail( localEntity_t *le ) {
++	// Mostly copy-pasted from `CG_BloodTrail`
++
++	int		t;
++	int		t2;
++	int		step;
++	int		tBase;
++	int		tOffset;
++	vec3_t	newOrigin;
++	// Changes only when the gib collides with something.
++	int seed = le->startTime
++		+ le->pos.trTime
++		+ le->pos.trBase[0] * 0x100
++		+ le->pos.trBase[1] * 0x100
++		+ le->pos.trBase[2] * 0x100
++		// We could also use these, but we have enough randomness already.
++		// + le->pos.trDelta[0] * 0x100
++		// + le->pos.trDelta[1] * 0x100
++		// + le->pos.trDelta[2] * 0x100
++		;
++
++	if ( cg_gibsFireTrailPeriod.integer <= 0 ) {
++		return;
++	}
++
++	tOffset = 15 & Q_rand(&seed);
++
++	tBase = le->startTime + tOffset;
++	if ( cg.time < tBase ) {
++		return;
++	}
++
++	step = cg_gibsFireTrailPeriod.integer * (1 + 0.5*random());
++	t = tBase + step * ( ( cg.time - cg.frametime - tBase + step ) / step );
++	t2 = tBase + step * ( ( cg.time - tBase ) / step );
++
++	for ( ; t <= t2; t += step ) {
++		vec3_t vel;
++		const int decayStartTime =
++			le->startTime + cg_gibsFireTrailDuration.value / 8;
++		float sizeScale = 1;
++
++		if (t < decayStartTime) {
++			sizeScale = 1;
++		} else {
++			sizeScale = 1 - (t - decayStartTime) /
++				cg_gibsFireTrailDuration.value *
++				( 1 + 0.5*Q_crandom(&seed) );
++			if (sizeScale < 0.4) {
++				sizeScale = 0;
++				// Stop calling `CG_FireTrail()`, just for performance.
++				if ( le->light == LIGHT_GIB_FIRE_TRAIL) {
++					le->light = 0;
++				}
++				break;
++			}
++		}
++		sizeScale *= 1.5;
++		sizeScale *= 1 + 0.25*Q_crandom(&seed);
++
++		BG_EvaluateTrajectory( &le->pos, t, newOrigin );
++		newOrigin[0] += rand() & 15 - 8;
++		newOrigin[1] += rand() & 15 - 8;
++		newOrigin[2] += rand() & 15 - 8;
++
++		BG_EvaluateTrajectoryDelta( &le->pos, t, vel);
++		// Make the fire "trail behind".
++		VectorScale(vel, 0.5, vel);
++		vel[0] += rand() & 63 - 32;
++		vel[1] += rand() & 63 - 32;
++		vel[2] += rand() & 63 - 32;
++
++		CG_ParticleExplosion( "explode1", newOrigin, vel, 300,
++			sizeScale*10, sizeScale*3 );
++	}
++}
+ 
+ 
+ /*
+@@ -426,6 +502,10 @@ void CG_AddFragment( localEntity_t *le ) {
+ 		// add a blood trail
+ 		if ( le->leBounceSoundType == LEBS_BLOOD ) {
+ 			CG_BloodTrail( le );
++
++			if ( le->light == LIGHT_GIB_FIRE_TRAIL && !cg_oldGibs.integer ) {
++				CG_FireTrail( le );
++			}
+ 		}
+ 
+ 		return;
+-- 
+2.55.0
+

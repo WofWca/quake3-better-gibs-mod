@@ -1,4 +1,4 @@
-From d48e6a48cd43417c78c4a6cce312d5476ac28228 Mon Sep 17 00:00:00 2001
+From 59f21feaf3959bd616a8c9894a47d192413bf9ee Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 2 Feb 2026 14:41:58 +0400
 Subject: [PATCH] feat: gibs: damage-based random velocity
@@ -246,7 +246,7 @@ index 8c9a78486..ea4133ed3 100644
  //	i = trap_AAS_PointReachabilityAreaIndex( ent->client->ps.origin );
  //	ent->client->areabits[i >> 3] |= 1 << (i & 7);
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 549e94533..6ede89ec8 100644
+index 1251a6516..3ab98456c 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -236,11 +236,7 @@ KnockbackToKnockbackSpeed

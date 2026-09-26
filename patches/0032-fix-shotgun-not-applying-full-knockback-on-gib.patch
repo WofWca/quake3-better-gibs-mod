@@ -1,4 +1,4 @@
-From 3a2ecd0ba63a257faea8f4e9650f59f35ff35575 Mon Sep 17 00:00:00 2001
+From b9e88c0ddba3639c6b159d9705ef2f7b59286dfe Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 18 Feb 2026 21:29:10 +0400
 Subject: [PATCH] fix: shotgun not applying full knockback on gib
@@ -13,7 +13,7 @@ Related:
  3 files changed, 22 insertions(+), 2 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index e5f4becc2..edd3cac0c 100644
+index a7798ceec..4c16a87bb 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -287,7 +287,11 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d

@@ -1,4 +1,4 @@
-From d6d1ffb32edb280b3337bdef2595a469b83d68a0 Mon Sep 17 00:00:00 2001
+From ccba6dc37b6886e6aa81c7b326e06c2d5c0eb96c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 20 Feb 2026 14:12:27 +0400
 Subject: [PATCH] feat: make camera fly farther on gib + fix a bug
@@ -141,7 +141,7 @@ index c6a0e8748..5b4b27179 100644
  	Q_strncpyz ( oldname, client->pers.netname, sizeof( oldname ) );
  	s = Info_ValueForKey (userinfo, "name");
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 6ede89ec8..51035ee62 100644
+index 3ab98456c..52bf75a79 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -313,6 +313,18 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {

@@ -1,0 +1,83 @@
+From e2bae4f8620b55f164f35d85e67e977c836caab0 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Wed, 6 May 2026 23:29:47 +0400
+Subject: [PATCH] feat: add `cg_debugGibs`
+
+---
+ code/cgame/cg_cvar.h    |  3 +++
+ code/cgame/cg_effects.c | 22 ++++++++++++++++++++++
+ code/cgame/cg_event.c   | 11 +++++++++++
+ 3 files changed, 36 insertions(+)
+
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index a97c975c7..18e00877e 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -129,6 +129,9 @@ CG_CVAR( cg_animSpeed, "cg_animspeed", "1", CVAR_CHEAT, NULL )
+ CG_CVAR( cg_debugAnim, "cg_debuganim", "0", CVAR_CHEAT, NULL )
+ CG_CVAR( cg_debugPosition, "cg_debugposition", "0", CVAR_CHEAT, NULL )
+ CG_CVAR( cg_debugEvents, "cg_debugevents", "0", CVAR_CHEAT, NULL )
++CG_CVAR( cg_debugGibs, "cg_debugGibs", "0", CVAR_CHEAT,
++	"Flag-like variable: set to 1 for basic debug logging, "
++	"set to 1023 (or -1) for mega debugging" )
+ CG_CVAR( cg_errorDecay, "cg_errordecay", "100", 0, NULL )
+ CG_CVAR( cg_nopredict, "cg_nopredict", "0", 0, NULL )
+ CG_CVAR( cg_noPlayerAnims, "cg_noplayeranims", "0", CVAR_CHEAT, NULL )
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index 1e4d387e1..a70b3157a 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -708,6 +708,28 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 
+ 	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocityScaled );
+ 
++	if ( cg_debugGibs.integer & 0x01 ) {
++		CG_Printf( "gib:" );
++		CG_Printf( " "S_COLOR_YELLOW"%i"S_COLOR_WHITE" pieces",
++			numGibs );
++		CG_Printf( ", speeds: player: "S_COLOR_YELLOW"%.1f",
++			VectorLength( playerVelocityScaled ) );
++		CG_Printf( " (vertical "S_COLOR_YELLOW"%.1f"S_COLOR_WHITE")",
++			playerVelocityScaled[2] );
++		CG_Printf( ", random: "S_COLOR_YELLOW"%.1f",
++			baseRandomVelocity );
++		CG_Printf( "\n" );
++	}
++	if ( cg_debugGibs.integer & 0x02 ) {
++		CG_Printf( "     body pitch "S_COLOR_YELLOW"%.1f",
++			AngleNormalize180( bodyAngles[PITCH] ) );
++		CG_Printf( " yaw "S_COLOR_YELLOW"%.1f",
++			AngleNormalize360( bodyAngles[YAW] ) );
++		CG_Printf( ", knockback speed "S_COLOR_YELLOW"%i", knockbackSpeed );
++		CG_Printf( ", random seed "S_COLOR_YELLOW"%i", seed );
++		CG_Printf( "\n" );
++	}
++
+ 	do {
+ 		// Note that one gib will get launched even if `numGibs == 0`.
+ 		// This is in line with the original behavior of `CG_GibPlayer`.
+diff --git a/code/cgame/cg_event.c b/code/cgame/cg_event.c
+index 8d33f5538..562963f06 100644
+--- a/code/cgame/cg_event.c
++++ b/code/cgame/cg_event.c
+@@ -1277,6 +1277,17 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
+ 			torsoAngles[YAW] = torsoAnimation.yawAngle;
+ 			torsoAngles[ROLL] = 0;
+ 
++			if ( cg_debugGibs.integer & 0x04 ) {
++				CG_Printf("EV_GIB_PLAYER:");
++				CG_Printf(" time "S_COLOR_GREEN"%i.%03is",
++					cg.time / 1000, cg.time % 1000 );
++				CG_Printf(", targ "S_COLOR_GREEN"%i",
++					es->number );
++				CG_Printf(", usePredictedPs %s%i\n",
++					usePredictedPs ? S_COLOR_GREEN : S_COLOR_CYAN,
++					usePredictedPs );
++			}
++
+ 			CG_GibPlayer( cent->lerpOrigin, torsoAngles, *vel, knockbackSpeed,
+ 				&torsoAnimation, randSeed );
+ 		}
+-- 
+2.55.0
+
