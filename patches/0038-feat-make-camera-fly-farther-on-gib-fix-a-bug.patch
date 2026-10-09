@@ -192,5 +192,5 @@ index 4af3f87e4..b055422fd 100644
  	qboolean	inactivityWarning;	// qtrue if the five seoond warning has been given
  	int			rewardTime;			// clear the EF_AWARD_IMPRESSIVE, etc when time > this
 -- 
-2.55.0
+2.56.0
 

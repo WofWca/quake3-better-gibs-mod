@@ -146,5 +146,5 @@ index 3465781d9..3da6f82bb 100644
  	self->takedamage = qfalse;
  	self->s.eType = ET_INVISIBLE;
 -- 
-2.55.0
+2.56.0
 

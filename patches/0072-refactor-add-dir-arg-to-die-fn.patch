@@ -150,5 +150,5 @@ index ada16f113..d7dde5855 100644
  
  	otherTeam = OtherTeam( self->spawnflags );
 -- 
-2.55.0
+2.56.0
 
