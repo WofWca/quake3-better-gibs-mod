@@ -1,4 +1,4 @@
-From e5c141103ffc0434d2f8ce9c6df0d0afba475fcd Mon Sep 17 00:00:00 2001
+From 8f71a5e472ea176f47b020d09ddc70e52a6b41ce Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 10 Aug 2026 23:51:48 +0400
 Subject: [PATCH] feat: stop sounds (pain, taunts) when gibbed
@@ -149,7 +149,7 @@ index 580b70ff3..68abad75c 100644
  
  //
 diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
-index 8a27774cf..fd8185412 100644
+index 60086185d..c2e880c83 100644
 --- a/code/cgame/cg_snapshot.c
 +++ b/code/cgame/cg_snapshot.c
 @@ -69,6 +69,10 @@ static void CG_TransitionEntity( centity_t *cent ) {

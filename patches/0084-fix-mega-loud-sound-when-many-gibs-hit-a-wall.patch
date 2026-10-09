@@ -1,4 +1,4 @@
-From c8988eac2b164a49a5d4dc318afd4f8f66bdba0a Mon Sep 17 00:00:00 2001
+From 2b070fdfc48b0289768220be319e62b54a32807d Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 16 Aug 2026 13:44:33 +0400
 Subject: [PATCH] fix: mega loud sound when many gibs hit a wall
@@ -22,7 +22,7 @@ index 98c9aec6c..d426ee92a 100644
  	"Fraction of speed that gibs preserve when bouncing off a surface" )
  CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 6eae2e500..5ff99bee2 100644
+index 8d02dfab1..edfe47d95 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
 @@ -319,6 +319,37 @@ CG_FragmentBounceSound

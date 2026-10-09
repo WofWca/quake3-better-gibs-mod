@@ -1,4 +1,4 @@
-From 61508810436d7c41640bfa2a7b3fa1872948ffe3 Mon Sep 17 00:00:00 2001
+From ed6e030a1beb823be46e0d195239457f872e91bb Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 8 Jul 2026 23:12:50 +0400
 Subject: [PATCH] improvement: increase intermission delay by 100ms

@@ -1,4 +1,4 @@
-From fc938776649dca3199e2c8162a4f7a5c248e2cfe Mon Sep 17 00:00:00 2001
+From a7d323d7901d1542663eb95ffee1e109ed16a37d Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 10 Jul 2026 15:34:28 +0400
 Subject: [PATCH] feat: launch an extra brain when gibbing Klesk
@@ -10,10 +10,10 @@ Subject: [PATCH] feat: launch an extra brain when gibbing Klesk
  3 files changed, 23 insertions(+), 4 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 26908c3b5..1edb0c0fe 100644
+index 72023f8ad..1cf393ef8 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -665,7 +665,8 @@ in demo playback, so that players see the same gibs
+@@ -667,7 +667,8 @@ in demo playback, so that players see the same gibs
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  					const vec3_t playerVelocityOriginal,
  					const vec3_t knockbackDir, const int knockbackSpeedOriginal,
@@ -23,7 +23,7 @@ index 26908c3b5..1edb0c0fe 100644
  	int i;
  	vec3_t	baseOrigin, origin, velocity;
  	// Generally only the head should have pitch,
-@@ -828,6 +829,23 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -830,6 +831,23 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  			return;
  		}
  
@@ -47,7 +47,7 @@ index 26908c3b5..1edb0c0fe 100644
  		VectorCopy( baseOrigin, origin );
  		VectorMA( origin, MINS_Z + 0.65 * playerHeight, up, origin );
  		VectorClear( velocity );
-@@ -1282,7 +1300,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1284,7 +1302,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  	}
  
  	CG_GibPlayer( origin, torsoAngles, *vel, knockbackDir, knockbackSpeed,
@@ -71,10 +71,10 @@ index 45b2905c1..580b70ff3 100644
  void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  					const clientInfo_t *ci );
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 2d1175cf4..6eae2e500 100644
+index 302e6ecb1..8d02dfab1 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
-@@ -939,7 +939,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
+@@ -943,7 +943,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
  			randSeed = Q_rand(&randSeed) + cgs.levelStartTime;
  
  			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta,

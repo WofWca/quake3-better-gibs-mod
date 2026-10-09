@@ -1,4 +1,4 @@
-From 0af3cba02af3c028fd202e7628bb5af02fcea81e Mon Sep 17 00:00:00 2001
+From 435c024e9564bccae2397c614468cda3b9523e29 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sat, 11 Jul 2026 17:15:54 +0400
 Subject: [PATCH] fix: gibs: poor RNG (skull either always or never)
@@ -11,10 +11,10 @@ Yes, this increases rotation a little.
  1 file changed, 26 insertions(+), 12 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 1edb0c0fe..909da4801 100644
+index 1cf393ef8..768d20616 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -1191,28 +1191,42 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1193,28 +1193,42 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  	// are not in complete sync between clients,
  	// so this seed is not always the same for all players.
  	int randSeed = es->number;

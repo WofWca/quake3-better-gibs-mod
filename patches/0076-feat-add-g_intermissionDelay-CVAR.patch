@@ -1,4 +1,4 @@
-From 229e0d49a258510208b2d965f36fdb68f6c5e6bd Mon Sep 17 00:00:00 2001
+From 5cd219f9bc3502d302db13eb6f6290381e4cc9e9 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 6 Jul 2026 15:20:16 +0400
 Subject: [PATCH] feat: add `g_intermissionDelay` CVAR

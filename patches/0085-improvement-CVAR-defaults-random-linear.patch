@@ -1,4 +1,4 @@
-From a20c62a4c32dcbfb8bb67aeaaf0b04113d1589f5 Mon Sep 17 00:00:00 2001
+From f2b8c2a44e9efdbe48ce88e545edfc494ba736eb Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 11 Sep 2026 19:59:12 +0400
 Subject: [PATCH] improvement: CVAR defaults: -random +linear

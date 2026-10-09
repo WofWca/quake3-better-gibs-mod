@@ -1,0 +1,55 @@
+From a0884e6a15d9277f48324483d6b7e8a5eb2a0726 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 6 Oct 2026 23:06:52 +0400
+Subject: [PATCH] refactor: factor out `CG_ShouldTransitionNoLerp`
+
+---
+ code/cgame/cg_snapshot.c | 25 ++++++++++++++++++-------
+ 1 file changed, 18 insertions(+), 7 deletions(-)
+
+diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
+index 30e18a1ff..bce82eaa9 100644
+--- a/code/cgame/cg_snapshot.c
++++ b/code/cgame/cg_snapshot.c
+@@ -193,6 +193,23 @@ static void CG_TransitionSnapshot( void ) {
+ }
+ 
+ 
++static qboolean CG_ShouldTransitionNoLerp( const entityState_t *es ) {
++	if ( !cg_gibsNoLerpDelay.integer ) {
++		return qfalse;
++	}
++
++	if ( es->eType == ET_EVENTS + EV_GIB_PLAYER ) {
++		return qtrue;
++	}
++	// For vanilla servers.
++	if ( ( es->event & ~EV_EVENT_BITS ) == EV_GIB_PLAYER &&
++		cg_gibsNoLerpDelay.integer & 0x02 )
++	{
++		return qtrue;
++	}
++
++	return qfalse;
++}
+ /*
+ ===================
+ CG_TransitionNoLerpEntities
+@@ -222,13 +239,7 @@ static void CG_TransitionNoLerpEntities( const snapshot_t *snap ) {
+ 			const int 		originalPreviousEvent = cent->previousEvent;
+ 			const qboolean	originalCurrentValid = cent->currentValid;
+ 
+-			if ( es->eType != ET_EVENTS + EV_GIB_PLAYER &&
+-				// For vanilla servers.
+-				!(
+-					( es->event & ~EV_EVENT_BITS ) == EV_GIB_PLAYER &&
+-					cg_gibsNoLerpDelay.integer & 0x02
+-				) )
+-			{
++			if ( !CG_ShouldTransitionNoLerp( es ) ) {
+ 				continue;
+ 			}
+ 
+-- 
+2.56.0
+

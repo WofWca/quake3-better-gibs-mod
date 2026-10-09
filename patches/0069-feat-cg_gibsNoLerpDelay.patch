@@ -1,12 +1,12 @@
-From f007aa6a3b5344d092652e356c76e847ea3b0796 Mon Sep 17 00:00:00 2001
+From 4c85bb962313e52d2bcd4c892df9d2e74843daa4 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 23 Jun 2026 19:44:50 +0400
 Subject: [PATCH] feat: `cg_gibsNoLerpDelay`
 
 ---
  code/cgame/cg_cvar.h     | 21 ++++++++++
- code/cgame/cg_snapshot.c | 82 ++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 103 insertions(+)
+ code/cgame/cg_snapshot.c | 86 ++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 107 insertions(+)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
 index 73dd17ba7..4e788cef1 100644
@@ -45,10 +45,10 @@ index 73dd17ba7..4e788cef1 100644
  	"Fraction of speed that gibs preserve when bouncing off a surface" )
  CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
 diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
-index 11b9a0678..8a27774cf 100644
+index 11b9a0678..60086185d 100644
 --- a/code/cgame/cg_snapshot.c
 +++ b/code/cgame/cg_snapshot.c
-@@ -186,6 +186,86 @@ static void CG_TransitionSnapshot( void ) {
+@@ -186,6 +186,90 @@ static void CG_TransitionSnapshot( void ) {
  }
  
  
@@ -78,8 +78,8 @@ index 11b9a0678..8a27774cf 100644
 +			centity_t *targCent = targNum == cg.snap->ps.clientNum
 +				? &cg.predictedPlayerEntity
 +				: &cg_entities[ targNum ];
-+			vec3_t posBase;
-+			int nextStateEvent;
++			const int 		originalPreviousEvent = cent->previousEvent;
++			const qboolean	originalCurrentValid = cent->currentValid;
 +
 +			if ( es->eType != ET_EVENTS + EV_GIB_PLAYER &&
 +				// For vanilla servers.
@@ -89,11 +89,6 @@ index 11b9a0678..8a27774cf 100644
 +				) )
 +			{
 +				continue;
-+			}
-+
-+			if ( cg_debugGibs.integer & 0x08 ) {
-+				CG_Printf("Running gib event without lerp delay (cg_gibsNoLerpDelay). ent %i targ %i t %i server time %i\n",
-+					es->number, targNum, cg.time, snap->serverTime );
 +			}
 +
 +			// TODO fix: with vanilla servers (old protocol)
@@ -112,6 +107,15 @@ index 11b9a0678..8a27774cf 100644
 +			// Copied from the other occurrence of `CG_TransitionEntity`.
 +			// Otherwise it seems that `CG_GibPlayer()` runs twice.
 +			cent->snapShotTime = cg.snap->serverTime;
++
++			if ( cg_debugGibs.integer & 0x08 &&
++				// Don't log the same event multiple times
++				( !originalCurrentValid ||
++					cent->previousEvent != originalPreviousEvent ) )
++			{
++				CG_Printf("ran event without lerp delay (cg_gibsNoLerpDelay). ent %i type %i targ %i t %i server time %i\n",
++					es->number, es->eType, targNum, cg.time, snap->serverTime );
++			}
 +
 +			// We've run the "gib" event for this entity ahead of time,
 +			// so we also need to make it invisible ahead of time,
@@ -135,7 +139,7 @@ index 11b9a0678..8a27774cf 100644
  /*
  ===================
  CG_SetNextSnap
-@@ -240,6 +320,8 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
+@@ -240,6 +324,8 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
  
  	// sort out solid entities
  	CG_BuildSolidList();

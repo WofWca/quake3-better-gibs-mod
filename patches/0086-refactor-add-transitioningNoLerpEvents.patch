@@ -1,4 +1,4 @@
-From bb0c379b0cd13b1f39a54dffd7e8ce067a35b87a Mon Sep 17 00:00:00 2001
+From 11d888497090279047af2f1647fbaf9140b695e8 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 22 Sep 2026 17:21:38 +0400
 Subject: [PATCH] refactor: add `transitioningNoLerpEvents`
@@ -22,10 +22,10 @@ index 68abad75c..016346126 100644
  	float		frameInterpolation;	// (float)( cg.time - cg.frame->serverTime ) / (cg.nextFrame->serverTime - cg.frame->serverTime)
  
 diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
-index fd8185412..e11645c45 100644
+index c2e880c83..1e583df32 100644
 --- a/code/cgame/cg_snapshot.c
 +++ b/code/cgame/cg_snapshot.c
-@@ -328,7 +328,9 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
+@@ -332,7 +332,9 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
  	// sort out solid entities
  	CG_BuildSolidList();
  

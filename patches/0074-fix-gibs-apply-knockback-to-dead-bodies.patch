@@ -1,4 +1,4 @@
-From 374f2c94e2d7c84af02cdfb1f84fa6d19e2cd4ed Mon Sep 17 00:00:00 2001
+From 8d63b5e57d748f0f04cd6fb31de61adffef5bc2c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 16:58:03 +0400
 Subject: [PATCH] fix: gibs: apply knockback to dead bodies

@@ -1,4 +1,4 @@
-From 5ce0c173127320e1683e20252705ab130fdcab7e Mon Sep 17 00:00:00 2001
+From 2489e43d2568cdad131a60495309dda6877980a2 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 22 Sep 2026 17:53:11 +0400
 Subject: [PATCH] feat: calc explosion knockback for each piece
@@ -39,10 +39,10 @@ index 59ca839c0..6475ec297 100644
  	"Scale how much random velocity (spread) the gibs gain "
  	"from damage (knockback)." )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 909da4801..f9e4f80c2 100644
+index 768d20616..74879b6cc 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -648,6 +648,34 @@ void AdjustPositionIfDeathAnimation( const lerpFrame_t *anim, vec3_t origin,
+@@ -650,6 +650,34 @@ void AdjustPositionIfDeathAnimation( const lerpFrame_t *anim, vec3_t origin,
  		lookDirAngles[PITCH] += 360;
  	}
  }
@@ -77,7 +77,7 @@ index 909da4801..f9e4f80c2 100644
  /*
  ===================
  CG_GibPlayer
-@@ -665,6 +693,7 @@ in demo playback, so that players see the same gibs
+@@ -667,6 +695,7 @@ in demo playback, so that players see the same gibs
  void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  					const vec3_t playerVelocityOriginal,
  					const vec3_t knockbackDir, const int knockbackSpeedOriginal,
@@ -85,7 +85,7 @@ index 909da4801..f9e4f80c2 100644
  					const lerpFrame_t *bodyAnimation, const clientInfo_t *ci,
  					const int randSeed ) {
  	int i;
-@@ -684,6 +713,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -686,6 +715,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		cg_gibsExtraKnockback.integer +
  		cg_gibsKnockback.value * knockbackSpeedOriginal;
  	float stoppingSpeed;
@@ -95,7 +95,7 @@ index 909da4801..f9e4f80c2 100644
  	float baseRandomVelocity =
  		cg_gibsExtraRandomVelocity.value +
  		cg_gibsRandomVelocityFromKnockback.value * knockbackSpeed;
-@@ -730,16 +762,39 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -732,16 +764,39 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	}
  	VectorCopy( playerVelocityOriginal, playerVelocity );
  
@@ -142,7 +142,7 @@ index 909da4801..f9e4f80c2 100644
  			playerVelocity );
  	}
  
-@@ -766,6 +821,17 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -768,6 +823,17 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  
  	VectorScale( playerVelocity, cg_gibsInheritPlayerVelocity.value, playerVelocity );
  
@@ -160,7 +160,7 @@ index 909da4801..f9e4f80c2 100644
  	if ( cg_debugGibs.integer & 0x01 ) {
  		CG_Printf( "gib:" );
  		CG_Printf( " "S_COLOR_YELLOW"%i"S_COLOR_WHITE" pieces",
-@@ -784,6 +850,19 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -786,6 +852,19 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		CG_Printf( "\n" );
  	}
  	if ( cg_debugGibs.integer & 0x02 ) {
@@ -180,7 +180,7 @@ index 909da4801..f9e4f80c2 100644
  		CG_Printf( "     body pitch "S_COLOR_YELLOW"%.1f",
  			AngleNormalize180( bodyAngles[PITCH] ) );
  		CG_Printf( " yaw "S_COLOR_YELLOW"%.1f",
-@@ -819,6 +898,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -821,6 +900,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  			up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -189,7 +189,7 @@ index 909da4801..f9e4f80c2 100644
  		if ( !skullLaunched && (Q_rand(&seed) & 1) ) {
  			CG_LaunchGib( origin, lookDirAngles, velocity, cgs.media.gibSkull, fireTrail, Q_rand(&seed) );
  			skullLaunched = qtrue;
-@@ -842,6 +923,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -844,6 +925,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  			velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
  			velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
  			VectorAdd( velocity, playerVelocity, velocity );
@@ -198,7 +198,7 @@ index 909da4801..f9e4f80c2 100644
  			CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibBrain, fireTrail, Q_rand(&seed) );
  			// Don't decrement `numGibs`. This is extra.
  		}
-@@ -853,6 +936,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -855,6 +938,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
  		velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -207,7 +207,7 @@ index 909da4801..f9e4f80c2 100644
  		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibAbdomen, fireTrail, Q_rand(&seed) );
  		if (--numGibs <= 0) {
  			return;
-@@ -868,6 +953,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -870,6 +955,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -216,7 +216,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] += 70;
  		angles[PITCH] += 45;
-@@ -885,6 +972,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -887,6 +974,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		velocity[1] = 0.5*Q_crandom(&seed)*baseRandomVelocity;
  		velocity[2] = jump + 0.5*Q_crandom(&seed)*baseRandomVelocity;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -225,7 +225,7 @@ index 909da4801..f9e4f80c2 100644
  		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibChest, fireTrail, Q_rand(&seed) );
  		if (--numGibs <= 0) {
  			return;
-@@ -899,6 +988,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -901,6 +990,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
  		velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -234,7 +234,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[PITCH] -= 80;
  		angles[YAW] += 50;
-@@ -923,6 +1014,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -925,6 +1016,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
  		velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -243,7 +243,7 @@ index 909da4801..f9e4f80c2 100644
  		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibFoot, fireTrail, Q_rand(&seed) );
  		if (--numGibs <= 0) {
  			return;
-@@ -938,6 +1031,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -940,6 +1033,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -252,7 +252,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] -= 90;
  		angles[PITCH] -= 75;
-@@ -953,6 +1048,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -955,6 +1050,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
  		velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -261,7 +261,7 @@ index 909da4801..f9e4f80c2 100644
  		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibIntestine, fireTrail, Q_rand(&seed) );
  		if (--numGibs <= 0) {
  			return;
-@@ -968,6 +1065,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -970,6 +1067,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -270,7 +270,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] -= 30;
  		angles[PITCH] -= 15;
-@@ -986,6 +1085,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -988,6 +1087,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -279,7 +279,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[PITCH] += 15;
  		CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, fireTrail, Q_rand(&seed) );
-@@ -1006,6 +1107,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -1008,6 +1109,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -288,7 +288,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] += 90;
  		angles[YAW] += 180;
-@@ -1026,6 +1129,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -1028,6 +1131,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -297,7 +297,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] += 90;
  		angles[PITCH] += 10;
-@@ -1048,6 +1153,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -1050,6 +1155,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -306,7 +306,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		// TODO seems not to be rotated well when bodyAngles is not upright
  		// (i.e. gib a dead player). Same for some other gibs.
-@@ -1068,6 +1175,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -1070,6 +1177,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
  		velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -315,7 +315,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[PITCH] -= 45;
  		CG_LaunchGib( origin, angles, velocity, cgs.media.gibFoot, fireTrail, Q_rand(&seed) );
-@@ -1087,6 +1196,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -1089,6 +1198,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
  		velocity[2] += jump;
  		VectorAdd( velocity, playerVelocity, velocity );
@@ -324,7 +324,7 @@ index 909da4801..f9e4f80c2 100644
  		VectorCopy( bodyAngles, angles );
  		angles[ROLL] += 85;
  		angles[PITCH] += 90;
-@@ -1106,6 +1217,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -1108,6 +1219,8 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  			velocity[1] = Q_crandom(&seed)*baseRandomVelocity;
  			velocity[2] = jump + Q_crandom(&seed)*baseRandomVelocity;
  			VectorAdd( velocity, playerVelocity, velocity );
@@ -333,7 +333,7 @@ index 909da4801..f9e4f80c2 100644
  			VectorCopy( bodyAngles, angles );
  			angles[0] += Q_random(&seed) * 360;
  			angles[1] += Q_random(&seed) * 360;
-@@ -1117,6 +1230,260 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -1119,6 +1232,260 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		}
  	} while (numGibs > 0);
  }
@@ -594,7 +594,7 @@ index 909da4801..f9e4f80c2 100644
  void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  					const clientInfo_t *ci ) {
  	// With the new proto, `cent` is the temp event entity.
-@@ -1160,6 +1527,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1162,6 +1529,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		// Just use the default knockback speed for 100 damage.
  		: 100 * 1000 / COMBAT_PLAYER_MASS;
  	vec3_t knockbackDir;
@@ -603,7 +603,7 @@ index 909da4801..f9e4f80c2 100644
  
  	// Apparently at this point `targEs->pos.trDelta` doesn't yet have
  	// the knockback from the damage that gibbed us,
-@@ -1256,6 +1625,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1258,6 +1627,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		VectorClear( knockbackDir );
  	}
  
@@ -612,7 +612,7 @@ index 909da4801..f9e4f80c2 100644
  	// Torso animation angles seem to be in better sync
  	// between the local state and how others see us,
  	// and overall are closer to other player's viewangles
-@@ -1314,6 +1685,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1316,6 +1687,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  	}
  
  	CG_GibPlayer( origin, torsoAngles, *vel, knockbackDir, knockbackSpeed,
@@ -641,10 +641,10 @@ index 016346126..8fd9553df 100644
  //
  // cg_info.c
 diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
-index 5ff99bee2..21a7ad1e1 100644
+index edfe47d95..c62ffbc0f 100644
 --- a/code/cgame/cg_localents.c
 +++ b/code/cgame/cg_localents.c
-@@ -971,7 +971,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
+@@ -975,7 +975,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
  			randSeed = Q_rand(&randSeed) + cgs.levelStartTime;
  
  			CG_GibPlayer( le->refEntity.origin, angles, le->pos.trDelta,
@@ -654,10 +654,10 @@ index 5ff99bee2..21a7ad1e1 100644
  	}
  	else {
 diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
-index e11645c45..d1b743012 100644
+index 1e583df32..30e18a1ff 100644
 --- a/code/cgame/cg_snapshot.c
 +++ b/code/cgame/cg_snapshot.c
-@@ -489,3 +489,21 @@ void CG_ProcessSnapshots( void ) {
+@@ -493,3 +493,21 @@ void CG_ProcessSnapshots( void ) {
  
  }
  
