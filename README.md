@@ -150,7 +150,10 @@ so you can enjoy it on basically any server
 - `g_intermissionDelay`
 - `g_intermissionDelaySinglePlayer`
   Only in Team Arena.
-- (maybe I've missed some: search the code for `+vmCvar_t`)
+
+For the most up-to-date list and descriptions see
+[`cg_cvar.h`](../../blob/baseq3a/code/cgame/cg_cvar.h)
+and [`g_cvar.h`](../../blob/baseq3a/code/game/g_cvar.h)
 
 Another way to (almost) restore the old behavior:
 
