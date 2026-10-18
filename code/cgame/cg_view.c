@@ -424,19 +424,27 @@ static void CG_OffsetFirstPersonView( void ) {
 //======================================================================
 
 void CG_ZoomDown_f( void ) { 
+	int zoomProgress = cg.time - cg.zoomTime;
+	if ( zoomProgress > ZOOM_TIME ) {
+		zoomProgress = ZOOM_TIME;
+	}
 	if ( cg.zoomed ) {
 		return;
 	}
 	cg.zoomed = qtrue;
-	cg.zoomTime = cg.time;
+	cg.zoomTime = cg.time - ( ZOOM_TIME - zoomProgress );
 }
 
 void CG_ZoomUp_f( void ) { 
+	int zoomProgress = cg.time - cg.zoomTime;
+	if ( zoomProgress > ZOOM_TIME ) {
+		zoomProgress = ZOOM_TIME;
+	}
 	if ( !cg.zoomed ) {
 		return;
 	}
 	cg.zoomed = qfalse;
-	cg.zoomTime = cg.time;
+	cg.zoomTime = cg.time - ( ZOOM_TIME - zoomProgress );
 }
 
 
@@ -484,6 +492,7 @@ static int CG_CalcFov( void ) {
 
 		if ( cg.zoomed ) {
 			f = ( cg.time - cg.zoomTime ) / (float)ZOOM_TIME;
+
 			if ( f > 1.0 ) {
 				fov_x = zoomFov;
 			} else {
@@ -831,7 +840,14 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	CG_PredictPlayerState();
 
 	// decide on third person view
-	cg.renderingThirdPerson = cg_thirdPerson.integer || (cg.snap->ps.stats[STAT_HEALTH] <= 0);
+	cg.renderingThirdPerson = cg_thirdPerson.integer ||
+		// We could have instead simply used `cg.predictedPlayerState`,
+		// which is based on `cg.nextSnap` and not `cg.snap`,
+		// but the difference is that `cg.nextSnap` is authoritative
+		// whereas `predictedPlayerState` could mispredict e.g. fall damage.
+		(cg.nextSnap
+			? cg.nextSnap->ps.stats[STAT_HEALTH] <= 0
+			: cg.snap->ps.stats[STAT_HEALTH] <= 0);
 
 	CG_TrackClientTeamChange();
 

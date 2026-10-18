@@ -704,6 +704,11 @@ static void CG_DrawStatusBar( void ) {
 	// armor
 	//
 	value = ps->stats[STAT_ARMOR];
+	if ( value > 100 ) {
+		color = 3; // white
+	} else {
+		color = 0; 	// yellow
+	}
 	if ( value > 0 ) {
 #ifdef USE_NEW_FONT_RENDERER
 		CG_SelectFont( 1 );
@@ -2077,6 +2082,15 @@ static void CG_ScanForCrosshairEntity( void ) {
 	CG_Trace( &trace, start, vec3_origin, vec3_origin, end, 
 		cg.snap->ps.clientNum, CONTENTS_SOLID|CONTENTS_BODY );
 	if ( trace.entityNum >= MAX_CLIENTS ) {
+		return;
+	}
+
+	// `CG_Trace` might trace based on a very old entity's position
+	// (`cg_solidEntities` is build from next snap,
+	// but `CG_ClipMoveToEntities` checks `currentState`),
+	// so we hack around it here.
+	// See https://github.com/ioquake/ioq3/issues/732.
+	if ( !cg_entities[ trace.entityNum ].currentValid ) {
 		return;
 	}
 
