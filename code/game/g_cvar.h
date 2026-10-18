@@ -41,6 +41,7 @@ G_CVAR( g_capturelimit, "capturelimit", "8", CVAR_SERVERINFO | CVAR_ARCHIVE | CV
 G_CVAR( g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, NO_TRACK, NULL )
 
 G_CVAR( g_friendlyFire, "g_friendlyFire", "0", CVAR_ARCHIVE, TRACK, NULL )
+G_CVAR( g_canDamageAfterMatchEnd, "g_canDamageAfterMatchEnd", "1", CVAR_ARCHIVE, TRACK, NULL )
 
 G_CVAR( g_autoJoin, "g_autoJoin", "1", CVAR_ARCHIVE, NO_TRACK, NULL )
 G_CVAR( g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE, NO_TRACK, NULL )

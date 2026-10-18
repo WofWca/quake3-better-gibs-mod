@@ -50,7 +50,7 @@ void P_DamageFeedback( gentity_t *player ) {
 	}
 
 	// play an apropriate pain sound
-	if ( (level.time > player->pain_debounce_time) && !(player->flags & FL_GODMODE) ) {
+	if ( (level.time >= player->pain_debounce_time) && !(player->flags & FL_GODMODE) ) {
 		player->pain_debounce_time = level.time + 700;
 		G_AddEvent( player, EV_PAIN, player->health );
 		client->ps.damageEvent++;
@@ -760,16 +760,6 @@ void ClientThink_real( gentity_t *ent ) {
 	client->lastCmdTime = ucmd->serverTime;
 	client->lastUpdateFrame = level.framenum;
 
-	msec = ucmd->serverTime - client->ps.commandTime;
-	// following others may result in bad times, but we still want
-	// to check for follow toggles
-	if ( msec < 1 && client->sess.spectatorState != SPECTATOR_FOLLOW ) {
-		return;
-	}
-	if ( msec > 200 ) {
-		msec = 200;
-	}
-
 	if ( pmove_msec.integer < 8 ) {
 		trap_Cvar_Set( "pmove_msec", "8" );
 		trap_Cvar_Update( &pmove_msec );
@@ -782,6 +772,16 @@ void ClientThink_real( gentity_t *ent ) {
 		ucmd->serverTime = ((ucmd->serverTime + pmove_msec.integer-1) / pmove_msec.integer) * pmove_msec.integer;
 		//if (ucmd->serverTime - client->ps.commandTime <= 0)
 		//	return;
+	}
+
+	msec = ucmd->serverTime - client->ps.commandTime;
+	// following others may result in bad times, but we still want
+	// to check for follow toggles
+	if ( msec < 1 && client->sess.spectatorState != SPECTATOR_FOLLOW ) {
+		return;
+	}
+	if ( msec > 200 ) {
+		msec = 200;
 	}
 
 	//
