@@ -1,4 +1,4 @@
-From 2b931e60a63a5f073b1357f9c8aa2ef24a2acb39 Mon Sep 17 00:00:00 2001
+From 78b4f6d7b6a5e0faf51f1d7a3fedbfdcd1748658 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 8 Oct 2026 22:24:25 +0400
 Subject: [PATCH] feat: `cg_gibsNoLerpDelay` for more events
@@ -9,7 +9,7 @@ Subject: [PATCH] feat: `cg_gibsNoLerpDelay` for more events
  2 files changed, 69 insertions(+)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 3a734a6b5..f5218dcd5 100644
+index ac9eaad75..28e77cea8 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
 @@ -175,6 +175,9 @@ CG_CVAR( cg_gibsNoLerpDelay, "cg_gibsNoLerpDelay", "1", 0,
@@ -20,7 +20,7 @@ index 3a734a6b5..f5218dcd5 100644
 +	"such as explosions, railgun trails, bullet hits, ahead of time.\n"
 +	"Set bits 5 and up to play even more events ahead of time.\n"
  	"To get vanilla behavior, set to 0." )
- CG_CVAR( cg_gibsStopPlayerSounds, "cg_gibsStopPlayerSounds", "3", 0,
+ CG_CVAR( cg_gibsStopPlayerSounds, "cg_gibsStopPlayerSounds", "1", 0,
  	"Stop player's sounds (pain, taunts) when they get gibbed.\n"
 diff --git a/code/cgame/cg_snapshot.c b/code/cgame/cg_snapshot.c
 index bce82eaa9..d1d7e08d1 100644

@@ -1,4 +1,4 @@
-From 5cd219f9bc3502d302db13eb6f6290381e4cc9e9 Mon Sep 17 00:00:00 2001
+From 6a77126d8d2b64cf283e49144c1581d45a07107c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Mon, 6 Jul 2026 15:20:16 +0400
 Subject: [PATCH] feat: add `g_intermissionDelay` CVAR
@@ -28,7 +28,7 @@ index fc5861890..45b0e3b47 100644
  G_CVAR( g_podiumDrop, "g_podiumDrop", "70", NO_FLAGS, NO_TRACK, NULL )
  
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 22321037f..f35928307 100644
+index 29b392e79..a9d7e90ec 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -39,9 +39,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,7 +41,7 @@ index 22321037f..f35928307 100644
  // gentity->flags
  #define	FL_GODMODE				0x00000010
  #define	FL_NOTARGET				0x00000020
-@@ -401,7 +398,7 @@ typedef struct {
+@@ -402,7 +399,7 @@ typedef struct {
  
  	// intermission state
  	int			intermissionQueued;		// intermission was qualified, but

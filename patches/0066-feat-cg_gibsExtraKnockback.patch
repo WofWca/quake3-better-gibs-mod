@@ -1,4 +1,4 @@
-From 7e72087ad2407c1a0fb10ad224c9b66659c96a11 Mon Sep 17 00:00:00 2001
+From 42ab26eccf73dcf96e18e6cbc155080060ddc69a Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 21 Jun 2026 14:03:01 +0400
 Subject: [PATCH] feat: `cg_gibsExtraKnockback`
@@ -27,10 +27,10 @@ index 88fc2f33c..9ce24d5a8 100644
  	"For every 100 of knockback speed above 500 (100 damage), "
  	"add this many pieces of gibs, times the value of `cg_gibs`.\n"
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 2de554afa..b335b07bb 100644
+index b3cd8d637..005ffec7d 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -679,7 +679,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -686,7 +686,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  	// to account for crounching.
  	float playerHeight = 32 - MINS_Z;
  	float playerRadius = PLAYER_WIDTH;

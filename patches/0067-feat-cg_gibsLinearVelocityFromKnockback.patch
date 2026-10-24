@@ -1,4 +1,4 @@
-From 3bfd610eace5fbccfe0c9d8afe8b9b7199becac3 Mon Sep 17 00:00:00 2001
+From f8866c3b61ffa63a64ea9053ffd3462caebda928 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Wed, 24 Jun 2026 19:08:01 +0400
 Subject: [PATCH] feat: `cg_gibsLinearVelocityFromKnockback`
@@ -25,10 +25,10 @@ index 9ce24d5a8..11c5d64b8 100644
  	"Scale how much random velocity (spread) the gibs gain "
  	"from damage (knockback)." )
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index b335b07bb..ab50d41da 100644
+index 005ffec7d..b0b9bf4e1 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -724,7 +724,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+@@ -731,7 +731,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
  		//
  		// This also handles `knockbackDir` being a zero-vector.
  		VectorMA( playerVelocity,

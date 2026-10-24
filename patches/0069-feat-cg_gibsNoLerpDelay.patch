@@ -1,4 +1,4 @@
-From 4c85bb962313e52d2bcd4c892df9d2e74843daa4 Mon Sep 17 00:00:00 2001
+From 61f0751238ff68222b121e8b84d06931250f9be9 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 23 Jun 2026 19:44:50 +0400
 Subject: [PATCH] feat: `cg_gibsNoLerpDelay`

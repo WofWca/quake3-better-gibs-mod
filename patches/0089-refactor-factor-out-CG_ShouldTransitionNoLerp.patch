@@ -1,4 +1,4 @@
-From a0884e6a15d9277f48324483d6b7e8a5eb2a0726 Mon Sep 17 00:00:00 2001
+From dd5e3ea27820d98bddc2dbbe3dd8dfe5602c4755 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 6 Oct 2026 23:06:52 +0400
 Subject: [PATCH] refactor: factor out `CG_ShouldTransitionNoLerp`

@@ -1,4 +1,4 @@
-From a8c0490a082053a7f3349b5a184f7d4f8586228c Mon Sep 17 00:00:00 2001
+From 721cc7a193845ee2ed6cdd26b4dc2cdbc81097ab Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 13:48:03 +0400
 Subject: [PATCH] refactor: add `dir` arg to `die()` fn
@@ -35,7 +35,7 @@ index f349a1bc4..998d4b405 100644
  	}
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index bb9b842be..12a0aa869 100644
+index 52fb73f36..87798fd5a 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -426,7 +426,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback ) {
@@ -80,7 +80,7 @@ index bb9b842be..12a0aa869 100644
  		} else if ( targ->pain ) {
  			targ->pain (targ, attacker, take);
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 744ab67f2..730dc5b6d 100644
+index 4f15bdd3c..2f1972305 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
 @@ -135,7 +135,7 @@ struct gentity_s {
@@ -92,7 +92,7 @@ index 744ab67f2..730dc5b6d 100644
  
  	int			pain_debounce_time;
  	int			fly_sound_debounce_time;	// wind tunnel
-@@ -519,7 +519,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback );
+@@ -520,7 +520,7 @@ void GibEntity( gentity_t *self, int killer, const int damageBloodFallback );
  #define SetFlNoKnockback( ent ) {ent->flags |= FL_NO_KNOCKBACK;}
  qboolean G_RadiusDamage (vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int mod);
  int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t impactpoint, vec3_t bouncedir );
@@ -101,7 +101,7 @@ index 744ab67f2..730dc5b6d 100644
  void TossClientItems( gentity_t *self );
  #ifdef MISSIONPACK
  void TossClientPersistantPowerups( gentity_t *self );
-@@ -597,7 +597,7 @@ void ClientRespawn(gentity_t *ent);
+@@ -598,7 +598,7 @@ void ClientRespawn(gentity_t *ent);
  void BeginIntermission (void);
  void InitBodyQue (void);
  void ClientSpawn( gentity_t *ent );

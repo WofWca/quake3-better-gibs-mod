@@ -1,4 +1,4 @@
-From 3aaf66d3062b859f8db95b9bdb792cef9215b7be Mon Sep 17 00:00:00 2001
+From 4087408ce1fbf132cab36f6c979b7b84ee55dac5 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 7 Jun 2026 15:45:08 +0400
 Subject: [PATCH] fix: `G_TempEntity` for `EV_GIB_PLAYER`
@@ -50,9 +50,9 @@ changes a few other things that are related to that:
  code/game/g_bot.c          |   5 --
  code/game/g_combat.c       | 128 +++++++++++++++++++++++++++----------
  code/game/g_cvar.h         |  21 +++++-
- code/game/g_local.h        |   6 ++
+ code/game/g_local.h        |   7 ++
  code/game/g_weapon.c       |  40 ++++++++++--
- 10 files changed, 235 insertions(+), 73 deletions(-)
+ 10 files changed, 236 insertions(+), 73 deletions(-)
 
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
 index 02a0dbedd..cb673c28f 100644
@@ -257,7 +257,7 @@ index 544f96e9f..b6b205f11 100644
  	trap_SetUserinfo( clientNum, userinfo );
  
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 3da6f82bb..ffb7d5ee1 100644
+index 3da6f82bb..223fc3df7 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -242,29 +242,57 @@ static float KnockbackToKnockbackSpeed( int knockback ) {
@@ -410,7 +410,7 @@ index 3da6f82bb..ffb7d5ee1 100644
 -		self->client->ps.torsoAnim = 
 -			( ( self->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
 +		if ( ShouldPostponeDeathOrGib( meansOfDeath ) ) {
-+			self->setDeathAnimScheduled = 1 + anim;
++			self->setDeathAnimScheduled = 1 + i;
 +		} else {
 +			self->client->ps.legsAnim = 
 +				( ( self->client->ps.legsAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
@@ -465,10 +465,10 @@ index 0169496eb..3e38032d2 100644
  	"If a player's speed abruptly changes by this much or more, "
  	"as a result of collision with something (e.g. floor, wall), "
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index fd214dcb8..744ab67f2 100644
+index fd214dcb8..4f15bdd3c 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
-@@ -144,6 +144,12 @@ struct gentity_s {
+@@ -144,6 +144,13 @@ struct gentity_s {
  	int			health;
  
  	qboolean	takedamage;
@@ -476,7 +476,8 @@ index fd214dcb8..744ab67f2 100644
 +	// and fire a `EV_DEATH*` event
 +	// after applying all the pellets of a shotgun shot.
 +	// 0 means "nothing is scheduled",
-+	// otherwise this represents (animation index + 1).
++	// otherwise this represents (animation index + 1),
++	// where animation index is [0, 2]
 +	int			setDeathAnimScheduled;
  	// Whether to `GibEntity` after applying all the pellets of a shotgun shot.
  	qboolean	gibScheduled;

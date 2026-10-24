@@ -1,4 +1,4 @@
-From ce67e68f538c6ad267265912d561b9f8134a456f Mon Sep 17 00:00:00 2001
+From 91d2b07cbf4cd36a21956dbe256b39497a1211a1 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 9 Jul 2026 15:25:20 +0400
 Subject: [PATCH] feat: `cg_marks` to specify duration

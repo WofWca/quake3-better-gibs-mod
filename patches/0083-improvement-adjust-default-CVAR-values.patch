@@ -1,4 +1,4 @@
-From 55753f81c192f4cbb4ffb967b2f883d6e36d4cbb Mon Sep 17 00:00:00 2001
+From 8a88d4d6836f8814ba796893fc5ed9ce356163aa Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 14 Aug 2026 22:34:01 +0400
 Subject: [PATCH] improvement: adjust default CVAR values
@@ -8,7 +8,7 @@ Subject: [PATCH] improvement: adjust default CVAR values
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 04c1e8099..98c9aec6c 100644
+index 6714d4dab..557437d91 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
 @@ -66,7 +66,7 @@ CG_CVAR( cg_gibsKnockback, "cg_gibsKnockback", "1.0", 0,

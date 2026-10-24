@@ -1,4 +1,4 @@
-From 284c123d242fde187871589bf285ea564d719946 Mon Sep 17 00:00:00 2001
+From 070fe659a342bf50c40d8cca19325b3962e9b99c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 13:50:42 +0400
 Subject: [PATCH] refactor: mark `DirToByte` arg as `const`
@@ -22,7 +22,7 @@ index 13158661b..8c3cca6e5 100644
  	float	d, bestd;
  
 diff --git a/code/qcommon/q_shared.h b/code/qcommon/q_shared.h
-index 91dee771e..b56277100 100644
+index 1877a42cb..e54cfbf14 100644
 --- a/code/qcommon/q_shared.h
 +++ b/code/qcommon/q_shared.h
 @@ -527,7 +527,7 @@ signed char ClampChar( int i );

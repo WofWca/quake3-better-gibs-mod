@@ -1,13 +1,12 @@
-From a307bc629486aece7a43fe59c091cd40e7bbdfe5 Mon Sep 17 00:00:00 2001
+From 035487e5308702f7d939ccfde48f812b41059a4f Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 14 Jun 2026 23:37:56 +0400
 Subject: [PATCH] feat: `cg_gibsOriginalOrigin` CVAR (default to 0)
 
 ---
- code/cgame/cg_cvar.h    | 15 +++++++++++++++
- code/cgame/cg_effects.c | 38 ++++++++++++++++++++++++++++++++------
- code/qcommon/q_shared.h |  8 ++++++++
- 3 files changed, 55 insertions(+), 6 deletions(-)
+ code/cgame/cg_cvar.h    | 15 ++++++++++++++
+ code/cgame/cg_effects.c | 45 +++++++++++++++++++++++++++++++++++------
+ 2 files changed, 54 insertions(+), 6 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
 index e5857bf9a..365b96447 100644
@@ -36,10 +35,24 @@ index e5857bf9a..365b96447 100644
  	"Fraction of speed that gibs preserve when bouncing off a surface" )
  CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 2877da12b..a2772fba6 100644
+index 2877da12b..42667fad8 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -1054,6 +1054,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -26,6 +26,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ #include "cg_local.h"
+ 
+ 
++#define	VectorLerp(v1, f, v2, o)	(\
++	(o)[0]=(v1)[0]+(f)*(v2[0]-v1[0]),\
++	(o)[1]=(v1)[1]+(f)*(v2[1]-v1[1]),\
++	(o)[2]=(v1)[2]+(f)*(v2[2]-v1[2])\
++)
++
++
+ /*
+ ==================
+ CG_BubbleTrail
+@@ -1054,6 +1061,8 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		targCent == &cg.predictedPlayerEntity;
  	const int killer = es->eventParm;
  
@@ -48,7 +61,7 @@ index 2877da12b..a2772fba6 100644
  	int knockbackSpeed = cgs.g_gibsNewEvGibPlayerProtocol & 0x02
  		? es->generic1 * COMBAT_EV_GIB_PLAYER_ARG_DIVISOR
  		// Also check the old Better Gibs mod protocol.
-@@ -1118,6 +1120,28 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1118,6 +1127,28 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		randSeed = Q_rand(&randSeed) + ci->name[0];
  	}
  
@@ -77,7 +90,7 @@ index 2877da12b..a2772fba6 100644
  	// Torso animation angles seem to be in better sync
  	// between the local state and how others see us,
  	// and overall are closer to other player's viewangles
-@@ -1154,11 +1178,13 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1154,11 +1185,13 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  		// where the position and velocity are fixed at what they were
  		// the moment the player got gibbed on the server,
  		// i.e. they are not interpolated.
@@ -96,7 +109,7 @@ index 2877da12b..a2772fba6 100644
  		VectorSubtract( targEs->pos.trDelta, *vel, diff );
  		l = VectorLength( diff );
  		CG_Printf(", vel diff %s%.1f",
-@@ -1170,7 +1196,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+@@ -1170,7 +1203,7 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
  			usePredictedPs );
  	}
  
@@ -104,25 +117,6 @@ index 2877da12b..a2772fba6 100644
 +	CG_GibPlayer( origin, torsoAngles, *vel, knockbackSpeed,
  		&torsoAnimation, randSeed );
  }
- 
-diff --git a/code/qcommon/q_shared.h b/code/qcommon/q_shared.h
-index 1877a42cb..91dee771e 100644
---- a/code/qcommon/q_shared.h
-+++ b/code/qcommon/q_shared.h
-@@ -565,6 +565,14 @@ typedef struct {
- #define VectorNegate(a,b)		((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
- #define VectorSet(v, x, y, z)	((v)[0]=(x), (v)[1]=(y), (v)[2]=(z))
- #define Vector4Copy(a,b)		((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
-+// (o)[0]=(v1)[0]*f+(v2)[0]*(1-f),
-+// (o)[1]=(v1)[1]*f+(v2)[1]*(1-f),
-+// (o)[2]=(v1)[2]*f+(v2)[2]*(1-f)
-+#define	VectorLerp(v1, f, v2, o)	(\
-+	(o)[0]=(v1)[0]+f*(v2[0]-v1[0]),\
-+	(o)[1]=(v1)[1]+f*(v2[1]-v1[1]),\
-+	(o)[2]=(v1)[2]+f*(v2[2]-v1[2])\
-+)
- 
- #define Byte4Copy(a,b)			((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
  
 -- 
 2.56.0

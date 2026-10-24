@@ -1,4 +1,4 @@
-From 766c6544a6cc6fd7ee9a5e164754350735c22506 Mon Sep 17 00:00:00 2001
+From af53bb17f3d08269f36dabadd8b8435ef29051c7 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 27 Sep 2026 12:16:27 +0400
 Subject: [PATCH] improvement: increase default random velocity CVAR
@@ -11,7 +11,7 @@ Bare linear speed is not enough.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 6475ec297..3a734a6b5 100644
+index 5d73c4fb3..ac9eaad75 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
 @@ -105,7 +105,7 @@ CG_CVAR( cg_gibsExplosionDistanceOffset, "cg_gibsExplosionDistanceOffset", "-3.0

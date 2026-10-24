@@ -1,4 +1,4 @@
-From 8d63b5e57d748f0f04cd6fb31de61adffef5bc2c Mon Sep 17 00:00:00 2001
+From 1a9a34d37ae7042fce6cfdd9f32315011ed3c06c Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Tue, 30 Jun 2026 16:58:03 +0400
 Subject: [PATCH] fix: gibs: apply knockback to dead bodies
@@ -11,7 +11,7 @@ Subject: [PATCH] fix: gibs: apply knockback to dead bodies
  4 files changed, 64 insertions(+), 38 deletions(-)
 
 diff --git a/code/game/g_combat.c b/code/game/g_combat.c
-index 12a0aa869..b29b0a38f 100644
+index 87798fd5a..464cc1820 100644
 --- a/code/game/g_combat.c
 +++ b/code/game/g_combat.c
 @@ -250,7 +250,7 @@ with more info about the gib event.
@@ -183,10 +183,10 @@ index 2783da549..fc5861890 100644
  	"If a player's speed abruptly changes by this much or more, "
  	"as a result of collision with something (e.g. floor, wall), "
 diff --git a/code/game/g_local.h b/code/game/g_local.h
-index 730dc5b6d..22321037f 100644
+index 2f1972305..29b392e79 100644
 --- a/code/game/g_local.h
 +++ b/code/game/g_local.h
-@@ -502,7 +502,7 @@ const char *BuildShaderStateConfig( void );
+@@ -503,7 +503,7 @@ const char *BuildShaderStateConfig( void );
  //
  qboolean CanDamage (gentity_t *targ, vec3_t origin);
  void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod);

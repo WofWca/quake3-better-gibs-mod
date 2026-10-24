@@ -1,4 +1,4 @@
-From f2b8c2a44e9efdbe48ce88e545edfc494ba736eb Mon Sep 17 00:00:00 2001
+From aeae90f3b7c659e904593479a969dd9e9a27e7dc Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Fri, 11 Sep 2026 19:59:12 +0400
 Subject: [PATCH] improvement: CVAR defaults: -random +linear
@@ -10,7 +10,7 @@ That might be good for missiles but not for shotgun or railgun.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index d426ee92a..59ca839c0 100644
+index 4c04046bc..a66a2d97b 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
 @@ -85,12 +85,12 @@ CG_CVAR( cg_gibsPiecesFromKnockback, "cg_gibsPiecesFromKnockback", "1.1", CVAR_A

@@ -1,4 +1,4 @@
-From afd1ca96420810ef432cddc2a69b1d0fcc80f0ca Mon Sep 17 00:00:00 2001
+From ca45a1f889f5faf9a27e1b27a7ff3365a7c2ad32 Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Thu, 9 Jul 2026 15:23:54 +0400
 Subject: [PATCH] feat: `cg_gibsDuration`
@@ -24,10 +24,10 @@ index 4e788cef1..648916105 100644
  	"Whether to use the exact position where the player got gibbed "
  	"as the initial gibs position, instead of the position "
 diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
-index 549e1e5ba..72023f8ad 100644
+index f2a058a7f..0afd75cbd 100644
 --- a/code/cgame/cg_effects.c
 +++ b/code/cgame/cg_effects.c
-@@ -541,7 +541,9 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
+@@ -548,7 +548,9 @@ void CG_LaunchGib( const vec3_t origin, const vec3_t angles,
  
  	le->leType = LE_FRAGMENT;
  	le->startTime = cg.time;

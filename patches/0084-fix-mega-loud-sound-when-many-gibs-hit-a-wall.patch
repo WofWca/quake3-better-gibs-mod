@@ -1,4 +1,4 @@
-From 2b070fdfc48b0289768220be319e62b54a32807d Mon Sep 17 00:00:00 2001
+From 20de3748d144bc4eaf0ea293688b99056bd0e44b Mon Sep 17 00:00:00 2001
 From: WofWca <wofwca@protonmail.com>
 Date: Sun, 16 Aug 2026 13:44:33 +0400
 Subject: [PATCH] fix: mega loud sound when many gibs hit a wall
@@ -9,10 +9,10 @@ Subject: [PATCH] fix: mega loud sound when many gibs hit a wall
  2 files changed, 34 insertions(+)
 
 diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
-index 98c9aec6c..d426ee92a 100644
+index 557437d91..4c04046bc 100644
 --- a/code/cgame/cg_cvar.h
 +++ b/code/cgame/cg_cvar.h
-@@ -166,6 +166,8 @@ CG_CVAR( cg_gibsStopPlayerSounds, "cg_gibsStopPlayerSounds", "3", 0,
+@@ -166,6 +166,8 @@ CG_CVAR( cg_gibsStopPlayerSounds, "cg_gibsStopPlayerSounds", "1", 0,
  	"Doesn't work for self as of writing. "
  	"Set 1st bit to apply this to other players. "
  	"Set 2nd bit to still try to apply this to self." )
