@@ -78,11 +78,20 @@ CG_CVAR( cg_gibsExplosionDistanceOffset, "cg_gibsExplosionDistanceOffset", "-3.0
 	"For comparison, player height and width are 56 and 30 units.\n"
 	"This lets you increase the spread. "
 	"This doesn't affect the damage and knockback.\n" )
+CG_CVAR( cg_gibsOutwardVelocityFromKnockback, "cg_gibsOutwardVelocityFromKnockback", "0.0", 0,
+	"Scale how much outward velocity "
+	"(away from the center of the body, `cg_gibsOutwardVelocityCenterHeight`) "
+	"the gibs gain from damage (knockback)." )
 CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.5", CVAR_ARCHIVE,
 	"Scale how much random velocity (spread) the gibs gain "
 	"from damage (knockback)." )
 CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE,
 	"Scale how much vertical velocity the gibs gain from damage (knockback)." )
+CG_CVAR( cg_gibsExtraOutwardVelocity, "cg_gibsExtraOutwardVelocity", "0", 0,
+	"Like `cg_gibsOutwardVelocityFromKnockback`, "
+	"but adds a *fixed* amount of outward velocity to each piece.\n"
+	"Ensures that even if the player was gibbed with the machine gun, "
+	"the gibs would still fly apart somewhat." )
 CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE,
 	"Like `cg_gibsRandomVelocityFromKnockback`, "
 	"but add a *fixed* amount of random velocity to each piece.\n"
@@ -91,6 +100,11 @@ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_A
 CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE,
 	"Like `cg_gibsVerticalVelocityFromKnockback`, "
 	"but adds a *fixed* amount of vertical speed to each piece" )
+CG_CVAR( cg_gibsOutwardVelocityCenterHeight, "cg_gibsOutwardVelocityCenterHeight", "0.6", 0,
+	"The point that gibs fly away from "
+	"for `cg_gibsOutwardVelocityFromKnockback` "
+	"and `cg_gibsExtraOutwardVelocity`. "
+	"A fraction of player height, offset up from the feet." )
 CG_CVAR( cg_gibsPlayerSpeedFromKnockback, "cg_gibsPlayerSpeedFromKnockback", "-0.25", 0,
 	"How much to slow down the player "
 	"depending on how much damage (knockback) they took.\n"

@@ -708,6 +708,19 @@ static void AddKnockbackVelocity( const vec3_t gibOrigin,
 
 	VectorMA( resVelocity, speed, dir, resVelocity );
 }
+
+static void AddOutwardVelocity( const vec3_t gibOrigin, const vec3_t bodyCenter,
+	const float speed, vec3_t resVelocity )
+{
+	vec3_t dir;
+
+	VectorSubtract( gibOrigin, bodyCenter, dir );
+	// A zero-vector stays a zero-vector.
+	VectorNormalize( dir );
+
+	VectorMA( resVelocity, speed, dir, resVelocity );
+}
+
 /*
 ===================
 CG_GibPlayer
@@ -751,6 +764,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 	float baseRandomVelocity =
 		cg_gibsExtraRandomVelocity.value +
 		cg_gibsRandomVelocityFromKnockback.value * knockbackSpeed;
+	const float baseOutwardVelocity =
+		cg_gibsExtraOutwardVelocity.value +
+		cg_gibsOutwardVelocityFromKnockback.value * knockbackSpeed;
+	// The point that gibs fly away from (see `AddOutwardVelocity`).
+	vec3_t outwardCenter;
 	int seed = randSeed;
 
 	vec3_t playerVelocity;
@@ -785,6 +803,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		bodyAngles[PITCH] = 0;
 	}
 	AngleVectors( bodyAngles, forward, right, up );
+
+	VectorMA( baseOrigin,
+		MINS_Z + cg_gibsOutwardVelocityCenterHeight.value * playerHeight, up,
+		outwardCenter );
 
 	if ( knockbackDir ) {
 		VectorMA( playerVelocityOriginal, -knockbackSpeedOriginal, knockbackDir,
@@ -879,6 +901,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 			playerVelocity[2] );
 		CG_Printf( ", random: "S_COLOR_YELLOW"%.1f",
 			baseRandomVelocity );
+		if ( baseOutwardVelocity != 0 ) {
+			CG_Printf( ", outward: "S_COLOR_YELLOW"%.1f",
+				baseOutwardVelocity );
+		}
 		CG_Printf( "\n" );
 	}
 	if ( cg_debugGibs.integer & 0x02 ) {
@@ -924,6 +950,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		// (and less randomness overall).
 		// We also do the same for other gibs,
 		// but for the left / right velocity components.
+		//
+		// TODO now that we have `cg_gibsOutwardVelocityFromKnockback`,
+		// maybe we can remove these? At least the vertical component.
 		VectorMA( velocity,
 			(0.25 + 0.5 * (Q_random(&seed) + Q_random(&seed))/2)
 				*baseRandomVelocity,
@@ -932,6 +961,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		if ( !skullLaunched && (Q_rand(&seed) & 1) ) {
 			CG_LaunchGib( origin, lookDirAngles, velocity, cgs.media.gibSkull, fireTrail, Q_rand(&seed) );
 			skullLaunched = qtrue;
@@ -957,6 +987,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 			VectorAdd( velocity, playerVelocity, velocity );
 			AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 				perPieceKnockback, velocity );
+			AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 			CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibBrain, fireTrail, Q_rand(&seed) );
 			// Don't decrement `numGibs`. This is extra.
 		}
@@ -970,6 +1001,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, 0.5 * baseOutwardVelocity, velocity );
 		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibAbdomen, fireTrail, Q_rand(&seed) );
 		if (--numGibs <= 0) {
 			return;
@@ -987,6 +1019,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[ROLL] += 70;
 		angles[PITCH] += 45;
@@ -1006,6 +1039,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, 0.5 * baseOutwardVelocity, velocity );
 		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibChest, fireTrail, Q_rand(&seed) );
 		if (--numGibs <= 0) {
 			return;
@@ -1022,6 +1056,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[PITCH] -= 80;
 		angles[YAW] += 50;
@@ -1048,6 +1083,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibFoot, fireTrail, Q_rand(&seed) );
 		if (--numGibs <= 0) {
 			return;
@@ -1065,6 +1101,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[ROLL] -= 90;
 		angles[PITCH] -= 75;
@@ -1082,6 +1119,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibIntestine, fireTrail, Q_rand(&seed) );
 		if (--numGibs <= 0) {
 			return;
@@ -1099,6 +1137,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[ROLL] -= 30;
 		angles[PITCH] -= 15;
@@ -1119,6 +1158,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[PITCH] += 15;
 		CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, fireTrail, Q_rand(&seed) );
@@ -1141,6 +1181,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[ROLL] += 90;
 		angles[YAW] += 180;
@@ -1163,6 +1204,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[ROLL] += 90;
 		angles[PITCH] += 10;
@@ -1187,6 +1229,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		// TODO seems not to be rotated well when bodyAngles is not upright
 		// (i.e. gib a dead player). Same for some other gibs.
@@ -1209,6 +1252,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[PITCH] -= 45;
 		CG_LaunchGib( origin, angles, velocity, cgs.media.gibFoot, fireTrail, Q_rand(&seed) );
@@ -1230,6 +1274,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 			perPieceKnockback, velocity );
+		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 		VectorCopy( bodyAngles, angles );
 		angles[ROLL] += 85;
 		angles[PITCH] += 90;
@@ -1239,8 +1284,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		}
 
 		for ( i = 0; i < 7; i++ ) {
-			VectorCopy( baseOrigin, origin );
-			VectorMA( origin, MINS_Z + 0.60 * playerHeight, up, origin );
+			// VectorCopy( baseOrigin, origin );
+			// VectorMA( origin, MINS_Z + 0.60 * playerHeight, up, origin );
+			// Send the extra pieces in all directions.
+			VectorCopy( outwardCenter, origin );
+
 			origin[0] += Q_crandom(&seed) * playerRadius * 0.25;
 			origin[1] += Q_crandom(&seed) * playerRadius * 0.25;
 			origin[2] += Q_crandom(&seed) * playerRadius * 0.25;
@@ -1251,6 +1299,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 			VectorAdd( velocity, playerVelocity, velocity );
 			AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
 				perPieceKnockback, velocity );
+			AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
 			VectorCopy( bodyAngles, angles );
 			angles[0] += Q_random(&seed) * 360;
 			angles[1] += Q_random(&seed) * 360;
