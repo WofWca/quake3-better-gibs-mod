@@ -10,6 +10,13 @@ Namely, with this mod gibs' speed and direction
 depends on the direction and the amount of damage you inflicted
 on the poor opponent.
 
+This mod does *not* change gibs and blood models and textures:
+you are free to find another mod that does that,
+such as the various "high quality / upscale" mods.
+This mod is compatible with those other resource-only mods
+that don't change the game logic
+(i.e. don't have the `vm/cgame.qvm` file in them).
+
 This mod also fixes a few gibs-related bugs,
 e.g. the fact that in the original game the shotgun gibs very rarely
 (namely it only gibs when you aim at the enemy's feet).
