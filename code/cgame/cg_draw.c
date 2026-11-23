@@ -2784,6 +2784,7 @@ void CG_WarmupEvent( void ) {
 	cg.killerName[0] = '\0';
 	
 	cg.damageTime = 0;
+	cg.gibsBloodyScreenTime = 0;
 
 	cg.rewardStack = 0;
 	cg.rewardTime = 0;
