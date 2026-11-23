@@ -602,6 +602,48 @@ static void CG_DamageBlendBlob( void ) {
 	trap_R_AddRefEntityToScene( &ent );
 }
 
+static void CG_GibsBloodyScreenBlob( void ) {
+	refEntity_t		ent;
+	const int		t = cg.time - cg.gibsBloodyScreenTime;
+	int				seed = cg.gibsBloodyScreenTime + 96024;
+	const float		rx = Q_crandom(&seed);
+	const float		ry = Q_crandom(&seed);
+	float			fade;
+
+	if ( t < 0 || t >= cg_gibsBloodyScreenDuration.value
+		|| cg.gibsBloodyScreenTime == 0
+		|| !cg_blood.integer || cg_oldGibs.integer )
+	{
+		return;
+	}
+	// ragePro systems can't fade blends, so don't obscure the screen
+	if ( cgs.glconfig.hardwareType == GLHW_RAGEPRO ) {
+		return;
+	}
+
+	if ( cg_gibsBloodyScreenDuration.value == 0 ) {
+		// Should be unreachable, but double-ensure no division by 0.
+		return;
+	}
+	fade = 1.0f - t / cg_gibsBloodyScreenDuration.value;
+
+	memset( &ent, 0, sizeof( ent ) );
+	ent.reType = RT_SPRITE;
+	ent.renderfx = RF_FIRST_PERSON;
+
+	VectorMA( cg.refdef.vieworg, 8, cg.refdef.viewaxis[0], ent.origin );
+	VectorMA( ent.origin, rx*-8, cg.refdef.viewaxis[1], ent.origin );
+	VectorMA( ent.origin, ry*8, cg.refdef.viewaxis[2], ent.origin );
+
+	ent.radius = 32;
+	ent.customShader = cgs.media.viewBloodShader;
+	ent.shaderRGBA[0] = 255;
+	ent.shaderRGBA[1] = 255;
+	ent.shaderRGBA[2] = 255;
+	ent.shaderRGBA[3] = 255 * fade;
+	trap_R_AddRefEntityToScene( &ent );
+}
+
 
 /*
 ===============
@@ -810,6 +852,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	// first person blend blobs, done after AnglesToAxis
 	if ( !cg.renderingThirdPerson ) {
 		CG_DamageBlendBlob();
+		CG_GibsBloodyScreenBlob();
 	}
 
 	// build the render lists

@@ -1540,6 +1540,29 @@ static qboolean CG_GibsFindExplosion( int victimNum, const vec3_t victimOrigin,
 	return found;
 }
 
+static void CG_GibCheckBloodyScreen( const vec3_t origin ) {
+	vec3_t toGib;
+	trace_t tr;
+
+	VectorSubtract( origin, cg.refdef.vieworg, toGib );
+	if ( VectorNormalize( toGib ) > cg_gibsBloodyScreenDistance.value ) {
+		return;
+	}
+	// Is roughly within the FoV?
+	if ( DotProduct( toGib, cg.refdef.viewaxis[0] ) < 0.5f ) {
+		return;
+	}
+
+	// Behind a wall?
+	CG_Trace( &tr, cg.refdef.vieworg, NULL, NULL, origin,
+		cg.snap->ps.clientNum, MASK_SOLID );
+	if ( tr.fraction != 1.0f ) {
+		return;
+	}
+
+	cg.gibsBloodyScreenTime = cg.time;
+}
+
 void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 					const clientInfo_t *ci ) {
 	// With the new proto, `cent` is the temp event entity.
@@ -1743,6 +1766,10 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
 	CG_GibPlayer( origin, torsoAngles, *vel, knockbackDir, knockbackSpeed,
 		explosionFound ? explosionPoint : NULL,
 		&torsoAnimation, ci, randSeed );
+
+	if ( cg_gibsBloodyScreenDuration.value > 0 && targNum != cg.snap->ps.clientNum ) {
+		CG_GibCheckBloodyScreen( origin );
+	}
 }
 
 void CG_GibPlayerOld( vec3_t playerOrigin ) {

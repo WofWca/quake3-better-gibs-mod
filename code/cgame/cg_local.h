@@ -620,6 +620,7 @@ typedef struct {
 	// blend blobs
 	float		damageTime;
 	float		damageX, damageY, damageValue;
+	int			gibsBloodyScreenTime;
 
 	// status bar head
 	float		headYaw;

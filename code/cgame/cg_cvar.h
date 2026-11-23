@@ -221,6 +221,16 @@ CG_CVAR( cg_gibsFireTrailMinKnockback, "cg_gibsFireTrailMinKnockback", "-1", 0,
 	"for their gibs to leave fire trails.\n"
 	"100 damage is 500 knockback.\n"
 	"`-1` to disable." )
+CG_CVAR( cg_gibsBloodyScreenDuration, "cg_gibsBloodyScreenDuration", "250", 0,
+	"Cover the screen with blood when someone gets gibbed "
+	"in front of you for this many milliseconds.\n"
+	"0 to disable.\n"
+	"See also cg_gibsBloodyScreenDistance." )
+CG_CVAR( cg_gibsBloodyScreenDistance, "cg_gibsBloodyScreenDistance", "75", 0,
+	"Cover the screen with blood when someone gets gibbed "
+	"in front of you, closer than this many units.\n"
+	"0 to disable.\n"
+	"See also cg_gibsBloodyScreenDuration." )
 CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE,
 	"When you get gibbed, makes your camera get knocked farther away "
 	"thanks to it being smaller than your player's bounding box, "
