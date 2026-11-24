@@ -768,6 +768,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 	// The point that gibs fly away from (see `AddOutwardVelocity`).
 	vec3_t outwardCenter;
 	int seed = randSeed;
+	// `VectorMA` evaluates arguments multiple times,
+	// so we can't inline `Q_random`.
+	float r;
 
 	vec3_t playerVelocity;
 	// Note that this is not too accurate: we derive it based on knockback,
@@ -940,8 +943,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorCopy( baseOrigin, origin );
 		VectorMA(origin, MINS_Z + 0.95 * playerHeight, up, origin);
 		VectorClear( velocity );
-		VectorMA( velocity, 0.5*Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, 0.5*Q_crandom(&seed)*baseRandomVelocity, right, velocity );
+		r = 0.5*Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = 0.5*Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
 		// For the skull / brain we want the random velocity
 		// to never have downwards (inwards) component,
 		// so we use `Q_random` instead of `Q_crandom`
@@ -1010,9 +1015,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorMA( origin, 0.8 * playerRadius, right, origin );
 		VectorMA( origin, -0.3 * playerRadius, forward, origin );
 		VectorClear( velocity );
-		VectorMA( velocity, +(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
+		r = +(0.25+0.5*Q_random(&seed))*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, up, velocity );
 		velocity[2] += jump;
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
@@ -1092,9 +1100,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorMA( origin, -0.6 * playerRadius, right, origin );
 		VectorMA( origin, +0.2 * playerRadius, forward, origin );
 		VectorClear( velocity );
-		VectorMA( velocity, -(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
+		r = -(0.25+0.5*Q_random(&seed))*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, up, velocity );
 		velocity[2] += jump;
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
@@ -1128,9 +1139,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorMA( origin, 0.5 * playerRadius, right, origin );
 		VectorMA( origin, 0.1 * playerRadius, forward, origin );
 		VectorClear( velocity );
-		VectorMA( velocity, +(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
+		r = +(0.25+0.5*Q_random(&seed))*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, up, velocity );
 		velocity[2] += jump;
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
@@ -1149,9 +1163,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorMA( origin, -0.5 * playerRadius, right, origin );
 		VectorMA( origin, -0.2 * playerRadius, forward, origin );
 		VectorClear( velocity );
-		VectorMA( velocity, -(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
+		r = -(0.25+0.5*Q_random(&seed))*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, up, velocity );
 		velocity[2] += jump;
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
@@ -1172,9 +1189,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorMA( origin, -0.7 * playerRadius, right, origin );
 		VectorMA( origin, -0.2 * playerRadius, forward, origin );
 		VectorClear( velocity );
-		VectorMA( velocity, -(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
+		r = -(0.25+0.5*Q_random(&seed))*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, up, velocity );
 		velocity[2] += jump;
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
@@ -1195,9 +1215,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorMA( origin, +0.5 * playerRadius, right, origin );
 		VectorMA( origin, +0.0 * playerRadius, forward, origin );
 		VectorClear( velocity );
-		VectorMA( velocity, +(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
+		r = +(0.25+0.5*Q_random(&seed))*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, up, velocity );
 		velocity[2] += jump;
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
@@ -1220,9 +1243,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 			origin[2] = playerOrigin[2] + MINS_Z + 3;
 		}
 		VectorClear( velocity );
-		VectorMA( velocity, -(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
+		r = -(0.25+0.5*Q_random(&seed))*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, up, velocity );
 		velocity[2] += jump;
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
@@ -1265,9 +1291,12 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
 		VectorMA( origin, +0.9 * playerRadius, right, origin );
 		VectorMA( origin, -0.2 * playerRadius, forward, origin );
 		VectorClear( velocity );
-		VectorMA( velocity, +(0.25+0.5*Q_random(&seed))*baseRandomVelocity, right, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, forward, velocity );
-		VectorMA( velocity, Q_crandom(&seed)*baseRandomVelocity, up, velocity );
+		r = +(0.25+0.5*Q_random(&seed))*baseRandomVelocity;
+		VectorMA( velocity, r, right, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, forward, velocity );
+		r = Q_crandom(&seed)*baseRandomVelocity;
+		VectorMA( velocity, r, up, velocity );
 		velocity[2] += jump;
 		VectorAdd( velocity, playerVelocity, velocity );
 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
