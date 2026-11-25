@@ -175,6 +175,11 @@ CG_CVAR( cg_gibsMaxSimultaneousBounceSounds, "cg_gibsMaxSimultaneousBounceSounds
 	"Limit the amount of \"splat\" sounds per a few milliseconds" )
 CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
 	"Fraction of speed that gibs preserve when bouncing off a surface" )
+CG_CVAR( cg_fragmentsFriction, "cg_fragmentsFriction", "0.5", CVAR_ARCHIVE,
+	"Friction coefficient for fragments (gibs, brass) bouncing off a surface. "
+	"Tangential speed loss = this * normal speed change. "
+	"Bounce factor only affects the normal component of velocity.\n"
+	"Ignored with `cg_oldGibs 1`." )
 CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
 	"Fraction of `cg_gibsBounceFactor` that is random. "
 	"This makes gibs look less uniform, and spread a little more." )

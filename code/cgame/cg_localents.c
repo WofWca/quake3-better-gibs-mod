@@ -373,7 +373,6 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDiffe
 	hitTime = cg.time - cg.frametime + cg.frametime * trace->fraction;
 	BG_EvaluateTrajectoryDelta( &le->pos, hitTime, velocity );
 	dot = DotProduct( velocity, trace->plane.normal );
-	VectorMA( velocity, -2*dot, trace->plane.normal, le->pos.trDelta );
 
 	if ( le->leBounceSoundType == LEBS_BLOOD && !cg_oldGibs.value ) {
 		int seed = le->bounceFactor * 0x1000000;
@@ -383,7 +382,28 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDiffe
 		le->bounceFactor = cg_gibsBounceFactor.value;
 		le->bounceFactor *= 1 - r * cg_gibsBounceFactorRandomness.value;
 	}
-	VectorScale( le->pos.trDelta, le->bounceFactor, le->pos.trDelta );
+
+	if ( cg_oldGibs.integer ) {
+		VectorMA( velocity, -2*dot, trace->plane.normal, le->pos.trDelta );
+		VectorScale( le->pos.trDelta, le->bounceFactor, le->pos.trDelta );
+	} else {
+		// Restitution (`bounceFactor`) applies to the normal component only.
+		// The tangential component is reduced by Coulomb friction,
+		// i.e. proportionally to the normal impulse,
+		// so grazing hits keep most of their speed and slide along.
+		vec3_t	tangent;
+		float	tangentSpeed;
+		float	normalImpulse = fabs( dot ) * ( 1 + le->bounceFactor );
+
+		VectorMA( velocity, -dot, trace->plane.normal, tangent );
+		tangentSpeed = VectorNormalize( tangent );
+		tangentSpeed -= cg_fragmentsFriction.value * normalImpulse;
+		if ( tangentSpeed < 0 ) {
+			tangentSpeed = 0;
+		}
+		VectorScale( tangent, tangentSpeed, le->pos.trDelta );
+		VectorMA( le->pos.trDelta, -dot * le->bounceFactor, trace->plane.normal, le->pos.trDelta );
+	}
 
 	if (velocityDifference) {
 		VectorSubtract( le->pos.trDelta, velocity, velocityDifference );
