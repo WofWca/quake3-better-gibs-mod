@@ -210,6 +210,11 @@ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
 // Not archived because experimental
 CG_CVAR( cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0,
 	"How often in milliseconds gibs leave blood \"clouds\"" )
+CG_CVAR( cg_gibsBleedOnImpact, "cg_gibsBleedOnImpact", "0", 0,
+	"Spurt blood when a gib piece collides with something, "
+	"in addition to leaving a blood mark on the surface "
+	"(see cg_bounceMarksMinImpactSpeed). "
+	"Same visual effect as when hitting a player." )
 CG_CVAR( cg_gibsFireTrailPeriod, "cg_gibsFireTrailPeriod", "30", 0,
 	"How often in milliseconds gibs leave fire \"clouds\".\n"
 	"Remember to set `cg_gibsFireTrailMinKnockback` >= 0 for this to work" )
