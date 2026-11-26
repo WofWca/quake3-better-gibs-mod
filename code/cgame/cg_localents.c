@@ -567,6 +567,12 @@ static void CG_AddFragment( localEntity_t *le ) {
 	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceMarksMinImpactSpeed.value ) ) {
 		// leave a mark
 		CG_FragmentBounceMark( le, &trace, impactVelocityDiff );
+
+		if ( le->leMarkType == LEMT_BLOOD && cg_gibsBleedOnImpact.integer
+			&& !cg_oldGibs.integer )
+		{
+			CG_Bleed( trace.endpos, ENTITYNUM_WORLD );
+		}
 	}
 
 	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceSoundMinImpactSpeed.value ) ) {
