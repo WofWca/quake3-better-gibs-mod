@@ -396,7 +396,8 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDiffe
 	// check for stop, making sure that even on low FPS systems it doesn't bobble
 	if ( trace->allsolid || 
 		( trace->plane.normal[2] > 0 && 
-		( le->pos.trDelta[2] < 40 || le->pos.trDelta[2] < -cg.frametime * le->pos.trDelta[2] ) ) ) {
+		( le->pos.trDelta[2] < 40 || le->pos.trDelta[2] < -cg.frametime * le->pos.trDelta[2] ) ||
+		( le->bounceFactor <= 0 ) ) ) {
 		le->pos.trType = TR_STATIONARY;
 	} else {
 
