@@ -419,6 +419,16 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace, vec3_t velocityDiffe
 		( le->pos.trDelta[2] < 40 || le->pos.trDelta[2] < -cg.frametime * le->pos.trDelta[2] ) ||
 		( le->bounceFactor <= 0 ) ) ) {
 		le->pos.trType = TR_STATIONARY;
+
+		// This is for `cg_fragmentsSinkIntoPlane`.
+		// Generally `trDelta` is unused when `TR_STATIONARY`,
+		// so let's store the sink direction there.
+		if ( VectorCompare( trace->plane.normal, vec3_origin ) ) {
+			// Can happen when e.g. `allsolid`.
+			VectorSet( le->pos.trDelta, 0, 0, -1 );
+		} else {
+			VectorNegate( trace->plane.normal, le->pos.trDelta );
+		}
 	} else {
 
 	}
@@ -488,11 +498,18 @@ void CG_AddFragment( localEntity_t *le ) {
 	if ( le->pos.trType == TR_STATIONARY ) {
 		// sink into the ground if near the removal time
 		int		t;
-		float	oldZ;
+		vec3_t	oldOrigin;
+		vec3_t	sinkDir;
 		const int sinkTime = le->leMarkType == LEMT_BLOOD
 			// in vanilla the duraition is 5000ms and sink time is 1000ms.
 			? cg_gibsDuration.integer / 5
 			: SINK_TIME;
+
+		if ( cg_fragmentsSinkIntoPlane.integer ) {
+			VectorCopy( le->pos.trDelta, sinkDir );
+		} else {
+			VectorSet( sinkDir, 0, 0, -1 );
+		}
 		
 		t = le->endTime - cg.time;
 		if ( t < sinkTime ) {
@@ -501,10 +518,11 @@ void CG_AddFragment( localEntity_t *le ) {
 			// into the ground
 			VectorCopy( le->refEntity.origin, le->refEntity.lightingOrigin );
 			le->refEntity.renderfx |= RF_LIGHTING_ORIGIN;
-			oldZ = le->refEntity.origin[2];
-			le->refEntity.origin[2] -= 16 * ( 1.0 - (float)t / sinkTime );
+			VectorCopy( le->refEntity.origin, oldOrigin );
+			VectorMA( le->refEntity.origin, 16 * ( 1.0 - (float)t / sinkTime ),
+				sinkDir, le->refEntity.origin );
 			trap_R_AddRefEntityToScene( &le->refEntity );
-			le->refEntity.origin[2] = oldZ;
+			VectorCopy( oldOrigin, le->refEntity.origin );
 		} else {
 			trap_R_AddRefEntityToScene( &le->refEntity );
 		}
