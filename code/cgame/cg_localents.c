@@ -222,16 +222,16 @@ void CG_FireTrail( localEntity_t *le ) {
 		sizeScale *= 1 + 0.25*Q_crandom(&seed);
 
 		BG_EvaluateTrajectory( &le->pos, t, newOrigin );
-		newOrigin[0] += rand() & 15 - 8;
-		newOrigin[1] += rand() & 15 - 8;
-		newOrigin[2] += rand() & 15 - 8;
+		newOrigin[0] += (rand() & 15) - 8;
+		newOrigin[1] += (rand() & 15) - 8;
+		newOrigin[2] += (rand() & 15) - 8;
 
 		BG_EvaluateTrajectoryDelta( &le->pos, t, vel);
 		// Make the fire "trail behind".
 		VectorScale(vel, 0.5, vel);
-		vel[0] += rand() & 63 - 32;
-		vel[1] += rand() & 63 - 32;
-		vel[2] += rand() & 63 - 32;
+		vel[0] += (rand() & 63) - 32;
+		vel[1] += (rand() & 63) - 32;
+		vel[2] += (rand() & 63) - 32;
 
 		CG_ParticleExplosion( "explode1", newOrigin, vel, 300,
 			sizeScale*10, sizeScale*3 );
