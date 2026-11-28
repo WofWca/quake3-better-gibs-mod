@@ -1,0 +1,154 @@
+From 071ab09ef2da373ef4eda70a5bfa9dbfa49f0f93 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Tue, 24 Nov 2026 00:48:00 +0400
+Subject: [PATCH] feat: bloody screen when someone's gibbed close by
+
+---
+ code/cgame/cg_cvar.h    | 10 ++++++++++
+ code/cgame/cg_effects.c | 27 ++++++++++++++++++++++++++
+ code/cgame/cg_local.h   |  1 +
+ code/cgame/cg_view.c    | 43 +++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 81 insertions(+)
+
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 3859f7996..dad4d628d 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -221,6 +221,16 @@ CG_CVAR( cg_gibsFireTrailMinKnockback, "cg_gibsFireTrailMinKnockback", "-1", 0,
+ 	"for their gibs to leave fire trails.\n"
+ 	"100 damage is 500 knockback.\n"
+ 	"`-1` to disable." )
++CG_CVAR( cg_gibsBloodyScreenDuration, "cg_gibsBloodyScreenDuration", "250", 0,
++	"Cover the screen with blood when someone gets gibbed "
++	"in front of you for this many milliseconds.\n"
++	"0 to disable.\n"
++	"See also cg_gibsBloodyScreenDistance." )
++CG_CVAR( cg_gibsBloodyScreenDistance, "cg_gibsBloodyScreenDistance", "75", 0,
++	"Cover the screen with blood when someone gets gibbed "
++	"in front of you, closer than this many units.\n"
++	"0 to disable.\n"
++	"See also cg_gibsBloodyScreenDuration." )
+ CG_CVAR( cg_gibsBetterCameraOnGib, "cg_gibsBetterCameraOnGib", "1", CVAR_USERINFO | CVAR_ARCHIVE,
+ 	"When you get gibbed, makes your camera get knocked farther away "
+ 	"thanks to it being smaller than your player's bounding box, "
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index d20c97a80..ed31e76d7 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -1540,6 +1540,29 @@ static qboolean CG_GibsFindExplosion( int victimNum, const vec3_t victimOrigin,
+ 	return found;
+ }
+ 
++static void CG_GibCheckBloodyScreen( const vec3_t origin ) {
++	vec3_t toGib;
++	trace_t tr;
++
++	VectorSubtract( origin, cg.refdef.vieworg, toGib );
++	if ( VectorNormalize( toGib ) > cg_gibsBloodyScreenDistance.value ) {
++		return;
++	}
++	// Is roughly within the FoV?
++	if ( DotProduct( toGib, cg.refdef.viewaxis[0] ) < 0.5f ) {
++		return;
++	}
++
++	// Behind a wall?
++	CG_Trace( &tr, cg.refdef.vieworg, NULL, NULL, origin,
++		cg.snap->ps.clientNum, MASK_SOLID );
++	if ( tr.fraction != 1.0f ) {
++		return;
++	}
++
++	cg.gibsBloodyScreenTime = cg.time;
++}
++
+ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+ 					const clientInfo_t *ci ) {
+ 	// With the new proto, `cent` is the temp event entity.
+@@ -1743,6 +1766,10 @@ void CG_GibPlayer2( const centity_t *cent, const entityState_t *es,
+ 	CG_GibPlayer( origin, torsoAngles, *vel, knockbackDir, knockbackSpeed,
+ 		explosionFound ? explosionPoint : NULL,
+ 		&torsoAnimation, ci, randSeed );
++
++	if ( cg_gibsBloodyScreenDuration.value > 0 && targNum != cg.snap->ps.clientNum ) {
++		CG_GibCheckBloodyScreen( origin );
++	}
+ }
+ 
+ void CG_GibPlayerOld( vec3_t playerOrigin ) {
+diff --git a/code/cgame/cg_local.h b/code/cgame/cg_local.h
+index 8fd9553df..e188adf99 100644
+--- a/code/cgame/cg_local.h
++++ b/code/cgame/cg_local.h
+@@ -620,6 +620,7 @@ typedef struct {
+ 	// blend blobs
+ 	float		damageTime;
+ 	float		damageX, damageY, damageValue;
++	int			gibsBloodyScreenTime;
+ 
+ 	// status bar head
+ 	float		headYaw;
+diff --git a/code/cgame/cg_view.c b/code/cgame/cg_view.c
+index 3dba5ebae..492b03f41 100644
+--- a/code/cgame/cg_view.c
++++ b/code/cgame/cg_view.c
+@@ -602,6 +602,48 @@ static void CG_DamageBlendBlob( void ) {
+ 	trap_R_AddRefEntityToScene( &ent );
+ }
+ 
++static void CG_GibsBloodyScreenBlob( void ) {
++	refEntity_t		ent;
++	const int		t = cg.time - cg.gibsBloodyScreenTime;
++	int				seed = cg.gibsBloodyScreenTime + 96024;
++	const float		rx = Q_crandom(&seed);
++	const float		ry = Q_crandom(&seed);
++	float			fade;
++
++	if ( t < 0 || t >= cg_gibsBloodyScreenDuration.value
++		|| cg.gibsBloodyScreenTime == 0
++		|| !cg_blood.integer || cg_oldGibs.integer )
++	{
++		return;
++	}
++	// ragePro systems can't fade blends, so don't obscure the screen
++	if ( cgs.glconfig.hardwareType == GLHW_RAGEPRO ) {
++		return;
++	}
++
++	if ( cg_gibsBloodyScreenDuration.value == 0 ) {
++		// Should be unreachable, but double-ensure no division by 0.
++		return;
++	}
++	fade = 1.0f - t / cg_gibsBloodyScreenDuration.value;
++
++	memset( &ent, 0, sizeof( ent ) );
++	ent.reType = RT_SPRITE;
++	ent.renderfx = RF_FIRST_PERSON;
++
++	VectorMA( cg.refdef.vieworg, 8, cg.refdef.viewaxis[0], ent.origin );
++	VectorMA( ent.origin, rx*-8, cg.refdef.viewaxis[1], ent.origin );
++	VectorMA( ent.origin, ry*8, cg.refdef.viewaxis[2], ent.origin );
++
++	ent.radius = 32;
++	ent.customShader = cgs.media.viewBloodShader;
++	ent.shaderRGBA[0] = 255;
++	ent.shaderRGBA[1] = 255;
++	ent.shaderRGBA[2] = 255;
++	ent.shaderRGBA[3] = 255 * fade;
++	trap_R_AddRefEntityToScene( &ent );
++}
++
+ 
+ /*
+ ===============
+@@ -810,6 +852,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
+ 	// first person blend blobs, done after AnglesToAxis
+ 	if ( !cg.renderingThirdPerson ) {
+ 		CG_DamageBlendBlob();
++		CG_GibsBloodyScreenBlob();
+ 	}
+ 
+ 	// build the render lists
+-- 
+2.56.1
+

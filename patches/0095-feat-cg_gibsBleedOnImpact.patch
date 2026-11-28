@@ -1,0 +1,46 @@
+From eaf5d1597f0fe1944abef453e665a30b958c1213 Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Thu, 26 Nov 2026 13:41:16 +0400
+Subject: [PATCH] feat: `cg_gibsBleedOnImpact`
+
+---
+ code/cgame/cg_cvar.h      | 5 +++++
+ code/cgame/cg_localents.c | 6 ++++++
+ 2 files changed, 11 insertions(+)
+
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index dad4d628d..c9d63dea8 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -210,6 +210,11 @@ CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
+ // Not archived because experimental
+ CG_CVAR( cg_gibsBloodTrailPeriod, "cg_gibsBloodTrailPeriod", "150", 0,
+ 	"How often in milliseconds gibs leave blood \"clouds\"" )
++CG_CVAR( cg_gibsBleedOnImpact, "cg_gibsBleedOnImpact", "0", 0,
++	"Spurt blood when a gib piece collides with something, "
++	"in addition to leaving a blood mark on the surface "
++	"(see cg_bounceMarksMinImpactSpeed). "
++	"Same visual effect as when hitting a player." )
+ CG_CVAR( cg_gibsFireTrailPeriod, "cg_gibsFireTrailPeriod", "30", 0,
+ 	"How often in milliseconds gibs leave fire \"clouds\".\n"
+ 	"Remember to set `cg_gibsFireTrailMinKnockback` >= 0 for this to work" )
+diff --git a/code/cgame/cg_localents.c b/code/cgame/cg_localents.c
+index c62ffbc0f..5f5b29a8c 100644
+--- a/code/cgame/cg_localents.c
++++ b/code/cgame/cg_localents.c
+@@ -575,6 +575,12 @@ void CG_AddFragment( localEntity_t *le ) {
+ 	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceMarksMinImpactSpeed.value ) ) {
+ 		// leave a mark
+ 		CG_FragmentBounceMark( le, &trace, impactVelocityDiff );
++
++		if ( le->leMarkType == LEMT_BLOOD && cg_gibsBleedOnImpact.integer
++			&& !cg_oldGibs.integer )
++		{
++			CG_Bleed( trace.endpos, ENTITYNUM_WORLD );
++		}
+ 	}
+ 
+ 	if ( VectorLengthSquared( impactVelocityDiff ) >= Square( cg_bounceSoundMinImpactSpeed.value ) ) {
+-- 
+2.56.1
+

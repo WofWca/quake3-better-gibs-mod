@@ -113,10 +113,13 @@ so you can enjoy it on basically any server
 - `cg_gibsLinearVelocityFromKnockback`
 - `cg_gibsVelocityFromExplosionFraction`
 - `cg_gibsExplosionDistanceOffset`
+- `cg_gibsOutwardVelocityFromKnockback`
 - `cg_gibsRandomVelocityFromKnockback`
 - `cg_gibsVerticalVelocityFromKnockback`
+- `cg_gibsExtraOutwardVelocity`
 - `cg_gibsExtraRandomVelocity`
 - `cg_gibsExtraVerticalVelocity`
+- `cg_gibsOutwardVelocityCenterHeight`
 - `cg_gibsPlayerSpeedFromKnockback`
 - `cg_gibsPlayerSpeedFromKnockbackMaxFraction`
 - `cg_gibsDuration`
@@ -128,9 +131,12 @@ so you can enjoy it on basically any server
 - `cg_gibsBounceFactorRandomness`
 - `cg_gibsRotationFactor`
 - `cg_gibsBloodTrailPeriod`
+- `cg_gibsBleedOnImpact`
 - `cg_gibsFireTrailPeriod`
 - `cg_gibsFireTrailDuration`
 - `cg_gibsFireTrailMinKnockback`
+- `cg_gibsBloodyScreenDuration`
+- `cg_gibsBloodyScreenDistance`
 - `cg_gibsBetterCameraOnGib`
 - `cg_marks`
   Old CVAR, but it now controls the duration of blood and other marks,
@@ -175,6 +181,7 @@ set cg_gibsExtraVerticalVelocity 250
 set cg_gibsMaxSimultaneousBounceSounds 999999999
 set cg_gibsBounceFactor 0.6
 set cg_gibsRotationFactor 0
+set cg_gibsBloodyScreenDuration 0
 set cg_gibsBetterCameraOnGib 0
 set g_gibsMissileDirectionKnockbackWeight 1
 set g_gibsNewEvGibPlayerProtocol 0

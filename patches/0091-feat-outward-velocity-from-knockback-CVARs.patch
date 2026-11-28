@@ -1,0 +1,268 @@
+From e5334f855247608e116d4b7645878a1efe02d5af Mon Sep 17 00:00:00 2001
+From: WofWca <wofwca@protonmail.com>
+Date: Fri, 6 Nov 2026 17:41:54 +0400
+Subject: [PATCH] feat: outward velocity from knockback CVARs
+
+---
+ code/cgame/cg_cvar.h    | 14 +++++++++++
+ code/cgame/cg_effects.c | 53 +++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 65 insertions(+), 2 deletions(-)
+
+diff --git a/code/cgame/cg_cvar.h b/code/cgame/cg_cvar.h
+index 28e77cea8..3859f7996 100644
+--- a/code/cgame/cg_cvar.h
++++ b/code/cgame/cg_cvar.h
+@@ -105,11 +105,20 @@ CG_CVAR( cg_gibsExplosionDistanceOffset, "cg_gibsExplosionDistanceOffset", "-3.0
+ 	"For comparison, player height and width are 56 and 30 units.\n"
+ 	"This lets you increase the spread. "
+ 	"This doesn't affect the damage and knockback.\n" )
++CG_CVAR( cg_gibsOutwardVelocityFromKnockback, "cg_gibsOutwardVelocityFromKnockback", "0.0", 0,
++	"Scale how much outward velocity "
++	"(away from the center of the body, `cg_gibsOutwardVelocityCenterHeight`) "
++	"the gibs gain from damage (knockback)." )
+ CG_CVAR( cg_gibsRandomVelocityFromKnockback, "cg_gibsRandomVelocityFromKnockback", "0.5", CVAR_ARCHIVE,
+ 	"Scale how much random velocity (spread) the gibs gain "
+ 	"from damage (knockback)." )
+ CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE,
+ 	"Scale how much vertical velocity the gibs gain from damage (knockback)." )
++CG_CVAR( cg_gibsExtraOutwardVelocity, "cg_gibsExtraOutwardVelocity", "0", 0,
++	"Like `cg_gibsOutwardVelocityFromKnockback`, "
++	"but adds a *fixed* amount of outward velocity to each piece.\n"
++	"Ensures that even if the player was gibbed with the machine gun, "
++	"the gibs would still fly apart somewhat." )
+ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_ARCHIVE,
+ 	"Like `cg_gibsRandomVelocityFromKnockback`, "
+ 	"but add a *fixed* amount of random velocity to each piece.\n"
+@@ -118,6 +127,11 @@ CG_CVAR( cg_gibsExtraRandomVelocity, "cg_gibsExtraRandomVelocity", "100", CVAR_A
+ CG_CVAR( cg_gibsExtraVerticalVelocity, "cg_gibsExtraVerticalVelocity", "50", CVAR_ARCHIVE,
+ 	"Like `cg_gibsVerticalVelocityFromKnockback`, "
+ 	"but adds a *fixed* amount of vertical speed to each piece" )
++CG_CVAR( cg_gibsOutwardVelocityCenterHeight, "cg_gibsOutwardVelocityCenterHeight", "0.6", 0,
++	"The point that gibs fly away from "
++	"for `cg_gibsOutwardVelocityFromKnockback` "
++	"and `cg_gibsExtraOutwardVelocity`. "
++	"A fraction of player height, offset up from the feet." )
+ CG_CVAR( cg_gibsPlayerSpeedFromKnockback, "cg_gibsPlayerSpeedFromKnockback", "-0.25", 0,
+ 	"How much to slow down the player "
+ 	"depending on how much damage (knockback) they took.\n"
+diff --git a/code/cgame/cg_effects.c b/code/cgame/cg_effects.c
+index 4e18f9799..3f466ee81 100644
+--- a/code/cgame/cg_effects.c
++++ b/code/cgame/cg_effects.c
+@@ -685,6 +685,19 @@ static void AddKnockbackVelocity( const vec3_t gibOrigin,
+ 
+ 	VectorMA( resVelocity, speed, dir, resVelocity );
+ }
++
++static void AddOutwardVelocity( const vec3_t gibOrigin, const vec3_t bodyCenter,
++	const float speed, vec3_t resVelocity )
++{
++	vec3_t dir;
++
++	VectorSubtract( gibOrigin, bodyCenter, dir );
++	// A zero-vector stays a zero-vector.
++	VectorNormalize( dir );
++
++	VectorMA( resVelocity, speed, dir, resVelocity );
++}
++
+ /*
+ ===================
+ CG_GibPlayer
+@@ -728,6 +741,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 	float baseRandomVelocity =
+ 		cg_gibsExtraRandomVelocity.value +
+ 		cg_gibsRandomVelocityFromKnockback.value * knockbackSpeed;
++	const float baseOutwardVelocity =
++		cg_gibsExtraOutwardVelocity.value +
++		cg_gibsOutwardVelocityFromKnockback.value * knockbackSpeed;
++	// The point that gibs fly away from (see `AddOutwardVelocity`).
++	vec3_t outwardCenter;
+ 	int seed = randSeed;
+ 
+ 	vec3_t playerVelocity;
+@@ -763,6 +781,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 	}
+ 	AngleVectors( bodyAngles, forward, right, up );
+ 
++	VectorMA( baseOrigin,
++		MINS_Z + cg_gibsOutwardVelocityCenterHeight.value * playerHeight, up,
++		outwardCenter );
++
+ 	if ( knockbackDir ) {
+ 		VectorMA( playerVelocityOriginal, -knockbackSpeedOriginal, knockbackDir,
+ 			pVelBeforeKnockback );
+@@ -856,6 +878,10 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 			playerVelocity[2] );
+ 		CG_Printf( ", random: "S_COLOR_YELLOW"%.1f",
+ 			baseRandomVelocity );
++		if ( baseOutwardVelocity != 0 ) {
++			CG_Printf( ", outward: "S_COLOR_YELLOW"%.1f",
++				baseOutwardVelocity );
++		}
+ 		CG_Printf( "\n" );
+ 	}
+ 	if ( cg_debugGibs.integer & 0x02 ) {
+@@ -901,6 +927,9 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		// (and less randomness overall).
+ 		// We also do the same for other gibs,
+ 		// but for the left / right velocity components.
++		//
++		// TODO now that we have `cg_gibsOutwardVelocityFromKnockback`,
++		// maybe we can remove these? At least the vertical component.
+ 		VectorMA( velocity,
+ 			(0.25 + 0.5 * (Q_random(&seed) + Q_random(&seed))/2)
+ 				*baseRandomVelocity,
+@@ -909,6 +938,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		if ( !skullLaunched && (Q_rand(&seed) & 1) ) {
+ 			CG_LaunchGib( origin, lookDirAngles, velocity, cgs.media.gibSkull, fireTrail, Q_rand(&seed) );
+ 			skullLaunched = qtrue;
+@@ -934,6 +964,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 			VectorAdd( velocity, playerVelocity, velocity );
+ 			AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 				perPieceKnockback, velocity );
++			AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 			CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibBrain, fireTrail, Q_rand(&seed) );
+ 			// Don't decrement `numGibs`. This is extra.
+ 		}
+@@ -947,6 +978,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, 0.5 * baseOutwardVelocity, velocity );
+ 		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibAbdomen, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+@@ -964,6 +996,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] += 70;
+ 		angles[PITCH] += 45;
+@@ -983,6 +1016,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, 0.5 * baseOutwardVelocity, velocity );
+ 		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibChest, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+@@ -999,6 +1033,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[PITCH] -= 80;
+ 		angles[YAW] += 50;
+@@ -1025,6 +1060,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibFoot, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+@@ -1042,6 +1078,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] -= 90;
+ 		angles[PITCH] -= 75;
+@@ -1059,6 +1096,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		CG_LaunchGib( origin, bodyAngles, velocity, cgs.media.gibIntestine, fireTrail, Q_rand(&seed) );
+ 		if (--numGibs <= 0) {
+ 			return;
+@@ -1076,6 +1114,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] -= 30;
+ 		angles[PITCH] -= 15;
+@@ -1096,6 +1135,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[PITCH] += 15;
+ 		CG_LaunchGib( origin, angles, velocity, cgs.media.gibLeg, fireTrail, Q_rand(&seed) );
+@@ -1118,6 +1158,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] += 90;
+ 		angles[YAW] += 180;
+@@ -1140,6 +1181,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] += 90;
+ 		angles[PITCH] += 10;
+@@ -1164,6 +1206,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		// TODO seems not to be rotated well when bodyAngles is not upright
+ 		// (i.e. gib a dead player). Same for some other gibs.
+@@ -1186,6 +1229,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[PITCH] -= 45;
+ 		CG_LaunchGib( origin, angles, velocity, cgs.media.gibFoot, fireTrail, Q_rand(&seed) );
+@@ -1207,6 +1251,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		VectorAdd( velocity, playerVelocity, velocity );
+ 		AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 			perPieceKnockback, velocity );
++		AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 		VectorCopy( bodyAngles, angles );
+ 		angles[ROLL] += 85;
+ 		angles[PITCH] += 90;
+@@ -1216,8 +1261,11 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 		}
+ 
+ 		for ( i = 0; i < 7; i++ ) {
+-			VectorCopy( baseOrigin, origin );
+-			VectorMA( origin, MINS_Z + 0.60 * playerHeight, up, origin );
++			// VectorCopy( baseOrigin, origin );
++			// VectorMA( origin, MINS_Z + 0.60 * playerHeight, up, origin );
++			// Send the extra pieces in all directions.
++			VectorCopy( outwardCenter, origin );
++
+ 			origin[0] += Q_crandom(&seed) * playerRadius * 0.25;
+ 			origin[1] += Q_crandom(&seed) * playerRadius * 0.25;
+ 			origin[2] += Q_crandom(&seed) * playerRadius * 0.25;
+@@ -1228,6 +1276,7 @@ void CG_GibPlayer( const vec3_t playerOrigin, const vec3_t playerAngles,
+ 			VectorAdd( velocity, playerVelocity, velocity );
+ 			AddKnockbackVelocity( origin, explosionPoint, knockbackDir,
+ 				perPieceKnockback, velocity );
++			AddOutwardVelocity( origin, outwardCenter, baseOutwardVelocity, velocity );
+ 			VectorCopy( bodyAngles, angles );
+ 			angles[0] += Q_random(&seed) * 360;
+ 			angles[1] += Q_random(&seed) * 360;
+-- 
+2.56.1
+
