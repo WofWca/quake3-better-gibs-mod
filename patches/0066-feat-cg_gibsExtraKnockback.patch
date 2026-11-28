@@ -42,5 +42,5 @@ index b3cd8d637..005ffec7d 100644
  		cg_gibsExtraRandomVelocity.value +
  		cg_gibsRandomVelocityFromKnockback.value * knockbackSpeed;
 -- 
-2.56.0
+2.56.1
 

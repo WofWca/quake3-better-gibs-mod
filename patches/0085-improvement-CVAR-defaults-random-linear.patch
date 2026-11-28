@@ -29,5 +29,5 @@ index 4c04046bc..a66a2d97b 100644
  	"from damage (knockback)." )
  CG_CVAR( cg_gibsVerticalVelocityFromKnockback, "cg_gibsVerticalVelocityFromKnockback", "0.2", CVAR_ARCHIVE,
 -- 
-2.56.0
+2.56.1
 
