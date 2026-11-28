@@ -127,6 +127,9 @@ CG_CVAR( cg_gibsPlayerSpeedFromKnockbackMaxFraction, "cg_gibsPlayerSpeedFromKnoc
 CG_CVAR( cg_gibsDuration, "cg_gibsDuration", "5000", 0,
 	"How long (in milliseconds) gibs stay around "
 	"before sinking into the ground." )
+CG_CVAR( cg_fragmentsSinkIntoPlane, "cg_fragmentsSinkIntoPlane", "1", 0,
+	"If a gib or brass rests on a sloped plane, "
+	"sink it into that plane (along its normal) and not straight down." )
 CG_CVAR( cg_gibsOriginalOrigin, "cg_gibsOriginalOrigin", "0.0", 0,
 	"Whether to use the exact position where the player got gibbed "
 	"as the initial gibs position, instead of the position "
