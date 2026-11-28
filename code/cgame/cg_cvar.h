@@ -174,10 +174,13 @@ CG_CVAR( cg_gibsStopPlayerSounds, "cg_gibsStopPlayerSounds", "1", 0,
 CG_CVAR( cg_gibsMaxSimultaneousBounceSounds, "cg_gibsMaxSimultaneousBounceSounds", "3", 0,
 	"Limit the amount of \"splat\" sounds per a few milliseconds" )
 CG_CVAR( cg_gibsBounceFactor, "cg_gibsBounceFactor", "0.4", CVAR_ARCHIVE,
-	"Fraction of speed that gibs preserve when bouncing off a surface" )
+	"Fraction of speed that gibs preserve when bouncing off a surface.\n"
+	"If negative, gibs will stick to surfaces." )
 CG_CVAR( cg_gibsBounceFactorRandomness, "cg_gibsBounceFactorRandomness", "0.5", CVAR_ARCHIVE,
 	"Fraction of `cg_gibsBounceFactor` that is random. "
-	"This makes gibs look less uniform, and spread a little more." )
+	"This makes gibs look less uniform, and spread a little more.\n"
+	"Values >1 will result in some gibs sticking to surfaces "
+	"(due to the resulting bounce factor being negative)." )
 CG_CVAR( cg_gibsRotationFactor, "cg_gibsRotationFactor", "1.0", CVAR_ARCHIVE,
 	"Scale how fast gib pieces will rotate, depending on damage (knockback)." )
 // Not archived because experimental
